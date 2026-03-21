@@ -1,0 +1,638 @@
+{% extends "base.html" %}
+
+{% block title %}Security Advisor - Dark Web Monitor{% endblock %}
+
+{% block content %}
+<section class="hero hero-sm">
+    <div class="hero-content">
+        <h1><i class="fas fa-lightbulb"></i> Security Advisor</h1>
+        <p>Get personalized security recommendations based on your profile</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <!-- Quick Profile Assessment -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-clipboard-check"></i> Security Profile</h2>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-2">Answer these questions to get personalized recommendations:</p>
+                
+                <form id="profileForm">
+                    <div class="profile-questions">
+                        <div class="question-group">
+                            <label>Have any of your passwords been in a data breach?</label>
+                            <div class="toggle-options">
+                                <button type="button" class="toggle-btn" data-field="password_breached" data-value="true">Yes</button>
+                                <button type="button" class="toggle-btn" data-field="password_breached" data-value="false">No</button>
+                                <button type="button" class="toggle-btn active" data-field="password_breached" data-value="unknown">Not Sure</button>
+                            </div>
+                        </div>
+                        
+                        <div class="question-group">
+                            <label>Do you use a password manager?</label>
+                            <div class="toggle-options">
+                                <button type="button" class="toggle-btn" data-field="uses_password_manager" data-value="true">Yes</button>
+                                <button type="button" class="toggle-btn" data-field="uses_password_manager" data-value="false">No</button>
+                            </div>
+                        </div>
+                        
+                        <div class="question-group">
+                            <label>Do you have 2FA enabled on important accounts?</label>
+                            <div class="toggle-options">
+                                <button type="button" class="toggle-btn" data-field="has_2fa" data-value="true">Yes, all</button>
+                                <button type="button" class="toggle-btn" data-field="has_2fa" data-value="some">Some</button>
+                                <button type="button" class="toggle-btn" data-field="has_2fa" data-value="false">No</button>
+                            </div>
+                        </div>
+                        
+                        <div class="question-group">
+                            <label>How often do you reuse passwords?</label>
+                            <div class="toggle-options">
+                                <button type="button" class="toggle-btn" data-field="password_reuse" data-value="never">Never</button>
+                                <button type="button" class="toggle-btn" data-field="password_reuse" data-value="rarely">Rarely</button>
+                                <button type="button" class="toggle-btn" data-field="password_reuse" data-value="often">Often</button>
+                            </div>
+                        </div>
+                        
+                        <div class="question-group">
+                            <label>Do you own a domain (website)?</label>
+                            <div class="toggle-options">
+                                <button type="button" class="toggle-btn" data-field="owns_domain" data-value="true">Yes</button>
+                                <button type="button" class="toggle-btn" data-field="owns_domain" data-value="false">No</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg mt-2">
+                        <i class="fas fa-magic"></i> Get Recommendations
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden mt-2">
+            <!-- Summary -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-pie"></i> Recommendation Summary</h2>
+                </div>
+                <div class="card-body">
+                    <div class="summary-stats">
+                        <div class="summary-stat">
+                            <span class="summary-value priority-critical" id="criticalCount">0</span>
+                            <span class="summary-label">Critical</span>
+                        </div>
+                        <div class="summary-stat">
+                            <span class="summary-value priority-high" id="highCount">0</span>
+                            <span class="summary-label">High</span>
+                        </div>
+                        <div class="summary-stat">
+                            <span class="summary-value priority-medium" id="mediumCount">0</span>
+                            <span class="summary-label">Medium</span>
+                        </div>
+                        <div class="summary-stat">
+                            <span class="summary-value priority-low" id="lowCount">0</span>
+                            <span class="summary-label">Low</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Wins -->
+            <div class="card mt-2">
+                <div class="card-header">
+                    <h2><i class="fas fa-bolt"></i> Quick Wins</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-1">High-impact actions you can complete quickly:</p>
+                    <div id="quickWins" class="quick-wins-grid"></div>
+                </div>
+            </div>
+
+            <!-- All Recommendations -->
+            <div class="card mt-2">
+                <div class="card-header">
+                    <h2><i class="fas fa-tasks"></i> All Recommendations</h2>
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-filter="all">All</button>
+                        <button class="filter-tab" data-filter="CRITICAL">Critical</button>
+                        <button class="filter-tab" data-filter="HIGH">High</button>
+                        <button class="filter-tab" data-filter="MEDIUM">Medium</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="allRecommendations" class="recommendations-container"></div>
+                </div>
+            </div>
+
+            <!-- Action Plan -->
+            <div class="card mt-2">
+                <div class="card-header">
+                    <h2><i class="fas fa-calendar-alt"></i> Weekly Action Plan</h2>
+                </div>
+                <div class="card-body">
+                    <div id="actionPlan" class="action-plan"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('profileForm');
+    const resultsSection = document.getElementById('resultsSection');
+    let profileData = {};
+    let allRecs = [];
+    
+    // Toggle button handling
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const field = this.dataset.field;
+            const value = this.dataset.value;
+            
+            // Update active state
+            this.parentElement.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Store value
+            if (value === 'true') profileData[field] = true;
+            else if (value === 'false') profileData[field] = false;
+            else profileData[field] = value;
+        });
+    });
+    
+    // Filter tabs
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            filterRecommendations(this.dataset.filter);
+        });
+    });
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Build context from profile
+        const context = {
+            password_breached: profileData.password_breached === true,
+            password_breach_count: profileData.password_breached === true ? 10 : 0,
+            uses_password_manager: profileData.uses_password_manager === true,
+            has_2fa: profileData.has_2fa === true || profileData.has_2fa === 'some',
+            password_reuse: profileData.password_reuse || 'unknown',
+            owns_domain: profileData.owns_domain === true,
+            has_https: true,
+            has_spf: true
+        };
+        
+        showLoading('Analyzing your security profile...');
+        
+        try {
+            const response = await fetch('/api/security-recommendations', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(context)
+            });
+            
+            const data = await response.json();
+            hideLoading();
+            
+            if (data.success) {
+                allRecs = data.recommendations || [];
+                displayResults(data);
+                loadActionPlan(context);
+            } else {
+                showToast(data.error || 'Failed to get recommendations', 'error');
+            }
+        } catch (error) {
+            hideLoading();
+            showToast('Connection error', 'error');
+        }
+    });
+    
+    async function loadActionPlan(context) {
+        try {
+            const response = await fetch('/api/security-recommendations/action-plan', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ timeframe: 'week', context })
+            });
+            
+            const data = await response.json();
+            displayActionPlan(data);
+        } catch (error) {
+            console.error('Failed to load action plan:', error);
+        }
+    }
+    
+    function displayResults(data) {
+        resultsSection.classList.remove('hidden');
+        
+        // Summary counts
+        const summary = data.priority_summary || {};
+        document.getElementById('criticalCount').textContent = summary.critical || 0;
+        document.getElementById('highCount').textContent = summary.high || 0;
+        document.getElementById('mediumCount').textContent = summary.medium || 0;
+        document.getElementById('lowCount').textContent = summary.low || 0;
+        
+        // Quick wins
+        const qwDiv = document.getElementById('quickWins');
+        const quickWins = data.recommendations?.filter(r => r.difficulty === 'easy' && r.priority <= 2).slice(0, 4) || [];
+        
+        qwDiv.innerHTML = quickWins.map(qw => `
+            <div class="quick-win-card">
+                <div class="qw-icon"><i class="fas fa-bolt"></i></div>
+                <div class="qw-content">
+                    <h4>${qw.title}</h4>
+                    <p class="qw-time"><i class="fas fa-clock"></i> ${qw.time_estimate}</p>
+                </div>
+            </div>
+        `).join('') || '<p class="text-muted">No quick wins available</p>';
+        
+        // All recommendations
+        displayRecommendations(data.recommendations || []);
+        
+        // Scroll to results
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function displayRecommendations(recs) {
+        const container = document.getElementById('allRecommendations');
+        
+        container.innerHTML = recs.map(rec => `
+            <div class="rec-card priority-${rec.priority_label?.toLowerCase()}" data-priority="${rec.priority_label}">
+                <div class="rec-header">
+                    <span class="rec-priority priority-badge-${rec.priority_label?.toLowerCase()}">${rec.priority_label}</span>
+                    <span class="rec-category"><i class="${getCategoryIcon(rec.category)}"></i> ${rec.category}</span>
+                </div>
+                <h3 class="rec-title">${rec.title}</h3>
+                <p class="rec-description">${rec.description}</p>
+                
+                <div class="rec-meta">
+                    <span class="rec-time"><i class="fas fa-clock"></i> ${rec.time_estimate}</span>
+                    <span class="rec-difficulty difficulty-${rec.difficulty}"><i class="fas fa-signal"></i> ${rec.difficulty}</span>
+                </div>
+                
+                <details class="rec-details">
+                    <summary>View Steps</summary>
+                    <ol class="rec-steps">
+                        ${rec.steps?.map(s => `<li>${s}</li>`).join('') || ''}
+                    </ol>
+                    ${rec.tools?.length ? `
+                        <div class="rec-tools">
+                            <strong>Recommended Tools:</strong>
+                            ${rec.tools.map(t => `<span class="tool-tag">${t}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                </details>
+            </div>
+        `).join('') || '<p class="text-muted">No recommendations available</p>';
+    }
+    
+    function filterRecommendations(filter) {
+        const cards = document.querySelectorAll('.rec-card');
+        cards.forEach(card => {
+            if (filter === 'all' || card.dataset.priority === filter) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    function displayActionPlan(data) {
+        const container = document.getElementById('actionPlan');
+        
+        if (!data.actions?.length) {
+            container.innerHTML = '<p class="text-muted">No action plan available</p>';
+            return;
+        }
+        
+        container.innerHTML = `
+            <div class="plan-header">
+                <h3>${data.title}</h3>
+                <p class="text-muted">${data.total_time_estimate}</p>
+            </div>
+            <div class="plan-timeline">
+                ${data.actions.map(action => `
+                    <div class="plan-item">
+                        <div class="plan-day">Day ${action.day}</div>
+                        <div class="plan-content">
+                            <h4>${action.task}</h4>
+                            <div class="plan-meta">
+                                <span class="priority-badge-${action.priority?.toLowerCase()}">${action.priority}</span>
+                                <span><i class="fas fa-clock"></i> ${action.time_needed}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+    
+    function getCategoryIcon(category) {
+        const icons = {
+            'password': 'fas fa-key',
+            'authentication': 'fas fa-fingerprint',
+            'privacy': 'fas fa-user-shield',
+            'network': 'fas fa-network-wired',
+            'monitoring': 'fas fa-eye',
+            'recovery': 'fas fa-undo',
+            'infrastructure': 'fas fa-server',
+            'awareness': 'fas fa-brain'
+        };
+        return icons[category] || 'fas fa-shield-alt';
+    }
+});
+</script>
+
+<style>
+.profile-questions {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.question-group label {
+    display: block;
+    margin-bottom: 0.75rem;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.toggle-options {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.toggle-btn {
+    padding: 0.5rem 1.25rem;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: var(--font-body);
+}
+
+.toggle-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.toggle-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--bg);
+}
+
+.summary-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+}
+
+.summary-stat {
+    text-align: center;
+}
+
+.summary-value {
+    display: block;
+    font-size: 3rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+}
+
+.summary-label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.priority-critical { color: #ff0055; }
+.priority-high { color: #ff6600; }
+.priority-medium { color: #ffcc00; }
+.priority-low { color: var(--primary); }
+
+.quick-wins-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.quick-win-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0,255,136,0.1);
+    border: 1px solid var(--primary);
+    border-radius: 12px;
+}
+
+.qw-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--primary);
+    color: var(--bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.qw-content h4 {
+    margin: 0 0 0.25rem;
+    font-family: var(--font-display);
+    font-size: 1rem;
+}
+
+.qw-time {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter-tab {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+}
+
+.filter-tab:hover, .filter-tab.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--bg);
+}
+
+.recommendations-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.rec-card {
+    background: rgba(26,26,46,0.8);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid;
+}
+
+.rec-card.priority-critical { border-left-color: #ff0055; }
+.rec-card.priority-high { border-left-color: #ff6600; }
+.rec-card.priority-medium { border-left-color: #ffcc00; }
+.rec-card.priority-low { border-left-color: var(--primary); }
+
+.rec-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.rec-priority {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.priority-badge-critical { background: rgba(255,0,85,0.2); color: #ff0055; }
+.priority-badge-high { background: rgba(255,102,0,0.2); color: #ff6600; }
+.priority-badge-medium { background: rgba(255,204,0,0.2); color: #ffcc00; }
+.priority-badge-low { background: rgba(0,255,136,0.2); color: var(--primary); }
+
+.rec-category {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.rec-title {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--text);
+}
+
+.rec-description {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.rec-meta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.difficulty-easy { color: var(--primary); }
+.difficulty-medium { color: #ffcc00; }
+.difficulty-hard { color: var(--danger); }
+
+.rec-details {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.rec-details summary {
+    cursor: pointer;
+    color: var(--secondary);
+    font-weight: 500;
+}
+
+.rec-steps {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+    color: var(--text-muted);
+}
+
+.rec-steps li {
+    margin-bottom: 0.5rem;
+}
+
+.rec-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.tool-tag {
+    background: rgba(0,212,255,0.1);
+    border: 1px solid var(--secondary);
+    color: var(--secondary);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.plan-header {
+    margin-bottom: 1.5rem;
+}
+
+.plan-header h3 {
+    margin: 0;
+    font-family: var(--font-display);
+}
+
+.plan-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.plan-item {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.plan-day {
+    background: var(--primary);
+    color: var(--bg);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.plan-content h4 {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-display);
+}
+
+.plan-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+</style>
+{% endblock %}

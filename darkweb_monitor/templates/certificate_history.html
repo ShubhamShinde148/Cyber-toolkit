@@ -1,0 +1,508 @@
+{% extends "base.html" %}
+
+{% block title %}Certificate History & Verification - Dark Web Monitor{% endblock %}
+
+{% block content %}
+<section class="section-page" style="padding-top:100px; min-height:100vh;">
+    <div class="container">
+
+        <!-- Page Header -->
+        <div class="page-header" style="text-align:center; margin-bottom:2.5rem;">
+            <h1 class="page-title"><i class="fas fa-certificate" style="color:var(--primary-color);"></i> Certificate Hub</h1>
+            <p class="page-subtitle">View your earned certificates &amp; verify any certificate ID</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="cert-tabs" style="display:flex; justify-content:center; gap:1rem; margin-bottom:2rem;">
+            <button class="cert-tab active" data-tab="history" onclick="switchTab('history')">
+                <i class="fas fa-history"></i> My Certificates
+            </button>
+            <button class="cert-tab" data-tab="verify" onclick="switchTab('verify')">
+                <i class="fas fa-search"></i> Verify Certificate
+            </button>
+        </div>
+
+        <!-- ==================== TAB 1: Certificate History ==================== -->
+        <div id="tab-history" class="cert-tab-content active">
+
+            <div id="historyLoading" class="text-center" style="padding:3rem;">
+                <div class="loading-spinner" style="margin:0 auto 1rem;"></div>
+                <p style="color:var(--text-secondary);">Loading your certificates...</p>
+            </div>
+
+            <div id="historyEmpty" style="display:none; text-align:center; padding:3rem;">
+                <i class="fas fa-award" style="font-size:4rem; color:var(--text-muted); margin-bottom:1rem; display:block;"></i>
+                <h3 style="color:var(--text-secondary); margin-bottom:0.5rem;">No Certificates Yet</h3>
+                <p style="color:var(--text-muted); margin-bottom:1.5rem;">Complete the Cybersecurity Quiz to earn your first certificate!</p>
+                <a href="/quiz" class="btn btn-primary"><i class="fas fa-graduation-cap"></i> Take the Quiz</a>
+            </div>
+
+            <div id="historyGrid" class="cert-history-grid" style="display:none;"></div>
+        </div>
+
+        <!-- ==================== TAB 2: Verify Certificate ==================== -->
+        <div id="tab-verify" class="cert-tab-content" style="display:none;">
+            <div class="verify-section">
+                <div class="verify-card">
+                    <div class="verify-card-header">
+                        <i class="fas fa-shield-alt" style="font-size:2.5rem; color:var(--primary-color); margin-bottom:1rem;"></i>
+                        <h2 style="color:var(--text-primary); margin-bottom:0.5rem;">Certificate Verification</h2>
+                        <p style="color:var(--text-secondary); font-size:0.95rem;">Enter a certificate ID to verify its authenticity</p>
+                    </div>
+                    <div class="verify-input-group">
+                        <div style="position:relative; flex:1;">
+                            <i class="fas fa-fingerprint" style="position:absolute; left:1rem; top:50%; transform:translateY(-50%); color:var(--text-muted);"></i>
+                            <input type="text" id="verifyCertId" placeholder="e.g. DWM-CERT-2026-0001"
+                                   style="width:100%; padding:0.85rem 1rem 0.85rem 2.8rem; background:var(--bg-secondary); border:1px solid var(--card-border);
+                                          color:var(--text-primary); font-family:'JetBrains Mono',monospace; border-radius:var(--border-radius-lg); font-size:1rem;"
+                                   onkeydown="if(event.key==='Enter') verifyCertificate()">
+                        </div>
+                        <button class="btn btn-primary" onclick="verifyCertificate()" id="verifyBtn" style="white-space:nowrap;">
+                            <i class="fas fa-search"></i> Verify
+                        </button>
+                    </div>
+
+                    <!-- Verify Result Area -->
+                    <div id="verifyResult" style="display:none; margin-top:1.5rem;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+/* Tab buttons */
+.cert-tab {
+    padding: 0.75rem 1.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
+    color: var(--text-secondary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    border-radius: var(--border-radius-lg);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.cert-tab:hover { border-color: var(--primary-color); color: var(--primary-color); }
+.cert-tab.active {
+    background: rgba(0,255,136,0.1);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
+}
+
+/* History Grid */
+.cert-history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Certificate Card in History */
+.cert-hist-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+.cert-hist-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+}
+.cert-hist-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.cert-hist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+.cert-hist-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent-color);
+    background: rgba(0,212,255,0.1);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--border-radius-sm);
+}
+.cert-hist-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.cert-hist-badge.passed {
+    background: rgba(0,255,136,0.15);
+    color: var(--primary-color);
+    border: 1px solid rgba(0,255,136,0.3);
+}
+.cert-hist-badge.failed {
+    background: rgba(255,0,85,0.15);
+    color: var(--accent-red);
+    border: 1px solid rgba(255,0,85,0.3);
+}
+
+.cert-hist-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    color: #FFD700;
+    margin-bottom: 0.75rem;
+}
+
+.cert-hist-score-bar {
+    position: relative;
+    height: 8px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+.cert-hist-score-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+}
+.cert-hist-score-fill.low { background: linear-gradient(90deg, var(--accent-red), #ff4477); }
+.cert-hist-score-fill.mid { background: linear-gradient(90deg, var(--warning-color), #ffcc00); }
+
+.cert-hist-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.cert-hist-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.cert-hist-stat {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.cert-hist-stat i { color: var(--primary-color); font-size: 0.75rem; }
+
+.cert-hist-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+.cert-hist-actions .btn {
+    flex: 1;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Verify section */
+.verify-section { max-width: 680px; margin: 0 auto; }
+.verify-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--border-radius-lg);
+    padding: 2.5rem;
+    text-align: center;
+}
+.verify-card-header { margin-bottom: 1.5rem; }
+.verify-input-group {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+/* Verify Result Styles */
+.verify-result-valid {
+    background: rgba(0,255,136,0.05);
+    border: 1px solid rgba(0,255,136,0.3);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    text-align: left;
+}
+.verify-result-invalid {
+    background: rgba(255,0,85,0.05);
+    border: 1px solid rgba(255,0,85,0.3);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    text-align: center;
+}
+.verify-stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 0.5rem 1.2rem;
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 1rem;
+}
+.verify-stamp.valid {
+    background: rgba(0,255,136,0.15);
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+}
+.verify-stamp.invalid {
+    background: rgba(255,0,85,0.15);
+    color: var(--accent-red);
+    border: 2px solid var(--accent-red);
+}
+.verify-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+.verify-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+.verify-detail-item .label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.verify-detail-item .value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+.verify-detail-item .value.gold { color: #FFD700; }
+
+@media (max-width: 600px) {
+    .cert-history-grid { grid-template-columns: 1fr; }
+    .verify-input-group { flex-direction: column; }
+    .verify-detail-grid { grid-template-columns: 1fr; }
+    .cert-tabs { flex-direction: column; align-items: stretch; }
+}
+</style>
+
+<script>
+function switchTab(tab) {
+    document.querySelectorAll('.cert-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.cert-tab-content').forEach(c => { c.style.display = 'none'; c.classList.remove('active'); });
+    document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+    const target = document.getElementById('tab-' + tab);
+    target.style.display = 'block';
+    target.classList.add('active');
+}
+
+// Load certificate history
+document.addEventListener('DOMContentLoaded', () => {
+    loadHistory();
+});
+
+async function loadHistory() {
+    const loading = document.getElementById('historyLoading');
+    const empty = document.getElementById('historyEmpty');
+    const grid = document.getElementById('historyGrid');
+
+    try {
+        const resp = await fetch('/api/certificate-history');
+        const data = await resp.json();
+        loading.style.display = 'none';
+
+        if (!data.success || !data.certificates || data.certificates.length === 0) {
+            empty.style.display = 'block';
+            return;
+        }
+
+        grid.style.display = 'grid';
+        grid.innerHTML = data.certificates.map(c => buildCertCard(c)).join('');
+
+        // Animate score bars
+        setTimeout(() => {
+            grid.querySelectorAll('.cert-hist-score-fill').forEach(bar => {
+                bar.style.width = bar.dataset.width + '%';
+            });
+        }, 200);
+
+    } catch (e) {
+        loading.style.display = 'none';
+        empty.style.display = 'block';
+    }
+}
+
+function buildCertCard(c) {
+    const pct = c.percentage || 0;
+    const barClass = pct >= 70 ? '' : pct >= 40 ? 'mid' : 'low';
+    const passed = c.passed ? '<span class="cert-hist-badge passed">PASSED</span>' : '<span class="cert-hist-badge failed">FAILED</span>';
+
+    let level = 'Beginner';
+    let levelIcon = 'fa-user';
+    if (pct >= 90) { level = 'Cyber Defender'; levelIcon = 'fa-shield-alt'; }
+    else if (pct >= 70) { level = 'Advanced'; levelIcon = 'fa-user-shield'; }
+    else if (pct >= 40) { level = 'Intermediate'; levelIcon = 'fa-user-graduate'; }
+
+    return `
+    <div class="cert-hist-card">
+        <div class="cert-hist-header">
+            <span class="cert-hist-id">${c.certificate_id || 'N/A'}</span>
+            ${passed}
+        </div>
+        <div class="cert-hist-name">${escapeHtml(c.participant_name || 'Anonymous')}</div>
+        <div class="cert-hist-score-bar">
+            <div class="cert-hist-score-fill ${barClass}" data-width="${pct}" style="width:0%"></div>
+        </div>
+        <div class="cert-hist-meta">
+            <span><i class="fas fa-percent"></i> ${pct}%</span>
+            <span><i class="fas fa-check"></i> ${c.score || 0}/${c.total || 20}</span>
+        </div>
+        <div class="cert-hist-stats">
+            <div class="cert-hist-stat"><i class="fas fa-calendar"></i> ${c.completion_time || 'N/A'}</div>
+            <div class="cert-hist-stat"><i class="fas ${levelIcon}"></i> ${level}</div>
+        </div>
+        <div class="cert-hist-actions">
+            <a href="/certificate/${encodeURIComponent(c.certificate_id)}" class="btn btn-primary" target="_blank"><i class="fas fa-eye"></i> View</a>
+            <button class="btn btn-outline" onclick="emailCert('${escapeHtml(c.certificate_id)}')"><i class="fas fa-envelope"></i> Email</button>
+            <button class="btn btn-outline" onclick="copyId('${escapeHtml(c.certificate_id)}')"><i class="fas fa-copy"></i> Copy ID</button>
+        </div>
+    </div>`;
+}
+
+function escapeHtml(text) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
+}
+
+function copyId(id) {
+    navigator.clipboard.writeText(id).then(() => {
+        if (typeof showToast === 'function') showToast('Certificate ID copied!', 'success');
+    });
+}
+
+// ==================== Email Certificate ====================
+async function emailCert(certId) {
+    if (typeof showToast === 'function') showToast('Sending certificate to your email...', 'info');
+    try {
+        const resp = await fetch('/api/email-certificate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ certificate_id: certId })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            if (typeof showToast === 'function') showToast('Certificate sent to your email!', 'success');
+        } else {
+            if (typeof showToast === 'function') showToast(data.error || 'Failed to send email', 'error');
+        }
+    } catch (e) {
+        if (typeof showToast === 'function') showToast('Failed to send email', 'error');
+    }
+}
+
+// ==================== Verify Certificate ====================
+async function verifyCertificate() {
+    const input = document.getElementById('verifyCertId');
+    const certId = input.value.trim();
+    const resultDiv = document.getElementById('verifyResult');
+    const btn = document.getElementById('verifyBtn');
+
+    if (!certId) {
+        if (typeof showToast === 'function') showToast('Please enter a Certificate ID', 'warning');
+        input.focus();
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+    resultDiv.style.display = 'none';
+
+    try {
+        const resp = await fetch('/api/verify-certificate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ certificate_id: certId })
+        });
+        const data = await resp.json();
+
+        if (data.valid) {
+            const pct = data.percentage || 0;
+            resultDiv.innerHTML = `
+                <div class="verify-result-valid">
+                    <div style="text-align:center; margin-bottom:1rem;">
+                        <div class="verify-stamp valid"><i class="fas fa-check-circle"></i> VERIFIED &mdash; AUTHENTIC</div>
+                    </div>
+                    <div class="verify-detail-grid">
+                        <div class="verify-detail-item">
+                            <span class="label">Certificate ID</span>
+                            <span class="value">${escapeHtml(data.certificate_id)}</span>
+                        </div>
+                        <div class="verify-detail-item">
+                            <span class="label">Holder</span>
+                            <span class="value gold">${escapeHtml(data.participant_name)}</span>
+                        </div>
+                        <div class="verify-detail-item">
+                            <span class="label">Score</span>
+                            <span class="value">${data.score} / ${data.total} (${pct}%)</span>
+                        </div>
+                        <div class="verify-detail-item">
+                            <span class="label">Status</span>
+                            <span class="value" style="color:${data.passed ? 'var(--primary-color)' : 'var(--accent-red)'}">${data.passed ? 'PASSED' : 'NOT PASSED'}</span>
+                        </div>
+                        <div class="verify-detail-item">
+                            <span class="label">Issue Date</span>
+                            <span class="value">${escapeHtml(data.completion_time || 'N/A')}</span>
+                        </div>
+                        <div class="verify-detail-item">
+                            <span class="label">Issued By</span>
+                            <span class="value">${escapeHtml(data.issued_by)}</span>
+                        </div>
+                    </div>
+                    <div style="text-align:center; margin-top:1.2rem;">
+                        <a href="/certificate/${encodeURIComponent(data.certificate_id)}" class="btn btn-primary" target="_blank">
+                            <i class="fas fa-external-link-alt"></i> View Full Certificate
+                        </a>
+                    </div>
+                </div>`;
+        } else {
+            resultDiv.innerHTML = `
+                <div class="verify-result-invalid">
+                    <div class="verify-stamp invalid"><i class="fas fa-times-circle"></i> NOT FOUND</div>
+                    <p style="color:var(--text-secondary); margin-top:0.75rem;">
+                        ${escapeHtml(data.error || 'This certificate ID does not match any issued certificate.')}
+                    </p>
+                    <p style="color:var(--text-muted); font-size:0.85rem; margin-top:0.5rem;">
+                        Please double-check the ID and try again. IDs are case-sensitive (e.g. <code style="color:var(--accent-color);">DWM-CERT-2026-0001</code>).
+                    </p>
+                </div>`;
+        }
+
+        resultDiv.style.display = 'block';
+    } catch (e) {
+        resultDiv.innerHTML = `
+            <div class="verify-result-invalid">
+                <div class="verify-stamp invalid"><i class="fas fa-exclamation-triangle"></i> ERROR</div>
+                <p style="color:var(--text-secondary); margin-top:0.75rem;">Verification service is temporarily unavailable. Please try again.</p>
+            </div>`;
+        resultDiv.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-search"></i> Verify';
+    }
+}
+</script>
+{% endblock %}

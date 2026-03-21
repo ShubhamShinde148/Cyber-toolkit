@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}Username OSINT Scanner - Dark Web Monitor{% endblock %}
+
+{% block content %}
+<section class="hero hero-sm">
+    <div class="hero-content">
+        <h1><i class="fas fa-user-secret"></i> Username OSINT Scanner</h1>
+        <p>Discover where a username appears across social media, forums, and websites</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-search"></i> Scan Username</h2>
+            </div>
+            <div class="card-body">
+                <form id="usernameForm">
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fas fa-at"></i></span>
+                        <input type="text" id="usernameInput" placeholder="Enter username to search..." required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-radar"></i> Scan
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="info-box mt-2">
+                    <i class="fas fa-info-circle"></i>
+                    <span>This tool checks public profile URLs across 25+ platforms. No accounts are accessed or logged into.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden mt-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-bar"></i> Scan Results</h2>
+                </div>
+                <div class="card-body">
+                    <!-- Stats Cards -->
+                    <div class="stats-grid" id="statsGrid">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-globe"></i></div>
+                            <div class="stat-value" id="platformsChecked">0</div>
+                            <div class="stat-label">Platforms Checked</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="stat-value cyber-green" id="profilesFound">0</div>
+                            <div class="stat-label">Profiles Found</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="fas fa-percentage"></i></div>
+                            <div class="stat-value" id="exposureRate">0%</div>
+                            <div class="stat-label">Exposure Rate</div>
+                        </div>
+                    </div>
+
+                    <!-- Category Results -->
+                    <h3 class="mt-2"><i class="fas fa-layer-group"></i> Profiles by Category</h3>
+                    <div id="categoryResults" class="category-grid"></div>
+
+                    <!-- All Profiles List -->
+                    <h3 class="mt-2"><i class="fas fa-list"></i> Found Profiles</h3>
+                    <div id="profilesList" class="profiles-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Platforms -->
+        <div class="card mt-2">
+            <div class="card-header">
+                <h2><i class="fas fa-layer-group"></i> Supported Platforms</h2>
+            </div>
+            <div class="card-body">
+                <div id="platformsList" class="platforms-tags"></div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('usernameForm');
+    const resultsSection = document.getElementById('resultsSection');
+    
+    // Load available platforms
+    loadPlatforms();
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('usernameInput').value.trim();
+        if (!username) return;
+        
+        showLoading('Scanning platforms for username...');
+        
+        try {
+            const response = await fetch('/api/username-osint', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username: username })
+            });
+            
+            const data = await response.json();
+            hideLoading();
+            
+            if (data.success) {
+                displayResults(data);
+            } else {
+                showToast(data.error || 'Scan failed', 'error');
+            }
+        } catch (error) {
+            hideLoading();
+            showToast('Connection error', 'error');
+        }
+    });
+    
+    function displayResults(data) {
+        resultsSection.classList.remove('hidden');
+        
+        // Update stats
+        document.getElementById('platformsChecked').textContent = data.total_checked;
+        document.getElementById('profilesFound').textContent = data.total_found;
+        
+        const rate = ((data.total_found / data.total_checked) * 100).toFixed(1);
+        document.getElementById('exposureRate').textContent = rate + '%';
+        
+        // Display by category
+        const categoryDiv = document.getElementById('categoryResults');
+        categoryDiv.innerHTML = '';
+        
+        for (const [category, profiles] of Object.entries(data.by_category || {})) {
+            const categoryCard = document.createElement('div');
+            categoryCard.className = 'category-card';
+            categoryCard.innerHTML = `
+                <div class="category-header">
+                    <i class="${getCategoryIcon(category)}"></i>
+                    <span>${category}</span>
+                    <span class="badge">${profiles.length}</span>
+                </div>
+                <div class="category-profiles">
+                    ${profiles.map(p => `
+                        <a href="${p.url}" target="_blank" class="profile-link">
+                            <i class="fas fa-external-link-alt"></i> ${p.platform}
+                        </a>
+                    `).join('')}
+                </div>
+            `;
+            categoryDiv.appendChild(categoryCard);
+        }
+        
+        // Display all profiles
+        const profilesList = document.getElementById('profilesList');
+        profilesList.innerHTML = '';
+        
+        for (const profile of data.found_profiles || []) {
+            const profileCard = document.createElement('div');
+            profileCard.className = 'profile-card';
+            profileCard.innerHTML = `
+                <div class="profile-header">
+                    <span class="profile-platform">${profile.platform}</span>
+                    <span class="profile-category badge">${profile.category}</span>
+                </div>
+                <a href="${profile.url}" target="_blank" class="profile-url">
+                    ${profile.url}
+                </a>
+                <div class="profile-meta">
+                    <span><i class="fas fa-clock"></i> ${profile.response_time}s</span>
+                </div>
+            `;
+            profilesList.appendChild(profileCard);
+        }
+        
+        if (!data.found_profiles || data.found_profiles.length === 0) {
+            profilesList.innerHTML = '<p class="text-muted">No profiles found for this username.</p>';
+        }
+        
+        // Scroll to results
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function getCategoryIcon(category) {
+        const icons = {
+            'Social Media': 'fas fa-users',
+            'Development': 'fas fa-code',
+            'Professional': 'fas fa-briefcase',
+            'Content': 'fas fa-edit',
+            'Gaming': 'fas fa-gamepad',
+            'Creative': 'fas fa-palette',
+            'Tech': 'fas fa-microchip',
+            'Security': 'fas fa-shield-alt',
+            'Personal': 'fas fa-user'
+        };
+        return icons[category] || 'fas fa-globe';
+    }
+    
+    async function loadPlatforms() {
+        try {
+            const response = await fetch('/api/username-osint/platforms');
+            const data = await response.json();
+            
+            const container = document.getElementById('platformsList');
+            container.innerHTML = data.platforms.map(p => `
+                <span class="platform-tag" title="${p.category}">
+                    ${p.name}
+                </span>
+            `).join('');
+        } catch (error) {
+            console.error('Failed to load platforms:', error);
+        }
+    }
+});
+</script>
+
+<style>
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.category-card {
+    background: rgba(26, 26, 46, 0.8);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--primary);
+    font-family: var(--font-display);
+}
+
+.category-header .badge {
+    margin-left: auto;
+    background: var(--primary);
+    color: var(--bg);
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.8rem;
+}
+
+.category-profiles {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.profile-link {
+    color: var(--text);
+    text-decoration: none;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    transition: color 0.3s;
+}
+
+.profile-link:hover {
+    color: var(--primary);
+}
+
+.profiles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+}
+
+.profile-card {
+    background: rgba(26, 26, 46, 0.8);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.profile-platform {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.profile-url {
+    color: var(--secondary);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    word-break: break-all;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.profile-url:hover {
+    text-decoration: underline;
+}
+
+.profile-meta {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.platforms-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.platform-tag {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 0.3rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+}
+</style>
+{% endblock %}

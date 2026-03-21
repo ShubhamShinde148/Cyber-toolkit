@@ -1,0 +1,465 @@
+{% extends "base.html" %}
+
+{% block title %}IP Threat Intelligence - Dark Web Monitor{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ============== SOC Dashboard Layout ============== */
+    .soc-input-card {
+        background: linear-gradient(135deg, rgba(0,255,136,0.05), rgba(0,168,255,0.05));
+        border: 1px solid rgba(0,255,136,0.2);
+        border-radius: 16px;
+        padding: 2rem;
+    }
+    .soc-input-row {
+        display: flex; gap: 1rem; align-items: stretch;
+    }
+    .soc-input-row .input-group { flex: 1; }
+    .soc-input-row .btn { white-space: nowrap; height: 100%; }
+
+    /* Stat Cards */
+    .soc-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px,1fr)); gap: 1.5rem; margin: 2rem 0; }
+    .soc-stat {
+        background: var(--surface);
+        border: 1px solid rgba(0,255,136,0.15);
+        border-radius: 14px;
+        padding: 1.5rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition: transform .3s, box-shadow .3s;
+    }
+    .soc-stat:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,255,136,0.15); }
+    .soc-stat::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+    .soc-stat.low::before    { background: #00ff88; }
+    .soc-stat.medium::before { background: #ffd60a; }
+    .soc-stat.high::before   { background: #ff9f0a; }
+    .soc-stat.critical::before { background: #ff3b30; }
+    .soc-stat-icon { font-size: 1.8rem; margin-bottom: .5rem; }
+    .soc-stat.low .soc-stat-icon    { color: #00ff88; }
+    .soc-stat.medium .soc-stat-icon { color: #ffd60a; }
+    .soc-stat.high .soc-stat-icon   { color: #ff9f0a; }
+    .soc-stat.critical .soc-stat-icon { color: #ff3b30; }
+    .soc-stat-value { font-family:'Orbitron',monospace; font-size:2rem; font-weight:700; color:var(--text-primary); }
+    .soc-stat-label { font-size:.82rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:1px; margin-top:.25rem; }
+
+    /* Risk Gauge */
+    .gauge-wrap { display:flex; justify-content:center; align-items:center; padding:2rem 0; }
+    .gauge-svg { width:260px; height:150px; }
+    .gauge-bg { fill:none; stroke:rgba(255,255,255,0.08); stroke-width:18; stroke-linecap:round; }
+    .gauge-fill { fill:none; stroke-width:18; stroke-linecap:round; transition: stroke-dashoffset 1.2s ease, stroke .5s; }
+    .gauge-text { font-family:'Orbitron',monospace; font-size:2.4rem; font-weight:700; fill:var(--text-primary); text-anchor:middle; }
+    .gauge-label { font-size:.85rem; fill:var(--text-secondary); text-anchor:middle; }
+
+    /* Source Cards */
+    .source-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:1.5rem; margin-top:1.5rem; }
+    .source-card {
+        background: var(--surface);
+        border: 1px solid rgba(0,255,136,0.12);
+        border-radius: 14px;
+        overflow: hidden;
+    }
+    .source-card-header {
+        display:flex; align-items:center; gap:.75rem;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        font-weight:600;
+    }
+    .source-card-header i { font-size:1.2rem; color:var(--primary); }
+    .source-card-body { padding:1.25rem; }
+    .source-status { display:inline-block; padding:.2rem .6rem; border-radius:12px; font-size:.75rem; font-weight:600; margin-left:auto; }
+    .source-status.ok { background:rgba(0,255,136,0.15); color:#00ff88; }
+    .source-status.err { background:rgba(255,59,48,0.15); color:#ff6b6b; }
+    .source-status.skip { background:rgba(255,214,10,0.15); color:#ffd93d; }
+
+    .info-row { display:flex; justify-content:space-between; padding:.45rem 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.9rem; }
+    .info-row:last-child { border-bottom:none; }
+    .info-label { color:var(--text-secondary); }
+    .info-value { color:var(--text-primary); font-weight:500; font-family:'JetBrains Mono',monospace; }
+
+    /* Port / Vuln Table */
+    .port-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+    .port-table th { text-align:left; color:var(--primary); padding:.5rem .75rem; border-bottom:1px solid rgba(0,255,136,0.2); font-size:.78rem; text-transform:uppercase; letter-spacing:.5px; }
+    .port-table td { padding:.45rem .75rem; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-primary); font-family:'JetBrains Mono',monospace; }
+    .port-badge { display:inline-block; padding:.15rem .55rem; border-radius:6px; background:rgba(0,255,136,0.12); color:var(--primary); font-size:.8rem; margin:.15rem .25rem .15rem 0; }
+    .vuln-badge { display:inline-block; padding:.15rem .55rem; border-radius:6px; background:rgba(255,59,48,0.15); color:#ff6b6b; font-size:.78rem; margin:.15rem .25rem .15rem 0; }
+
+    /* Pulse list */
+    .pulse-item { padding:.6rem 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+    .pulse-item:last-child { border-bottom:none; }
+    .pulse-name { color:var(--text-primary); font-weight:500; }
+    .pulse-date { font-size:.78rem; color:var(--text-secondary); }
+
+    /* Threat badge */
+    .threat-badge { display:inline-block; padding:.35rem 1rem; border-radius:20px; font-weight:700; font-size:.85rem; text-transform:uppercase; letter-spacing:1px; }
+    .threat-badge.low { background:rgba(0,255,136,0.15); color:#00ff88; border:1px solid rgba(0,255,136,0.3); }
+    .threat-badge.medium { background:rgba(255,214,10,0.15); color:#ffd93d; border:1px solid rgba(255,214,10,0.3); }
+    .threat-badge.high { background:rgba(255,159,10,0.15); color:#ffb347; border:1px solid rgba(255,159,10,0.3); }
+    .threat-badge.critical { background:rgba(255,59,48,0.15); color:#ff6b6b; border:1px solid rgba(255,59,48,0.3); }
+
+    /* Report button */
+    .report-bar { display:flex; gap:1rem; flex-wrap:wrap; margin-top:1.5rem; }
+    .btn-report { display:inline-flex; align-items:center; gap:.5rem; padding:.75rem 1.5rem; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition:all .3s; }
+    .btn-report.primary { background:linear-gradient(135deg,var(--primary),var(--accent)); color:var(--background); }
+    .btn-report.primary:hover { transform:translateY(-2px); box-shadow:0 4px 15px rgba(0,255,136,0.4); }
+
+    /* Skeleton loading */
+    @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+    .skeleton { background: linear-gradient(90deg, rgba(255,255,255,.04) 25%, rgba(255,255,255,.08) 50%, rgba(255,255,255,.04) 75%); background-size:800px 100%; animation: shimmer 1.5s infinite; border-radius:8px; height:1.2rem; margin:.4rem 0; }
+    .skeleton.lg { height:3rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero hero-sm">
+    <div class="hero-content">
+        <h1><i class="fas fa-crosshairs"></i> IP Threat Intelligence Scanner</h1>
+        <p>SOC-level multi-source threat analysis using AbuseIPDB, OTX, GreyNoise &amp; Shodan</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <!-- Input -->
+        <div class="soc-input-card">
+            <form id="threatForm" autocomplete="off">
+                <div class="soc-input-row">
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fas fa-crosshairs"></i></span>
+                        <input type="text" id="ipInput" placeholder="Enter IP address (e.g. 185.220.101.1)" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="scanBtn">
+                        <i class="fas fa-satellite-dish"></i> Scan IP
+                    </button>
+                </div>
+                <div class="quick-actions mt-2">
+                    <span class="text-muted">Quick test:</span>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="quickScan('185.220.101.1')">Tor Exit</button>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="quickScan('8.8.8.8')">Google DNS</button>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="quickScan('1.1.1.1')">Cloudflare</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results (hidden until scan) -->
+        <div id="resultsSection" class="hidden">
+
+            <!-- Top Stat Cards -->
+            <div class="soc-stats" id="statCards">
+                <div class="soc-stat" id="statRisk">
+                    <div class="soc-stat-icon"><i class="fas fa-gauge-high"></i></div>
+                    <div class="soc-stat-value" id="valRisk">-</div>
+                    <div class="soc-stat-label">Risk Score</div>
+                </div>
+                <div class="soc-stat" id="statThreat">
+                    <div class="soc-stat-icon"><i class="fas fa-skull-crossbones"></i></div>
+                    <div class="soc-stat-value" id="valThreat">-</div>
+                    <div class="soc-stat-label">Threat Level</div>
+                </div>
+                <div class="soc-stat" id="statReports">
+                    <div class="soc-stat-icon"><i class="fas fa-flag"></i></div>
+                    <div class="soc-stat-value" id="valReports">-</div>
+                    <div class="soc-stat-label">Malicious Reports</div>
+                </div>
+                <div class="soc-stat" id="statScanner">
+                    <div class="soc-stat-icon"><i class="fas fa-radar"></i></div>
+                    <div class="soc-stat-value" id="valScanner">-</div>
+                    <div class="soc-stat-label">Scanner Activity</div>
+                </div>
+            </div>
+
+            <!-- Gauge -->
+            <div class="card">
+                <div class="card-header"><h2><i class="fas fa-tachometer-alt"></i> Risk Meter</h2></div>
+                <div class="card-body">
+                    <div class="gauge-wrap">
+                        <svg class="gauge-svg" viewBox="0 0 260 150">
+                            <path class="gauge-bg" d="M 30 130 A 100 100 0 0 1 230 130" />
+                            <path class="gauge-fill" id="gaugeFill" d="M 30 130 A 100 100 0 0 1 230 130" stroke-dasharray="314" stroke-dashoffset="314" />
+                            <text class="gauge-text" x="130" y="115" id="gaugeText">0</text>
+                            <text class="gauge-label" x="130" y="140" id="gaugeLabel">RISK SCORE</text>
+                        </svg>
+                    </div>
+                    <div style="text-align:center; margin-top:.5rem;">
+                        <span class="threat-badge" id="threatBadge">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Source Intelligence Cards -->
+            <div class="source-grid" id="sourceGrid">
+                <!-- AbuseIPDB -->
+                <div class="source-card">
+                    <div class="source-card-header">
+                        <i class="fas fa-shield-halved"></i> AbuseIPDB
+                        <span class="source-status" id="statusAbuse">-</span>
+                    </div>
+                    <div class="source-card-body" id="bodyAbuse">
+                        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+                    </div>
+                </div>
+                <!-- OTX -->
+                <div class="source-card">
+                    <div class="source-card-header">
+                        <i class="fas fa-satellite"></i> AlienVault OTX
+                        <span class="source-status" id="statusOTX">-</span>
+                    </div>
+                    <div class="source-card-body" id="bodyOTX">
+                        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+                    </div>
+                </div>
+                <!-- GreyNoise -->
+                <div class="source-card">
+                    <div class="source-card-header">
+                        <i class="fas fa-wave-square"></i> GreyNoise
+                        <span class="source-status" id="statusGN">-</span>
+                    </div>
+                    <div class="source-card-body" id="bodyGN">
+                        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+                    </div>
+                </div>
+                <!-- Shodan -->
+                <div class="source-card">
+                    <div class="source-card-header">
+                        <i class="fas fa-server"></i> Shodan
+                        <span class="source-status" id="statusShodan">-</span>
+                    </div>
+                    <div class="source-card-body" id="bodyShodan">
+                        <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Actions -->
+            <div class="report-bar">
+                <button class="btn-report primary" onclick="downloadReport()">
+                    <i class="fas fa-file-pdf"></i> Generate Security Report
+                </button>
+                <button class="btn-report primary" onclick="scanAgain()" style="background:linear-gradient(135deg,#0af,#08f);">
+                    <i class="fas fa-redo"></i> New Scan
+                </button>
+            </div>
+        </div><!-- /resultsSection -->
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentReport = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('threatForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const ip = document.getElementById('ipInput').value.trim();
+        if (ip) runScan(ip);
+    });
+});
+
+function quickScan(ip) {
+    document.getElementById('ipInput').value = ip;
+    runScan(ip);
+}
+function scanAgain() {
+    document.getElementById('ipInput').value = '';
+    document.getElementById('ipInput').focus();
+}
+
+async function runScan(ip) {
+    showLoading('Scanning ' + ip + ' across 4 threat intelligence sources...');
+    document.getElementById('resultsSection').classList.add('hidden');
+
+    try {
+        const resp = await fetch('/api/ip-threat-intel', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ip})
+        });
+        const data = await resp.json();
+        hideLoading();
+
+        if (!data.success) {
+            showToast(data.error || 'Scan failed', 'error');
+            return;
+        }
+
+        currentReport = data;
+        renderResults(data);
+        document.getElementById('resultsSection').classList.remove('hidden');
+        document.getElementById('resultsSection').scrollIntoView({behavior: 'smooth', block: 'start'});
+    } catch (err) {
+        hideLoading();
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+/* ---- Rendering helpers ---- */
+
+function severityClass(level) {
+    return (level || '').toLowerCase();
+}
+
+function renderResults(d) {
+    const lvl = severityClass(d.threat_level);
+
+    // Stat cards
+    setStatCard('statRisk',    d.risk_score, lvl);
+    setStatCard('statThreat',  d.threat_level, lvl);
+    setStatCard('statReports', d.abuseipdb.total_reports, lvl);
+    setStatCard('statScanner', d.greynoise.noise ? 'Detected' : 'None', d.greynoise.noise ? 'high' : 'low');
+
+    document.getElementById('valRisk').textContent = d.risk_score + '/100';
+    document.getElementById('valThreat').innerHTML = '<span class="threat-badge ' + lvl + '">' + d.threat_level + '</span>';
+    document.getElementById('valReports').textContent = d.abuseipdb.total_reports;
+    document.getElementById('valScanner').textContent = d.greynoise.noise ? 'Detected' : 'None';
+
+    // Gauge
+    animateGauge(d.risk_score, lvl);
+
+    // Threat badge
+    const badge = document.getElementById('threatBadge');
+    badge.textContent = d.threat_level;
+    badge.className = 'threat-badge ' + lvl;
+
+    // Source cards
+    renderAbuseIPDB(d);
+    renderOTX(d);
+    renderGreyNoise(d);
+    renderShodan(d);
+}
+
+function setStatCard(id, value, lvl) {
+    const el = document.getElementById(id);
+    el.className = 'soc-stat ' + lvl;
+}
+
+function animateGauge(score, lvl) {
+    const arc = document.getElementById('gaugeFill');
+    const total = 314;
+    const offset = total - (score / 100) * total;
+    const colors = {low:'#00ff88', medium:'#ffd60a', high:'#ff9f0a', critical:'#ff3b30'};
+    arc.style.stroke = colors[lvl] || '#00ff88';
+    arc.style.strokeDashoffset = offset;
+    document.getElementById('gaugeText').textContent = score;
+}
+
+function sourceStatus(sources, errors, name) {
+    if (sources.includes(name)) return '<span class="ok">OK</span>';
+    const key = name.toLowerCase().replace(/\s+/g, '').replace('alienvaultotx','otx').replace('abuseipdb','abuseipdb');
+    if (errors[key]) return '<span class="err">ERR</span>';
+    return '<span class="skip">N/A</span>';
+}
+
+function renderAbuseIPDB(d) {
+    const a = d.abuseipdb;
+    const statusMap = {abuseipdb: 'AbuseIPDB'};
+    document.getElementById('statusAbuse').innerHTML = sourceStatus(d.sources_queried, d.errors, 'AbuseIPDB');
+    document.getElementById('bodyAbuse').innerHTML = `
+        <div class="info-row"><span class="info-label">IP Address</span><span class="info-value">${d.ip}</span></div>
+        <div class="info-row"><span class="info-label">Abuse Score</span><span class="info-value" style="color:${a.confidence_score >= 50 ? '#ff6b6b' : '#00ff88'}">${a.confidence_score}%</span></div>
+        <div class="info-row"><span class="info-label">Country</span><span class="info-value">${a.country || 'N/A'}</span></div>
+        <div class="info-row"><span class="info-label">ISP</span><span class="info-value">${a.isp || 'N/A'}</span></div>
+        <div class="info-row"><span class="info-label">Domain</span><span class="info-value">${a.domain || 'N/A'}</span></div>
+        <div class="info-row"><span class="info-label">Total Reports</span><span class="info-value">${a.total_reports}</span></div>
+        <div class="info-row"><span class="info-label">Tor Exit Node</span><span class="info-value">${a.is_tor ? '⚠️ Yes' : 'No'}</span></div>
+        <div class="info-row"><span class="info-label">Last Reported</span><span class="info-value">${a.last_reported ? new Date(a.last_reported).toLocaleDateString() : 'Never'}</span></div>
+    `;
+}
+
+function renderOTX(d) {
+    const o = d.otx;
+    document.getElementById('statusOTX').innerHTML = sourceStatus(d.sources_queried, d.errors, 'AlienVault OTX');
+    let pulsesHtml = '';
+    if (o.pulses && o.pulses.length > 0) {
+        pulsesHtml = o.pulses.map(p => `<div class="pulse-item"><div class="pulse-name">${escapeHtml(p.name)}</div><div class="pulse-date">${p.created ? new Date(p.created).toLocaleDateString() : ''}</div></div>`).join('');
+    } else {
+        pulsesHtml = '<div class="text-muted">No threat pulses found</div>';
+    }
+    document.getElementById('bodyOTX').innerHTML = `
+        <div class="info-row"><span class="info-label">Pulse Count</span><span class="info-value">${o.pulse_count}</span></div>
+        <div class="info-row"><span class="info-label">Malware Indicators</span><span class="info-value">${o.malware_count}</span></div>
+        <div class="info-row"><span class="info-label">Reputation</span><span class="info-value">${o.reputation}</span></div>
+        <div style="margin-top:.75rem;"><strong style="color:var(--primary);font-size:.82rem;">THREAT PULSES</strong></div>
+        ${pulsesHtml}
+    `;
+}
+
+function renderGreyNoise(d) {
+    const g = d.greynoise;
+    document.getElementById('statusGN').innerHTML = sourceStatus(d.sources_queried, d.errors, 'GreyNoise');
+    const cls = g.classification || 'unknown';
+    let clsColor = '#00ff88';
+    if (cls === 'malicious') clsColor = '#ff3b30';
+    else if (cls === 'unknown') clsColor = '#ffd60a';
+    document.getElementById('bodyGN').innerHTML = `
+        <div class="info-row"><span class="info-label">Classification</span><span class="info-value" style="color:${clsColor};text-transform:uppercase">${cls}</span></div>
+        <div class="info-row"><span class="info-label">Internet Noise</span><span class="info-value">${g.noise ? '⚠️ Yes' : 'No'}</span></div>
+        <div class="info-row"><span class="info-label">RIOT (Benign Service)</span><span class="info-value">${g.riot ? '✅ Yes' : 'No'}</span></div>
+        <div class="info-row"><span class="info-label">Name</span><span class="info-value">${escapeHtml(g.name) || 'N/A'}</span></div>
+        <div class="info-row"><span class="info-label">Message</span><span class="info-value" style="font-family:inherit;">${escapeHtml(g.message) || 'N/A'}</span></div>
+    `;
+}
+
+function renderShodan(d) {
+    const s = d.shodan;
+    document.getElementById('statusShodan').innerHTML = sourceStatus(d.sources_queried, d.errors, 'Shodan');
+
+    let portsHtml = '<div class="text-muted">No open ports detected</div>';
+    if (s.ports && s.ports.length) {
+        portsHtml = s.ports.map(p => `<span class="port-badge">${p}</span>`).join('');
+    }
+
+    let vulnsHtml = '';
+    if (s.vulns && s.vulns.length) {
+        vulnsHtml = `<div style="margin-top:.75rem;"><strong style="color:#ff6b6b;font-size:.82rem;">VULNERABILITIES (${s.vulns.length})</strong></div>` +
+            s.vulns.map(v => `<span class="vuln-badge">${escapeHtml(v)}</span>`).join('');
+    }
+
+    document.getElementById('bodyShodan').innerHTML = `
+        <div class="info-row"><span class="info-label">Organization</span><span class="info-value">${escapeHtml(s.organization) || 'N/A'}</span></div>
+        <div class="info-row"><span class="info-label">OS</span><span class="info-value">${escapeHtml(s.os) || 'N/A'}</span></div>
+        <div class="info-row"><span class="info-label">Hostnames</span><span class="info-value">${s.hostnames && s.hostnames.length ? s.hostnames.map(h => escapeHtml(h)).join(', ') : 'N/A'}</span></div>
+        <div class="info-row"><span class="info-label">Open Ports</span><span class="info-value">${s.ports ? s.ports.length : 0}</span></div>
+        <div style="margin-top:.75rem;"><strong style="color:var(--primary);font-size:.82rem;">OPEN PORTS</strong></div>
+        <div style="margin-top:.4rem;">${portsHtml}</div>
+        ${vulnsHtml}
+    `;
+}
+
+/* ---- Report Download ---- */
+async function downloadReport() {
+    if (!currentReport) { showToast('Run a scan first', 'warning'); return; }
+    showLoading('Generating security report...');
+    try {
+        const resp = await fetch('/api/ip-threat-intel/report', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({report: currentReport})
+        });
+        hideLoading();
+        if (!resp.ok) { showToast('Report generation failed', 'error'); return; }
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ip_threat_report_${currentReport.ip.replace(/\./g,'_')}.html`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast('Report downloaded', 'success');
+    } catch (err) {
+        hideLoading();
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+/* ---- Utility ---- */
+function escapeHtml(str) {
+    if (!str) return '';
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+}
+</script>
+{% endblock %}

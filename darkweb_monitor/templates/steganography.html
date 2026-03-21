@@ -1,0 +1,1113 @@
+{% extends "base.html" %}
+
+{% block title %}Steganography Tool - Dark Web Monitor{% endblock %}
+
+{% block content %}
+<section class="hero hero-sm">
+    <div class="hero-content">
+        <h1><i class="fas fa-eye-slash"></i> Steganography Tool</h1>
+        <p>Hide secret messages inside images or extract hidden data from encoded images</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <!-- Mode Tabs -->
+        <div class="steg-tabs">
+            <button class="steg-tab active" data-mode="encode" id="tabEncode">
+                <i class="fas fa-lock"></i> Hide Message
+            </button>
+            <button class="steg-tab" data-mode="decode" id="tabDecode">
+                <i class="fas fa-unlock"></i> Extract Message
+            </button>
+        </div>
+
+        <!-- ===== ENCODE MODE ===== -->
+        <div class="steg-panel" id="panelEncode">
+            <div class="card steg-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-image"></i> Step 1: Select Cover Image</h2>
+                    <span class="steg-step-badge">1</span>
+                </div>
+                <div class="card-body">
+                    <div class="steg-upload-zone" id="encodeUploadZone">
+                        <div class="steg-upload-icon-wrap">
+                            <div class="steg-upload-ring"></div>
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h3>Drag &amp; Drop your image here</h3>
+                        <p class="steg-upload-sub">or click to browse files</p>
+                        <input type="file" id="encodeFileInput" accept=".png,.jpg,.jpeg,.bmp" hidden>
+                        <div class="steg-upload-formats">
+                            <span class="steg-format-tag steg-format-green"><i class="fas fa-image"></i> PNG</span>
+                            <span class="steg-format-tag steg-format-cyan"><i class="fas fa-image"></i> JPG</span>
+                            <span class="steg-format-tag steg-format-blue"><i class="fas fa-image"></i> BMP</span>
+                        </div>
+                        <p class="steg-upload-limit"><i class="fas fa-info-circle"></i> Maximum file size: 10MB</p>
+                    </div>
+                    <div id="encodeFilePreview" class="steg-file-selected hidden">
+                        <div class="steg-file-card">
+                            <div class="steg-file-icon-wrap">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            <div class="steg-file-info">
+                                <span class="steg-file-name" id="encodeFileName">-</span>
+                                <span class="steg-file-size" id="encodeFileSize">-</span>
+                            </div>
+                            <span class="steg-capacity-badge" id="encodeCapacity"></span>
+                            <button class="steg-remove-btn" id="encodeRemoveFile" title="Remove file">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card steg-card mt-1">
+                <div class="card-header">
+                    <h2><i class="fas fa-pen-fancy"></i> Step 2: Enter Secret Message</h2>
+                    <span class="steg-step-badge">2</span>
+                </div>
+                <div class="card-body">
+                    <div class="steg-message-wrap">
+                        <textarea id="encodeMessage" class="steg-textarea" placeholder="Type your secret message here..." maxlength="100000" rows="5"></textarea>
+                        <div class="steg-char-count"><i class="fas fa-keyboard"></i> <span id="encodeCharCount">0</span> characters</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-lg steg-action-btn" id="encodeBtn" disabled>
+                <span class="steg-btn-content"><i class="fas fa-lock"></i> Hide Message in Image</span>
+                <span class="steg-btn-glow"></span>
+            </button>
+
+            <!-- Encode Result -->
+            <div id="encodeResult" class="hidden mt-2">
+                <div class="card steg-card steg-result-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-check-circle" style="color:var(--primary-color)"></i> Message Hidden Successfully</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="steg-result-info">
+                            <div class="steg-result-stat">
+                                <span class="steg-result-label">Characters Hidden</span>
+                                <span class="steg-result-value" id="resultCharsHidden">-</span>
+                            </div>
+                            <div class="steg-result-stat">
+                                <span class="steg-result-label">Output Format</span>
+                                <span class="steg-result-value">PNG</span>
+                            </div>
+                        </div>
+                        <div class="steg-image-preview" id="encodedImagePreview"></div>
+                        <a id="downloadBtn" class="btn btn-primary btn-lg steg-download-btn" download="stego_image.png">
+                            <i class="fas fa-download"></i> Download Encoded Image
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== DECODE MODE ===== -->
+        <div class="steg-panel hidden" id="panelDecode">
+            <div class="card steg-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-image"></i> Upload Encoded Image</h2>
+                </div>
+                <div class="card-body">
+                    <div class="steg-upload-zone" id="decodeUploadZone">
+                        <div class="steg-upload-icon-wrap">
+                            <div class="steg-upload-ring"></div>
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h3>Drag &amp; Drop an encoded image</h3>
+                        <p class="steg-upload-sub">or click to browse files</p>
+                        <input type="file" id="decodeFileInput" accept=".png,.jpg,.jpeg,.bmp" hidden>
+                        <div class="steg-upload-formats">
+                            <span class="steg-format-tag steg-format-green"><i class="fas fa-image"></i> PNG</span>
+                            <span class="steg-format-tag steg-format-cyan"><i class="fas fa-image"></i> JPG</span>
+                            <span class="steg-format-tag steg-format-blue"><i class="fas fa-image"></i> BMP</span>
+                        </div>
+                    </div>
+                    <div id="decodeFilePreview" class="steg-file-selected hidden">
+                        <div class="steg-file-card">
+                            <div class="steg-file-icon-wrap">
+                                <i class="fas fa-image"></i>
+                            </div>
+                            <div class="steg-file-info">
+                                <span class="steg-file-name" id="decodeFileName">-</span>
+                                <span class="steg-file-size" id="decodeFileSize">-</span>
+                            </div>
+                            <button class="steg-remove-btn" id="decodeRemoveFile" title="Remove file">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-lg steg-action-btn" id="decodeBtn" disabled>
+                <span class="steg-btn-content"><i class="fas fa-unlock"></i> Extract Hidden Message</span>
+                <span class="steg-btn-glow"></span>
+            </button>
+
+            <!-- Decode Result -->
+            <div id="decodeResult" class="hidden mt-2">
+                <div class="card steg-card steg-result-card" id="decodeResultCard">
+                    <div class="card-header">
+                        <h2 id="decodeResultTitle"><i class="fas fa-check-circle" style="color:var(--primary-color)"></i> Hidden Message Found</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="steg-result-info" id="decodeResultInfo">
+                            <div class="steg-result-stat">
+                                <span class="steg-result-label">Characters</span>
+                                <span class="steg-result-value" id="resultDecodeChars">-</span>
+                            </div>
+                            <div class="steg-result-stat">
+                                <span class="steg-result-label">Image Size</span>
+                                <span class="steg-result-value" id="resultDecodeSize">-</span>
+                            </div>
+                        </div>
+                        <div class="steg-decoded-message">
+                            <div class="steg-decoded-header">
+                                <span><i class="fas fa-comment-dots"></i> Decoded Message</span>
+                                <button class="btn btn-sm btn-outline" id="copyDecodedBtn" title="Copy message">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                            </div>
+                            <pre class="steg-decoded-text" id="decodedMessageText"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="card steg-card steg-how-card mt-2">
+            <div class="card-header">
+                <h2><i class="fas fa-info-circle"></i> How Steganography Works</h2>
+            </div>
+            <div class="card-body">
+                <div class="steg-info-grid">
+                    <div class="steg-info-item">
+                        <div class="steg-info-icon"><i class="fas fa-image"></i></div>
+                        <h4>Cover Image</h4>
+                        <p>An ordinary-looking image is used as the carrier for your secret message.</p>
+                    </div>
+                    <div class="steg-info-item">
+                        <div class="steg-info-icon"><i class="fas fa-microchip"></i></div>
+                        <h4>LSB Encoding</h4>
+                        <p>The least significant bits of pixel color values are modified to embed message data.</p>
+                    </div>
+                    <div class="steg-info-item">
+                        <div class="steg-info-icon"><i class="fas fa-eye-slash"></i></div>
+                        <h4>Invisible Changes</h4>
+                        <p>The visual difference is imperceptible — the image looks identical to the original.</p>
+                    </div>
+                    <div class="steg-info-item">
+                        <div class="steg-info-icon"><i class="fas fa-unlock-alt"></i></div>
+                        <h4>Extraction</h4>
+                        <p>Only those who know to look can extract the hidden message from the encoded image.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="steg-security-notice mt-1">
+            <div class="steg-notice-icon"><i class="fas fa-shield-alt"></i></div>
+            <div class="steg-notice-content">
+                <strong>Privacy First:</strong> All encoding and decoding happens on the server in memory. 
+                Images and messages are never stored. Use PNG format for best results — JPEG compression can destroy hidden data.
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ========== Steganography Page Styles ========== */
+
+/* Tabs */
+.steg-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 32px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 255, 136, 0.15);
+    max-width: 460px;
+    background: rgba(10, 14, 23, 0.6);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+.steg-tab {
+    flex: 1;
+    padding: 16px 28px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.35s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+}
+
+.steg-tab.active {
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 212, 255, 0.08));
+    color: var(--primary-color);
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+}
+
+.steg-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    width: 80%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+}
+
+.steg-tab:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+}
+
+.steg-panel.hidden { display: none; }
+
+/* Card Enhancements */
+.steg-card {
+    border: 1px solid rgba(0, 255, 136, 0.12);
+    background: rgba(10, 14, 23, 0.7);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.steg-card:hover {
+    border-color: rgba(0, 255, 136, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 255, 136, 0.06);
+}
+
+.steg-card .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.steg-step-badge {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.1));
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    color: var(--primary-color);
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* ===== Upload Zone ===== */
+.steg-upload-zone {
+    border: 2px dashed rgba(0, 255, 136, 0.3);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.02), rgba(0, 212, 255, 0.02));
+    position: relative;
+    overflow: hidden;
+}
+
+.steg-upload-zone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(0, 255, 136, 0.04) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.steg-upload-zone:hover,
+.steg-upload-zone.drag-over {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.06), rgba(0, 212, 255, 0.04));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 40px rgba(0, 255, 136, 0.1), inset 0 0 60px rgba(0, 255, 136, 0.03);
+}
+
+.steg-upload-zone:hover::before,
+.steg-upload-zone.drag-over::before {
+    opacity: 1;
+}
+
+/* Upload Icon */
+.steg-upload-icon-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 90px;
+    margin-bottom: 1.2rem;
+}
+
+.steg-upload-icon-wrap > i {
+    font-size: 2.8rem;
+    color: var(--primary-color);
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 0 12px rgba(0, 255, 136, 0.4));
+    transition: transform 0.3s ease;
+}
+
+.steg-upload-zone:hover .steg-upload-icon-wrap > i {
+    transform: translateY(-4px) scale(1.08);
+}
+
+.steg-upload-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 255, 136, 0.15);
+    background: radial-gradient(circle, rgba(0, 255, 136, 0.08) 0%, transparent 70%);
+    animation: stegRingPulse 3s ease-in-out infinite;
+}
+
+@keyframes stegRingPulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.08); opacity: 1; }
+}
+
+.steg-upload-zone h3 {
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.steg-upload-sub {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    margin-bottom: 1.2rem;
+}
+
+/* Format Tags */
+.steg-upload-formats {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.steg-format-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border: 1px solid;
+    transition: all 0.3s ease;
+}
+
+.steg-format-green {
+    color: #00ff88;
+    background: rgba(0, 255, 136, 0.08);
+    border-color: rgba(0, 255, 136, 0.2);
+}
+
+.steg-format-cyan {
+    color: #00d4ff;
+    background: rgba(0, 212, 255, 0.08);
+    border-color: rgba(0, 212, 255, 0.2);
+}
+
+.steg-format-blue {
+    color: #6e8efb;
+    background: rgba(110, 142, 251, 0.08);
+    border-color: rgba(110, 142, 251, 0.2);
+}
+
+.steg-upload-zone:hover .steg-format-tag {
+    transform: translateY(-1px);
+}
+
+.steg-upload-limit {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+/* ===== Selected File Card ===== */
+.steg-file-selected {
+    padding: 1rem 0;
+}
+
+.steg-file-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.06), rgba(0, 212, 255, 0.03));
+    border: 1px solid rgba(0, 255, 136, 0.15);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.steg-file-card:hover {
+    border-color: rgba(0, 255, 136, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.06);
+}
+
+.steg-file-icon-wrap {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 212, 255, 0.1));
+    color: var(--primary-color);
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.steg-file-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.steg-file-name {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.steg-file-size {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+.steg-capacity-badge {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent-color);
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    padding: 5px 12px;
+    border-radius: 16px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.steg-remove-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 0, 85, 0.2);
+    background: rgba(255, 0, 85, 0.08);
+    color: var(--danger-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.steg-remove-btn:hover {
+    background: rgba(255, 0, 85, 0.2);
+    border-color: rgba(255, 0, 85, 0.4);
+    transform: rotate(90deg);
+}
+
+/* ===== Textarea ===== */
+.steg-message-wrap { position: relative; }
+
+.steg-textarea {
+    width: 100%;
+    min-height: 130px;
+    padding: 18px;
+    background: rgba(3, 5, 8, 0.6);
+    border: 1px solid rgba(0, 255, 136, 0.12);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    resize: vertical;
+    outline: none;
+    transition: all 0.3s ease;
+    line-height: 1.6;
+}
+
+.steg-textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.08), inset 0 0 30px rgba(0, 255, 136, 0.02);
+}
+
+.steg-textarea::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+.steg-char-count {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+/* ===== Action Button ===== */
+.steg-action-btn {
+    margin-top: 24px;
+    width: 100%;
+    max-width: 460px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+    padding: 16px 32px;
+    border-radius: 14px;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.steg-action-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.steg-btn-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.steg-btn-glow {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), transparent, rgba(0, 212, 255, 0.1));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.steg-action-btn:not(:disabled):hover .steg-btn-glow {
+    opacity: 1;
+}
+
+/* ===== Download Button ===== */
+.steg-download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+/* ===== Result Cards ===== */
+.steg-result-card {
+    border-color: rgba(0, 255, 136, 0.25);
+    box-shadow: 0 4px 30px rgba(0, 255, 136, 0.06);
+}
+
+.steg-result-info {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.steg-result-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 20px;
+    background: rgba(0, 255, 136, 0.04);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 255, 136, 0.1);
+    min-width: 140px;
+}
+
+.steg-result-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-family: var(--font-mono);
+}
+
+.steg-result-value {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.steg-image-preview {
+    margin-bottom: 24px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 255, 136, 0.15);
+    max-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(3, 5, 8, 0.6);
+}
+
+.steg-image-preview img {
+    max-width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+}
+
+/* ===== Decoded Message ===== */
+.steg-decoded-message {
+    background: rgba(3, 5, 8, 0.5);
+    border: 1px solid rgba(0, 255, 136, 0.15);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.steg-decoded-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    background: rgba(0, 255, 136, 0.03);
+}
+
+.steg-decoded-text {
+    padding: 20px;
+    margin: 0;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 300px;
+    overflow-y: auto;
+    line-height: 1.7;
+}
+
+/* ===== How It Works Grid ===== */
+.steg-how-card .card-body {
+    padding: 28px;
+}
+
+.steg-info-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.steg-info-item {
+    text-align: center;
+    padding: 24px 16px;
+    border-radius: 14px;
+    background: rgba(0, 255, 136, 0.02);
+    border: 1px solid rgba(0, 255, 136, 0.08);
+    transition: all 0.35s ease;
+}
+
+.steg-info-item:hover {
+    border-color: rgba(0, 255, 136, 0.2);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 255, 136, 0.06);
+    background: rgba(0, 255, 136, 0.04);
+}
+
+.steg-info-icon {
+    width: 60px;
+    height: 60px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.12), rgba(0, 212, 255, 0.08));
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    color: var(--primary-color);
+    font-size: 1.3rem;
+    margin-bottom: 16px;
+    transition: all 0.35s ease;
+}
+
+.steg-info-item:hover .steg-info-icon {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+    transform: scale(1.08);
+}
+
+.steg-info-item h4 {
+    font-family: var(--font-display);
+    font-size: 0.88rem;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+    letter-spacing: 0.5px;
+}
+
+.steg-info-item p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* ===== Security Notice ===== */
+.steg-security-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.06), rgba(0, 255, 136, 0.03));
+    border: 1px solid rgba(0, 212, 255, 0.15);
+    border-radius: 14px;
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.6;
+}
+
+.steg-notice-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    color: var(--accent-color);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.steg-notice-content strong {
+    color: var(--accent-color);
+}
+
+/* Error state */
+.steg-result-card.error-state {
+    border-color: rgba(255, 0, 85, 0.25);
+    box-shadow: 0 4px 30px rgba(255, 0, 85, 0.06);
+}
+
+.steg-result-card.error-state .steg-result-stat {
+    background: rgba(255, 0, 85, 0.04);
+    border-color: rgba(255, 0, 85, 0.1);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    .steg-info-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .steg-tabs {
+        max-width: 100%;
+    }
+    .steg-action-btn {
+        max-width: 100%;
+    }
+    .steg-upload-zone {
+        padding: 2rem 1.5rem;
+    }
+    .steg-upload-icon-wrap {
+        width: 72px;
+        height: 72px;
+    }
+    .steg-upload-icon-wrap > i {
+        font-size: 2.2rem;
+    }
+    .steg-file-card {
+        flex-wrap: wrap;
+    }
+    .steg-capacity-badge {
+        order: 4;
+        width: 100%;
+        text-align: center;
+        margin-top: 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .steg-info-grid {
+        grid-template-columns: 1fr;
+    }
+    .steg-result-info {
+        flex-direction: column;
+    }
+    .steg-result-stat {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+    const MAX_SIZE = 10 * 1024 * 1024;
+
+    // Tab switching
+    const tabEncode = document.getElementById('tabEncode');
+    const tabDecode = document.getElementById('tabDecode');
+    const panelEncode = document.getElementById('panelEncode');
+    const panelDecode = document.getElementById('panelDecode');
+
+    tabEncode.addEventListener('click', () => {
+        tabEncode.classList.add('active'); tabDecode.classList.remove('active');
+        panelEncode.classList.remove('hidden'); panelDecode.classList.add('hidden');
+    });
+    tabDecode.addEventListener('click', () => {
+        tabDecode.classList.add('active'); tabEncode.classList.remove('active');
+        panelDecode.classList.remove('hidden'); panelEncode.classList.add('hidden');
+    });
+
+    // -- ENCODE --
+    const encodeZone = document.getElementById('encodeUploadZone');
+    const encodeInput = document.getElementById('encodeFileInput');
+    const encodePreview = document.getElementById('encodeFilePreview');
+    const encodeName = document.getElementById('encodeFileName');
+    const encodeSize = document.getElementById('encodeFileSize');
+    const encodeCap = document.getElementById('encodeCapacity');
+    const encodeRemove = document.getElementById('encodeRemoveFile');
+    const encodeMsg = document.getElementById('encodeMessage');
+    const encodeCharCount = document.getElementById('encodeCharCount');
+    const encodeBtn = document.getElementById('encodeBtn');
+    const encodeResult = document.getElementById('encodeResult');
+    let encodeFile = null;
+
+    function formatSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / 1048576).toFixed(2) + ' MB';
+    }
+
+    function setupDragDrop(zone, input, handler) {
+        zone.addEventListener('click', () => input.click());
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+        zone.addEventListener('drop', e => {
+            e.preventDefault(); zone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) handler(e.dataTransfer.files[0]);
+        });
+        input.addEventListener('change', () => { if (input.files.length) handler(input.files[0]); });
+    }
+
+    function handleEncodeFile(file) {
+        if (file.size > MAX_SIZE) {
+            if (typeof showToast === 'function') showToast('File too large (max 10MB)', 'error');
+            return;
+        }
+        if (!file.type.startsWith('image/')) {
+            if (typeof showToast === 'function') showToast('Please select an image file', 'error');
+            return;
+        }
+        encodeFile = file;
+        encodeName.textContent = file.name;
+        encodeSize.textContent = formatSize(file.size);
+        encodeZone.classList.add('hidden');
+        encodePreview.classList.remove('hidden');
+        updateEncodeBtn();
+
+        // Get capacity
+        const fd = new FormData();
+        fd.append('file', file);
+        fetch('/api/steganography/capacity', { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(d => {
+                if (d.max_characters !== undefined) {
+                    encodeCap.textContent = '~' + d.max_characters.toLocaleString() + ' chars capacity';
+                }
+            }).catch(() => {});
+    }
+
+    encodeRemove.addEventListener('click', () => {
+        encodeFile = null;
+        encodeInput.value = '';
+        encodePreview.classList.add('hidden');
+        encodeZone.classList.remove('hidden');
+        encodeCap.textContent = '';
+        updateEncodeBtn();
+    });
+
+    encodeMsg.addEventListener('input', () => {
+        encodeCharCount.textContent = encodeMsg.value.length;
+        updateEncodeBtn();
+    });
+
+    function updateEncodeBtn() {
+        encodeBtn.disabled = !(encodeFile && encodeMsg.value.trim());
+    }
+
+    setupDragDrop(encodeZone, encodeInput, handleEncodeFile);
+
+    encodeBtn.addEventListener('click', async () => {
+        if (!encodeFile || !encodeMsg.value.trim()) return;
+        encodeBtn.disabled = true;
+        encodeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Encoding...';
+        encodeResult.classList.add('hidden');
+
+        try {
+            const fd = new FormData();
+            fd.append('file', encodeFile);
+            fd.append('message', encodeMsg.value);
+            const resp = await fetch('/api/steganography/encode', { method: 'POST', body: fd });
+            if (!resp.ok) {
+                const err = await resp.json();
+                throw new Error(err.error || 'Encoding failed');
+            }
+            const blob = await resp.blob();
+            const url = URL.createObjectURL(blob);
+
+            document.getElementById('resultCharsHidden').textContent = encodeMsg.value.length;
+            const preview = document.getElementById('encodedImagePreview');
+            preview.innerHTML = '<img src="' + url + '" alt="Encoded image">';
+            const dlBtn = document.getElementById('downloadBtn');
+            dlBtn.href = url;
+
+            encodeResult.classList.remove('hidden');
+            encodeResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (typeof showToast === 'function') showToast('Message hidden successfully!', 'success');
+        } catch (e) {
+            if (typeof showToast === 'function') showToast(e.message, 'error');
+        } finally {
+            encodeBtn.disabled = false;
+            encodeBtn.innerHTML = '<i class="fas fa-lock"></i> Hide Message in Image';
+            updateEncodeBtn();
+        }
+    });
+
+    // -- DECODE --
+    const decodeZone = document.getElementById('decodeUploadZone');
+    const decodeInput = document.getElementById('decodeFileInput');
+    const decodePreview = document.getElementById('decodeFilePreview');
+    const decodeName = document.getElementById('decodeFileName');
+    const decodeSize = document.getElementById('decodeFileSize');
+    const decodeRemove = document.getElementById('decodeRemoveFile');
+    const decodeBtn = document.getElementById('decodeBtn');
+    const decodeResult = document.getElementById('decodeResult');
+    let decodeFile = null;
+
+    function handleDecodeFile(file) {
+        if (file.size > MAX_SIZE) {
+            if (typeof showToast === 'function') showToast('File too large (max 10MB)', 'error');
+            return;
+        }
+        if (!file.type.startsWith('image/')) {
+            if (typeof showToast === 'function') showToast('Please select an image file', 'error');
+            return;
+        }
+        decodeFile = file;
+        decodeName.textContent = file.name;
+        decodeSize.textContent = formatSize(file.size);
+        decodeZone.classList.add('hidden');
+        decodePreview.classList.remove('hidden');
+        decodeBtn.disabled = false;
+    }
+
+    decodeRemove.addEventListener('click', () => {
+        decodeFile = null;
+        decodeInput.value = '';
+        decodePreview.classList.add('hidden');
+        decodeZone.classList.remove('hidden');
+        decodeBtn.disabled = true;
+    });
+
+    setupDragDrop(decodeZone, decodeInput, handleDecodeFile);
+
+    decodeBtn.addEventListener('click', async () => {
+        if (!decodeFile) return;
+        decodeBtn.disabled = true;
+        decodeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Extracting...';
+        decodeResult.classList.add('hidden');
+
+        try {
+            const fd = new FormData();
+            fd.append('file', decodeFile);
+            const resp = await fetch('/api/steganography/decode', { method: 'POST', body: fd });
+            const data = await resp.json();
+
+            const card = document.getElementById('decodeResultCard');
+            const title = document.getElementById('decodeResultTitle');
+            const info = document.getElementById('decodeResultInfo');
+
+            if (data.success) {
+                card.classList.remove('error-state');
+                title.innerHTML = '<i class="fas fa-check-circle" style="color:var(--primary-color)"></i> Hidden Message Found';
+                document.getElementById('resultDecodeChars').textContent = data.characters;
+                document.getElementById('resultDecodeSize').textContent = data.image_size;
+                document.getElementById('decodedMessageText').textContent = data.message;
+                info.style.display = '';
+                document.querySelector('.steg-decoded-message').style.display = '';
+                if (typeof showToast === 'function') showToast('Hidden message extracted!', 'success');
+            } else {
+                card.classList.add('error-state');
+                title.innerHTML = '<i class="fas fa-times-circle" style="color:var(--danger-color)"></i> No Hidden Message Found';
+                document.getElementById('resultDecodeSize').textContent = data.image_size || '-';
+                document.getElementById('resultDecodeChars').textContent = '0';
+                document.getElementById('decodedMessageText').textContent = data.error || 'No hidden data detected.';
+                info.style.display = '';
+                document.querySelector('.steg-decoded-message').style.display = '';
+            }
+
+            decodeResult.classList.remove('hidden');
+            decodeResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (e) {
+            if (typeof showToast === 'function') showToast(e.message || 'Decode failed', 'error');
+        } finally {
+            decodeBtn.disabled = false;
+            decodeBtn.innerHTML = '<i class="fas fa-unlock"></i> Extract Hidden Message';
+        }
+    });
+
+    // Copy button
+    document.getElementById('copyDecodedBtn').addEventListener('click', () => {
+        const text = document.getElementById('decodedMessageText').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            if (typeof showToast === 'function') showToast('Message copied!', 'success');
+        });
+    });
+})();
+</script>
+{% endblock %}

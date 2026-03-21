@@ -1,0 +1,310 @@
+/* ===================================
+   Dark Web Leak Monitor - Theme System
+   =================================== */
+
+/* 1. Cyber Green (Default Theme)
+   -----------------------------------
+   Variables are defined in style.css :root
+*/
+
+/* 2. Dark Purple Hacker [data-theme="purple"]
+   ----------------------------------- */
+[data-theme="purple"] {
+    --primary-color: #bf00ff;
+    --primary-dark: #8a00b8;
+    --primary-light: #e066ff;
+    --secondary-color: #0d0514;
+    
+    --success-color: #bf00ff;
+    --success-bg: rgba(191, 0, 255, 0.1);
+    --warning-color: #ffaa00;
+    --warning-bg: rgba(255, 170, 0, 0.1);
+    --danger-color: #ff0055;
+    --danger-bg: rgba(255, 0, 85, 0.1);
+    --info-color: #00d4ff;
+    --info-bg: rgba(0, 212, 255, 0.1);
+    
+    --bg-color: #050208;
+    --bg-secondary: #0d0514;
+    --bg-tertiary: #160a24;
+    --card-bg: rgba(13, 5, 20, 0.8);
+    --card-border: rgba(191, 0, 255, 0.3);
+    
+    --text-primary: #f2e6ff;
+    --text-secondary: #c9a3e6;
+    --text-muted: #8c66b3;
+    
+    --shadow-sm: 0 0 10px rgba(191, 0, 255, 0.15);
+    --shadow-md: 0 0 20px rgba(191, 0, 255, 0.2);
+    --shadow-lg: 0 0 30px rgba(191, 0, 255, 0.25);
+    --shadow-xl: 0 0 50px rgba(191, 0, 255, 0.3);
+    
+    --glow-primary: 0 0 20px rgba(191, 0, 255, 0.6);
+    --glow-accent: 0 0 20px rgba(0, 212, 255, 0.5);
+    --glow-danger: 0 0 20px rgba(255, 0, 85, 0.5);
+}
+
+/* 3. Blue Security [data-theme="blue"]
+   ----------------------------------- */
+[data-theme="blue"] {
+    --primary-color: #0088ff;
+    --primary-dark: #0055aa;
+    --primary-light: #66b3ff;
+    --secondary-color: #050a14;
+    
+    --success-color: #0088ff;
+    --success-bg: rgba(0, 136, 255, 0.1);
+    --warning-color: #ffaa00;
+    --warning-bg: rgba(255, 170, 0, 0.1);
+    --danger-color: #ff0055;
+    --danger-bg: rgba(255, 0, 85, 0.1);
+    --info-color: #00d4ff;
+    --info-bg: rgba(0, 212, 255, 0.1);
+    
+    --bg-color: #020408;
+    --bg-secondary: #050a14;
+    --bg-tertiary: #0a1429;
+    --card-bg: rgba(5, 10, 20, 0.8);
+    --card-border: rgba(0, 136, 255, 0.3);
+    
+    --text-primary: #e6f2ff;
+    --text-secondary: #a3ccf5;
+    --text-muted: #6699cc;
+    
+    --shadow-sm: 0 0 10px rgba(0, 136, 255, 0.15);
+    --shadow-md: 0 0 20px rgba(0, 136, 255, 0.2);
+    --shadow-lg: 0 0 30px rgba(0, 136, 255, 0.25);
+    --shadow-xl: 0 0 50px rgba(0, 136, 255, 0.3);
+    
+    --glow-primary: 0 0 20px rgba(0, 136, 255, 0.6);
+    --glow-accent: 0 0 20px rgba(0, 212, 255, 0.5);
+    --glow-danger: 0 0 20px rgba(255, 0, 85, 0.5);
+}
+
+/* 4. Red Threat Intel [data-theme="red"]
+   ----------------------------------- */
+[data-theme="red"] {
+    --primary-color: #ff2a2a;
+    --primary-dark: #aa0000;
+    --primary-light: #ff6666;
+    --secondary-color: #140505;
+    
+    --success-color: #00ff88;
+    --success-bg: rgba(0, 255, 136, 0.1);
+    --warning-color: #ffaa00;
+    --warning-bg: rgba(255, 170, 0, 0.1);
+    --danger-color: #ff2a2a;
+    --danger-bg: rgba(255, 42, 42, 0.1);
+    --info-color: #00d4ff;
+    --info-bg: rgba(0, 212, 255, 0.1);
+    
+    --bg-color: #080202;
+    --bg-secondary: #140505;
+    --bg-tertiary: #290a0a;
+    --card-bg: rgba(20, 5, 5, 0.8);
+    --card-border: rgba(255, 42, 42, 0.3);
+    
+    --text-primary: #ffe6e6;
+    --text-secondary: #f5a3a3;
+    --text-muted: #cc6666;
+    
+    --shadow-sm: 0 0 10px rgba(255, 42, 42, 0.15);
+    --shadow-md: 0 0 20px rgba(255, 42, 42, 0.2);
+    --shadow-lg: 0 0 30px rgba(255, 42, 42, 0.25);
+    --shadow-xl: 0 0 50px rgba(255, 42, 42, 0.3);
+    
+    --glow-primary: 0 0 20px rgba(255, 42, 42, 0.6);
+    --glow-accent: 0 0 20px rgba(0, 212, 255, 0.5);
+    --glow-danger: 0 0 30px rgba(255, 42, 42, 0.8);
+}
+
+/* 5. Light Professional [data-theme="light"]
+   ----------------------------------- */
+[data-theme="light"] {
+    --primary-color: #009955;
+    --primary-dark: #007744;
+    --primary-light: #00cc77;
+    --secondary-color: #f0f4f8;
+    --accent-color: #0066cc;
+    --accent-purple: #8800cc;
+    --accent-red: #cc0044;
+    
+    --success-color: #009955;
+    --success-bg: rgba(0, 153, 85, 0.1);
+    --warning-color: #cc8800;
+    --warning-bg: rgba(204, 136, 0, 0.1);
+    --danger-color: #cc0044;
+    --danger-bg: rgba(204, 0, 68, 0.1);
+    --info-color: #0066cc;
+    --info-bg: rgba(0, 102, 204, 0.1);
+    
+    --bg-color: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f1f5f9;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --card-border: rgba(0, 153, 85, 0.3);
+    
+    --text-primary: #1e293b;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+    
+    --glow-primary: 0 0 10px rgba(0, 153, 85, 0.3);
+    --glow-accent: 0 0 10px rgba(0, 102, 204, 0.3);
+    --glow-danger: 0 0 10px rgba(204, 0, 68, 0.3);
+}
+
+/* 6. SOC Analyst Theme [data-theme="soc"]
+   ----------------------------------- */
+[data-theme="soc"] {
+    --primary-color: #00c8ff;
+    --primary-dark: #008fcb;
+    --primary-light: #5cdbff;
+    --secondary-color: #111a2b;
+    --accent-color: #00ff9c;
+    --accent-purple: #a540ff;
+    --accent-red: #ff3b3b;
+    
+    /* Strict Alert Colors */
+    --success-color: #00ff9c;
+    --success-bg: rgba(0, 255, 156, 0.15);
+    --warning-color: #ffcc00;
+    --warning-bg: rgba(255, 204, 0, 0.15);
+    --danger-color: #ff3b3b;
+    --danger-bg: rgba(255, 59, 59, 0.15);
+    --info-color: #00c8ff;
+    --info-bg: rgba(0, 200, 255, 0.15);
+    
+    /* Backgrounds */
+    --bg-color: #0b1220;
+    --bg-secondary: #111a2b;
+    --bg-tertiary: #19263f;
+    --card-bg: #0f1b2e;
+    
+    /* Thin sharp borders */
+    --card-border: #1e3a5f;
+    --border-radius: 2px;
+    --border-radius-sm: 0px;
+    --border-radius-lg: 4px;
+    
+    /* Text */
+    --text-primary: #d6e4ff;
+    --text-secondary: #8fb1ea;
+    --text-muted: #5e7ba8;
+    
+    /* Flat sleek shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.6);
+    
+    /* Subtle glow */
+    --glow-primary: 0 0 8px rgba(0, 200, 255, 0.3);
+    --glow-accent: 0 0 8px rgba(0, 255, 156, 0.3);
+    --glow-danger: 0 0 10px rgba(255, 59, 59, 0.4);
+}
+
+/* Base structural overrides for SOC Analyst */
+[data-theme="soc"] .card, 
+[data-theme="soc"] .tool-card, 
+[data-theme="soc"] .dashboard-card {
+    border-width: 1px;
+    border-style: solid;
+    border-color: var(--card-border);
+    border-radius: var(--border-radius);
+    background: var(--card-bg);
+}
+
+[data-theme="soc"] .navbar {
+    background: #0b1220;
+    border-bottom: 1px solid var(--card-border);
+}
+
+[data-theme="soc"] .btn,
+[data-theme="soc"] button {
+    border-radius: var(--border-radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+[data-theme="soc"] body::after {
+    /* Subtle strict grid mimicking professional dashboards */
+    background-image: 
+        linear-gradient(rgba(30, 58, 95, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(30, 58, 95, 0.3) 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+
+/* ===================================
+   Theme Dropdown UI
+   =================================== */
+.nav-dropdown {
+    position: relative;
+}
+
+.theme-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-xl);
+    padding: 10px 0;
+    min-width: 220px;
+    z-index: 1000;
+    list-style: none;
+    margin-top: 10px;
+}
+
+.nav-dropdown:hover .theme-dropdown-menu {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+.theme-dropdown-menu li {
+    padding: 0;
+}
+
+.theme-dropdown-menu .theme-option {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    gap: 12px;
+}
+
+.theme-dropdown-menu .theme-option i:not(.theme-check) {
+    width: 20px;
+    text-align: center;
+}
+
+.theme-dropdown-menu .theme-option .theme-check {
+    margin-left: auto;
+    opacity: 0;
+    color: var(--primary-color);
+    transition: opacity 0.2s ease;
+}
+
+.theme-dropdown-menu .theme-option.active-theme .theme-check {
+    opacity: 1;
+}
+
+.theme-dropdown-menu .theme-option:hover {
+    background: var(--success-bg);
+    color: var(--text-primary);
+}
+
+.theme-dropdown-menu .dropdown-divider {
+    height: 1px;
+    background: var(--card-border);
+    margin: 8px 0;
+}

@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}Batch Check - Dark Web Leak Monitor{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-layer-group"></i> Batch Check</h1>
+        <p>Check multiple passwords or emails at once</p>
+    </div>
+</section>
+
+<section class="content-section">
+    <div class="container">
+        <div class="batch-container">
+            <!-- Input Section -->
+            <div class="batch-input-section">
+                <h2><i class="fas fa-list"></i> Batch Input</h2>
+                
+                <div class="type-selector">
+                    <button type="button" class="type-btn active" data-type="passwords" onclick="setCheckType('passwords')">
+                        <i class="fas fa-key"></i>
+                        <span>Passwords</span>
+                    </button>
+                    <button type="button" class="type-btn" data-type="emails" onclick="setCheckType('emails')">
+                        <i class="fas fa-envelope"></i>
+                        <span>Emails</span>
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <label for="batchInput">Enter items (one per line, max 50)</label>
+                    <textarea id="batchInput" rows="10" placeholder="Enter passwords or emails, one per line..."></textarea>
+                </div>
+                
+                <div class="batch-actions">
+                    <button type="button" class="btn btn-secondary" onclick="clearInput()">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="loadSample()">
+                        <i class="fas fa-file-import"></i> Load Sample
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="startBatchCheck()">
+                        <i class="fas fa-play"></i> Start Check
+                    </button>
+                </div>
+                
+                <div class="batch-info">
+                    <p><i class="fas fa-info-circle"></i> Items entered: <span id="itemCount">0</span></p>
+                </div>
+            </div>
+            
+            <!-- Results Section -->
+            <div id="resultsSection" class="batch-results-section hidden">
+                <h2><i class="fas fa-chart-bar"></i> Results</h2>
+                
+                <!-- Summary Cards -->
+                <div class="summary-cards" id="summaryCards">
+                    <!-- Dynamic content -->
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <p class="progress-text" id="progressText">Processing...</p>
+                </div>
+                
+                <!-- Results Table -->
+                <div class="results-table-container">
+                    <table class="results-table" id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Item</th>
+                                <th>Status</th>
+                                <th>Breaches</th>
+                                <th>Risk</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Export Actions -->
+                <div class="export-actions" id="exportActions">
+                    <button class="btn btn-secondary" onclick="exportBatchResults('json')">
+                        <i class="fas fa-file-code"></i> Export JSON
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportBatchResults('csv')">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportBatchResults('html')">
+                        <i class="fas fa-file-code"></i> Export HTML
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let checkType = 'passwords';
+let batchResults = null;
+
+function setCheckType(type) {
+    checkType = type;
+    
+    document.querySelectorAll('.type-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.type === type) {
+            btn.classList.add('active');
+        }
+    });
+    
+    const placeholder = type === 'passwords' 
+        ? 'Enter passwords, one per line...' 
+        : 'Enter email addresses, one per line...';
+    document.getElementById('batchInput').placeholder = placeholder;
+}
+
+function clearInput() {
+    document.getElementById('batchInput').value = '';
+    updateItemCount();
+}
+
+function loadSample() {
+    if (checkType === 'passwords') {
+        document.getElementById('batchInput').value = 
+`password123
+admin
+letmein
+qwerty
+123456789
+iloveyou
+welcome
+monkey`;
+    } else {
+        document.getElementById('batchInput').value = 
+`test@yahoo.com
+user@gmail.com
+admin@example.com
+john@linkedin.com
+jane@adobe.com`;
+    }
+    updateItemCount();
+}
+
+function updateItemCount() {
+    const input = document.getElementById('batchInput').value;
+    const items = input.split('\n').filter(item => item.trim());
+    document.getElementById('itemCount').textContent = items.length;
+}
+
+document.getElementById('batchInput').addEventListener('input', updateItemCount);
+
+async function startBatchCheck() {
+    const input = document.getElementById('batchInput').value;
+    const items = input.split('\n').filter(item => item.trim()).map(item => item.trim());
+    
+    if (items.length === 0) {
+        showToast('Please enter at least one item', 'warning');
+        return;
+    }
+    
+    if (items.length > 50) {
+        showToast('Maximum 50 items allowed', 'warning');
+        return;
+    }
+    
+    const resultsSection = document.getElementById('resultsSection');
+    const progressContainer = document.getElementById('progressContainer');
+    const exportActions = document.getElementById('exportActions');
+    
+    resultsSection.classList.remove('hidden');
+    progressContainer.classList.remove('hidden');
+    exportActions.classList.add('hidden');
+    
+    // Clear previous results
+    document.getElementById('summaryCards').innerHTML = '';
+    document.getElementById('resultsBody').innerHTML = '';
+    document.getElementById('progressFill').style.width = '0%';
+    document.getElementById('progressText').textContent = 'Starting...';
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/api/batch-check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: checkType, items })
+        });
+        
+        const data = await response.json();
+        hideLoading();
+        
+        if (data.error) {
+            showToast(data.error, 'error');
+            return;
+        }
+        
+        batchResults = data;
+        displayBatchResults(data);
+        progressContainer.classList.add('hidden');
+        exportActions.classList.remove('hidden');
+        
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+        
+    } catch (error) {
+        hideLoading();
+        showToast('An error occurred. Please try again.', 'error');
+        console.error(error);
+    }
+}
+
+function displayBatchResults(data) {
+    // Summary Cards
+    const summaryHtml = `
+        <div class="summary-card">
+            <div class="card-icon"><i class="fas fa-list"></i></div>
+            <div class="card-value">${data.total_items}</div>
+            <div class="card-label">Total Checked</div>
+        </div>
+        <div class="summary-card danger">
+            <div class="card-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="card-value">${data.compromised_count}</div>
+            <div class="card-label">Compromised</div>
+        </div>
+        <div class="summary-card success">
+            <div class="card-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="card-value">${data.safe_count}</div>
+            <div class="card-label">Safe</div>
+        </div>
+        <div class="summary-card">
+            <div class="card-icon"><i class="fas fa-percent"></i></div>
+            <div class="card-value">${data.compromise_rate}%</div>
+            <div class="card-label">Risk Rate</div>
+        </div>
+    `;
+    document.getElementById('summaryCards').innerHTML = summaryHtml;
+    
+    // Results Table
+    let tableHtml = '';
+    data.results.forEach(result => {
+        const item = result.password_masked || result.email || 'N/A';
+        const statusClass = result.is_compromised ? 'compromised' : 'safe';
+        const statusText = result.is_compromised ? 'COMPROMISED' : 'SAFE';
+        const breaches = result.breach_count || 0;
+        const risk = result.risk_level || (result.is_compromised ? 'HIGH' : 'LOW');
+        
+        tableHtml += `
+            <tr class="${statusClass}">
+                <td>${result.index}</td>
+                <td><code>${item}</code></td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td>${breaches.toLocaleString()}</td>
+                <td><span class="risk-badge risk-${risk.toLowerCase()}">${risk}</span></td>
+            </tr>
+        `;
+    });
+    document.getElementById('resultsBody').innerHTML = tableHtml;
+}
+
+async function exportBatchResults(format) {
+    if (!batchResults) {
+        showToast('No results to export', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/api/export', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ format })
+        });
+        const data = await response.json();
+        hideLoading();
+        
+        if (data.success) {
+            showToast(`${format.toUpperCase()} exported successfully!`, 'success');
+            window.open(`/api/download/${data.filename}`, '_blank');
+        } else {
+            showToast(data.error || 'Failed to export', 'error');
+        }
+    } catch (error) {
+        hideLoading();
+        showToast('Export failed. Please try again.', 'error');
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Certificate - Dark Web Monitor{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/certificate.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="cert-page">
+    <div class="cert-container">
+
+        <!-- Action Buttons -->
+        <div class="v3-cert-actions">
+            <button id="sendEmail" class="v3-action-btn primary" data-id="{{ cert.certificate_id }}" data-email="{{ cert.email }}"><i class="fas fa-paper-plane"></i> SYNC TO MAIL</button>
+            <button id="downloadPDF" class="v3-action-btn secondary"><i class="fas fa-file-pdf"></i> PDF EXPORT</button>
+            <button id="downloadPNG" class="v3-action-btn secondary"><i class="fas fa-image"></i> IMAGE EXPORT</button>
+            <button id="shareCert" class="v3-action-btn gold" data-url="{{ verify_url }}"><i class="fas fa-share-nodes"></i> BROADCAST</button>
+        </div>
+
+        <!-- Certificate Card (landscape ratio) -->
+        <div class="cert-card" id="certCard">
+            <!-- Corner accents -->
+            <div class="cert-corner cert-corner--tl"></div>
+            <div class="cert-corner cert-corner--tr"></div>
+            <div class="cert-corner cert-corner--bl"></div>
+            <div class="cert-corner cert-corner--br"></div>
+            <div class="cert-circuit"></div>
+            
+            <!-- Professional Watermark Background -->
+            <div class="cert-watermark">
+                <i class="fas fa-shield-virus"></i>
+            </div>
+
+            <div class="cert-inner">
+
+                <!-- Top: Logo + Program -->
+                <div class="cert-header">
+                    <div class="cert-logo">
+                        <div class="cert-logo-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div class="cert-logo-text">
+                            <div class="brand">DARK WEB MONITOR</div>
+                            <div class="sub">Security Lab</div>
+                        </div>
+                    </div>
+                    <div class="cert-program-label">Cybersecurity Awareness Program</div>
+                </div>
+
+                <div class="cert-divider"></div>
+
+                <!-- Center: Title + Name -->
+                <div class="cert-center">
+                    <div class="cert-seal">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <h1 class="cert-title">CERTIFICATE OF COMPLETION</h1>
+                    <p class="cert-preamble">This is to certify that</p>
+                    <div class="cert-user-name" id="certUserName">{{ cert.participant_name | upper }}</div>
+                    <div class="cert-name-line"></div>
+                    <p class="cert-desc">
+                        has successfully completed the <strong>Cybersecurity Awareness Quiz</strong>
+                        demonstrating proficiency in cybersecurity fundamentals, threat awareness, and security best practices.
+                    </p>
+                </div>
+
+                <!-- Info Row: Score | Status -->
+                <div class="cert-info-row">
+                    <div class="cert-info-cell">
+                        <div class="cert-score-ring">
+                            <svg viewBox="0 0 120 120">
+                                <circle class="ring-bg" cx="60" cy="60" r="50"></circle>
+                                <circle class="ring-fill" cx="60" cy="60" r="50" data-percent="{{ cert.percentage }}"></circle>
+                            </svg>
+                            <div class="ring-label">
+                                <span class="score-num" data-count-to="{{ cert.percentage }}" data-count-suffix="%">0%</span>
+                            </div>
+                        </div>
+                        <span class="info-caption">Score: {{ cert.score }}/{{ cert.total }}</span>
+                    </div>
+                    <div class="cert-info-cell">
+                        <div class="info-icon status-{% if cert.passed %}pass{% else %}fail{% endif %}">
+                            <i class="fas fa-{% if cert.passed %}check-circle{% else %}times-circle{% endif %}"></i>
+                        </div>
+                        <span class="info-value status-{% if cert.passed %}pass{% else %}fail{% endif %}">
+                            {% if cert.passed %}PASSED{% else %}NOT PASSED{% endif %}
+                        </span>
+                        <span class="info-caption">Status</span>
+                    </div>
+                </div>
+
+                <div class="cert-divider"></div>
+
+                <!-- Bottom: Cert ID + QR + Issued By -->
+                <div class="cert-bottom">
+                    <div class="cert-bottom-left">
+                        <div class="cert-detail"><span class="detail-label">Certificate ID</span><span class="detail-value">{{ cert.certificate_id }}</span></div>
+                        <div class="cert-detail"><span class="detail-label">Date Issued</span><span class="detail-value" id="certDate">{{ cert.completion_time }}</span></div>
+                    </div>
+                    <div class="cert-qr">
+                        <div class="cert-qr-box" id="certQR" data-url="{{ verify_url }}"></div>
+                        <span class="cert-qr-label">Scan to Verify Certificate</span>
+                    </div>
+                    <div class="cert-bottom-right" style="display: flex; align-items: flex-end;">
+                        <div class="cert-sig-name" style="margin-top: 20px; font-weight: bold; color: #fff;">Verified by Dark Web Monitor</div>
+                    </div>
+                </div>
+
+            </div><!-- .cert-inner -->
+        </div><!-- .cert-card -->
+
+    </div><!-- .cert-container -->
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/certificate.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const dateEl = document.getElementById('certDate');
+    if (dateEl) {
+        let rawDate = dateEl.textContent.trim();
+        try {
+            // Standardize format to ensure mobile Safari parses correctly 'YYYY-MM-DDTHH:MM:SS'
+            const d = new Date(rawDate.replace(' ', 'T'));
+            if (!isNaN(d.getTime())) {
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                dateEl.textContent = d.toLocaleDateString('en-US', options);
+            }
+        } catch(e) {}
+    }
+});
+</script>
+{% endblock %}

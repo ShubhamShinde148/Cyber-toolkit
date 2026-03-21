@@ -1,0 +1,537 @@
+{% extends "base.html" %}
+
+{% block title %}About - Dark Web Leak Monitor{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-info-circle"></i> About</h1>
+        <p>Learn more about Dark Web Leak Monitor</p>
+    </div>
+</section>
+
+<section class="content-section">
+    <div class="container">
+        <div class="about-grid">
+            <!-- What is this tool -->
+            <div class="about-card">
+                <div class="card-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h2>What is Dark Web Leak Monitor?</h2>
+                <p>
+                    Dark Web Leak Monitor is a comprehensive security tool designed to help you 
+                    check if your passwords or email addresses have been exposed in known data breaches. 
+                    We use the Have I Been Pwned (HIBP) API to provide real-time breach detection.
+                </p>
+            </div>
+            
+            <!-- How it works -->
+            <div class="about-card">
+                <div class="card-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h2>How Does It Work?</h2>
+                <p>
+                    We use the k-anonymity model for password checks. Only the first 5 characters 
+                    of your password's SHA-1 hash are sent to the API. Your full password never 
+                    leaves your device, ensuring complete privacy and security.
+                </p>
+            </div>
+            
+            <!-- Privacy -->
+            <div class="about-card">
+                <div class="card-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h2>Your Privacy Matters</h2>
+                <p>
+                    We do not store, log, or transmit your passwords. All password processing 
+                    is done locally in your browser and on our secure server. The k-anonymity 
+                    model ensures that even the API cannot determine your actual password.
+                </p>
+            </div>
+            
+            <!-- Features -->
+            <div class="about-card">
+                <div class="card-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <h2>Key Features</h2>
+                <ul class="feature-list">
+                    <li><i class="fas fa-check"></i> Password breach checking</li>
+                    <li><i class="fas fa-check"></i> Email breach detection</li>
+                    <li><i class="fas fa-check"></i> Secure password generator</li>
+                    <li><i class="fas fa-check"></i> Batch checking capability</li>
+                    <li><i class="fas fa-check"></i> Risk analysis and scoring</li>
+                    <li><i class="fas fa-check"></i> Export reports in multiple formats</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Security Best Practices -->
+        <div class="security-practices">
+            <h2><i class="fas fa-lock"></i> Security Best Practices</h2>
+            <div class="practices-grid">
+                <div class="practice-item">
+                    <div class="practice-number">1</div>
+                    <h3>Use Unique Passwords</h3>
+                    <p>Never reuse passwords across different accounts. If one gets compromised, all others remain safe.</p>
+                </div>
+                <div class="practice-item">
+                    <div class="practice-number">2</div>
+                    <h3>Enable 2FA</h3>
+                    <p>Two-factor authentication adds an extra layer of security even if your password is compromised.</p>
+                </div>
+                <div class="practice-item">
+                    <div class="practice-number">3</div>
+                    <h3>Use a Password Manager</h3>
+                    <p>Password managers generate and store complex passwords securely, so you don't have to remember them.</p>
+                </div>
+                <div class="practice-item">
+                    <div class="practice-number">4</div>
+                    <h3>Regular Password Updates</h3>
+                    <p>Change your passwords periodically, especially for critical accounts like email and banking.</p>
+                </div>
+                <div class="practice-item">
+                    <div class="practice-number">5</div>
+                    <h3>Check for Breaches</h3>
+                    <p>Regularly check if your credentials have been exposed in data breaches using tools like this one.</p>
+                </div>
+                <div class="practice-item">
+                    <div class="practice-number">6</div>
+                    <h3>Strong Passwords</h3>
+                    <p>Use passwords with at least 12 characters, including uppercase, lowercase, numbers, and symbols.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FAQ Section -->
+        <div class="faq-section">
+            <h2><i class="fas fa-question-circle"></i> Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Is it safe to enter my password here?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes! We use the k-anonymity model. Only the first 5 characters of your password's 
+                    SHA-1 hash are sent to the API. Your actual password is never transmitted or stored.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>What should I do if my password is compromised?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Immediately change that password on all accounts where you've used it. Use our 
+                    password generator to create a strong, unique password. Enable two-factor 
+                    authentication where available.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>How up-to-date is the breach database?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>We use the Have I Been Pwned API, which is continuously updated with newly 
+                    discovered breaches. The database contains billions of passwords from hundreds 
+                    of data breaches.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Can I check multiple passwords at once?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes! Use our Batch Check feature to check up to 50 passwords or email addresses 
+                    at once. You can also export the results in various formats.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>What does the breach count mean?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>The breach count shows how many times your password has appeared in known data 
+                    breaches. A higher count means the password is more commonly used and therefore 
+                    less secure.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Credits -->
+        <div class="credits-section">
+            <h2><i class="fas fa-heart"></i> Credits & Acknowledgements</h2>
+            <div class="credits-content">
+                <p>
+                    <strong>Have I Been Pwned</strong> - This tool uses the 
+                    <a href="https://haveibeenpwned.com/" target="_blank" rel="noopener">Have I Been Pwned</a> 
+                    API created by Troy Hunt for breach detection.
+                </p>
+                <p>
+                    <strong>Icons</strong> - Icons provided by 
+                    <a href="https://fontawesome.com/" target="_blank" rel="noopener">Font Awesome</a>.
+                </p>
+                <p>
+                    <strong>Fonts</strong> - Typography by 
+                    <a href="https://fonts.google.com/" target="_blank" rel="noopener">Google Fonts</a>.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Feedback Section -->
+        <div class="feedback-section">
+            <h2><i class="fas fa-comment-dots"></i> Share Your Feedback</h2>
+            <p class="feedback-intro">Help us improve Dark Web Leak Monitor. Your feedback is valuable!</p>
+            
+            <div class="feedback-form-container" id="feedbackFormContainer">
+                <form id="aboutFeedbackForm" class="about-feedback-form">
+                    <!-- Star Rating -->
+                    <div class="rating-section">
+                        <label class="form-label">Rate Your Experience</label>
+                        <div class="star-rating-inline" id="aboutStarRating">
+                            <input type="radio" name="rating" id="aboutStar5" value="5" required>
+                            <label for="aboutStar5" title="Excellent">★</label>
+                            <input type="radio" name="rating" id="aboutStar4" value="4">
+                            <label for="aboutStar4" title="Great">★</label>
+                            <input type="radio" name="rating" id="aboutStar3" value="3">
+                            <label for="aboutStar3" title="Good">★</label>
+                            <input type="radio" name="rating" id="aboutStar2" value="2">
+                            <label for="aboutStar2" title="Fair">★</label>
+                            <input type="radio" name="rating" id="aboutStar1" value="1">
+                            <label for="aboutStar1" title="Poor">★</label>
+                        </div>
+                        <span class="rating-text" id="aboutRatingText">Select a rating</span>
+                    </div>
+                    
+                    <!-- Feedback Message -->
+                    <div class="form-group">
+                        <label class="form-label" for="aboutFeedbackText">
+                            <i class="fas fa-pencil-alt"></i> Your Feedback (Optional)
+                        </label>
+                        <textarea 
+                            id="aboutFeedbackText" 
+                            name="feedback" 
+                            class="feedback-textarea" 
+                            placeholder="What did you like? What can we improve?"
+                            rows="4"
+                            maxlength="500"
+                        ></textarea>
+                        <div class="char-counter"><span id="aboutCharCount">0</span>/500</div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary feedback-submit" id="aboutSubmitBtn">
+                        <i class="fas fa-paper-plane"></i> Submit Feedback
+                    </button>
+                </form>
+                
+                <!-- Success Message -->
+                <div class="feedback-success hidden" id="aboutFeedbackSuccess">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Thank You!</h3>
+                    <p>Your feedback helps us improve Dark Web Leak Monitor.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Feedback Section Styles */
+.feedback-section {
+    margin-top: 60px;
+    padding: 40px;
+    background: linear-gradient(145deg, rgba(10, 14, 23, 0.9), rgba(5, 8, 15, 0.95));
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    border-radius: 16px;
+    text-align: center;
+}
+
+.feedback-section h2 {
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.feedback-section h2 i {
+    color: var(--primary-color);
+    margin-right: 10px;
+}
+
+.feedback-intro {
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+}
+
+.feedback-form-container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.about-feedback-form .rating-section {
+    margin-bottom: 24px;
+}
+
+.about-feedback-form .form-label {
+    display: block;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Star Rating Inline */
+.star-rating-inline {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.star-rating-inline input[type="radio"] {
+    display: none;
+}
+
+.star-rating-inline label {
+    cursor: pointer;
+    font-size: 36px;
+    color: #3d4555;
+    transition: all 0.2s ease;
+}
+
+.star-rating-inline label:hover,
+.star-rating-inline label:hover ~ label {
+    color: #FFD700;
+    transform: scale(1.1);
+}
+
+.star-rating-inline input[type="radio"]:checked ~ label {
+    color: #FFD700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.rating-text {
+    display: block;
+    font-size: 14px;
+    color: var(--primary-color);
+    min-height: 20px;
+}
+
+.rating-text.error {
+    color: #ff6b6b;
+}
+
+/* Form Group */
+.about-feedback-form .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.about-feedback-form .form-label i {
+    color: var(--primary-color);
+    margin-right: 6px;
+}
+
+.feedback-textarea {
+    width: 100%;
+    padding: 14px 18px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 100px;
+    transition: all 0.3s ease;
+}
+
+.feedback-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.15);
+}
+
+.feedback-textarea::placeholder {
+    color: #4a5568;
+}
+
+.char-counter {
+    text-align: right;
+    font-size: 12px;
+    color: #4a5568;
+    margin-top: 6px;
+}
+
+.char-counter.warning {
+    color: var(--warning-color);
+}
+
+/* Submit Button */
+.feedback-submit {
+    width: 100%;
+    padding: 14px 28px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.feedback-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Success State */
+.feedback-success {
+    text-align: center;
+    padding: 30px;
+}
+
+.feedback-success .success-icon {
+    font-size: 60px;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    animation: successPulse 2s ease-in-out infinite;
+}
+
+@keyframes successPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+.feedback-success h3 {
+    color: var(--primary-color);
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.feedback-success p {
+    color: var(--text-secondary);
+}
+
+.hidden {
+    display: none !important;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleFaq(element) {
+    const faqItem = element.parentElement;
+    const isActive = faqItem.classList.contains('active');
+    
+    // Close all FAQ items
+    document.querySelectorAll('.faq-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    // Toggle current item
+    if (!isActive) {
+        faqItem.classList.add('active');
+    }
+}
+
+// Feedback Form Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const ratingDescriptions = {
+        1: 'Poor - Needs improvement',
+        2: 'Fair - Could be better',
+        3: 'Good - Met expectations',
+        4: 'Great - Above average',
+        5: 'Excellent - Outstanding!'
+    };
+    
+    // Star rating interaction
+    const radioButtons = document.querySelectorAll('#aboutStarRating input[type="radio"]');
+    const ratingText = document.getElementById('aboutRatingText');
+    
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', function() {
+            const value = parseInt(this.value);
+            ratingText.textContent = ratingDescriptions[value];
+            ratingText.classList.remove('error');
+        });
+    });
+    
+    // Character counter
+    const feedbackTextarea = document.getElementById('aboutFeedbackText');
+    const charCountSpan = document.getElementById('aboutCharCount');
+    
+    if (feedbackTextarea && charCountSpan) {
+        feedbackTextarea.addEventListener('input', function() {
+            const count = this.value.length;
+            charCountSpan.textContent = count;
+            charCountSpan.parentElement.classList.toggle('warning', count >= 450);
+        });
+    }
+    
+    // Form submission
+    const form = document.getElementById('aboutFeedbackForm');
+    const submitBtn = document.getElementById('aboutSubmitBtn');
+    const successDiv = document.getElementById('aboutFeedbackSuccess');
+    
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const selectedRating = document.querySelector('#aboutStarRating input[type="radio"]:checked');
+            
+            if (!selectedRating) {
+                ratingText.textContent = 'Please select a rating!';
+                ratingText.classList.add('error');
+                return;
+            }
+            
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            
+            const feedbackData = {
+                rating: parseInt(selectedRating.value),
+                feedback: feedbackTextarea.value.trim(),
+                page: '/about',
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent
+            };
+            
+            try {
+                const response = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(feedbackData)
+                });
+                
+                // Show success regardless of response
+                form.classList.add('hidden');
+                successDiv.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Feedback error:', error);
+                // Still show success for good UX
+                form.classList.add('hidden');
+                successDiv.classList.remove('hidden');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

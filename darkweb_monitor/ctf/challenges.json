@@ -1,0 +1,89 @@
+{
+  "challenges": [
+    {
+      "id": 1,
+      "title": "Ghost in the Socials",
+      "type": "osint",
+      "difficulty": "Beginner",
+      "points": 100,
+      "prerequisite_id": null,
+      "scenario": "A hacker known as 'v0id_walker' was seen bragging about a breach on an underground forum. We need to find their real username used on professional platforms.",
+      "objective": "Find the professional username of 'v0id_walker'. (Hint: He might have a GitHub or LinkedIn with a slightly different name)",
+      "flag_hash": "4d6d9ff35c6e50929e4a1ed125ce96c62ba8f6cc0aec3319b2bfe82e69b76970",
+      "hints": [
+        "Search for 'v0id_walker' on GitHub.",
+        "Check the profile bio for clues."
+      ],
+      "solution": "Searching for 'v0id_walker' leads to a GitHub profile where the bio mentions 'Contact me at walker_tech'. The flag is DWM{walker_tech_2026}.",
+      "asset_path": null
+    },
+    {
+      "id": 2,
+      "title": "Hidden in Plain Sight",
+      "type": "forensics",
+      "difficulty": "Beginner",
+      "points": 100,
+      "prerequisite_id": null,
+      "scenario": "An informant sent us a photo of a secret meeting location. They claim the GPS coordinates are hidden inside the image file itself.",
+      "objective": "Download the image and extract the hidden metadata to find the secret city.",
+      "flag_hash": "79b6985b8efaf6fafec3fd4ab089fcf6f9fd105e56b65496772ba3a69f4435ce",
+      "hints": [
+        "Use an EXIF viewer tool.",
+        "Look at the 'Artist' or 'Copyright' tag if GPS is missing."
+      ],
+      "solution": "Extracting EXIF data from the image reveals 'Artist: Mumbai Cyber Hub'. The flag is DWM{mumbai_cyber_hub}.",
+      "asset_path": "/static/ctf/challenge2_loc.jpg"
+    },
+    {
+      "id": 3,
+      "title": "The Invisible Script",
+      "type": "stego",
+      "difficulty": "Intermediate",
+      "points": 250,
+      "prerequisite_id": 1,
+      "scenario": "Our monitoring system intercepted a suspicious banner ad. Our analysts suspect there's a hidden message encoded in the pixels.",
+      "objective": "Analyze the image for hidden steganographic messages.",
+      "flag_hash": "4927365648f65271776e9cf587b06bc50ce9b1a54ee164f2254b36fac8e3993b",
+      "hints": [
+        "Try 'strings' command on the file.",
+        "Check the end of the file (EOF) for appended data."
+      ],
+      "solution": "Running 'strings' or hex analysis on the image reveals a hidden string at the end of the file: 'DWM{pixel_perfect_spy}'.",
+      "asset_path": "/static/ctf/stego_banner.png"
+    },
+    {
+      "id": 4,
+      "title": "Breach Collector",
+      "type": "breach",
+      "difficulty": "Intermediate",
+      "points": 250,
+      "prerequisite_id": 2,
+      "scenario": "A database dump from a recent leak contains a list of 'Secure' users. One specific user 'admin_alpha' has a weak hash.",
+      "objective": "Crack the MD5 hash for 'admin_alpha' in the provided breach snippet.",
+      "flag_hash": "e1d9157ec682708955b900ddc7fee40aed5986991e82cb90ef47d68ef5583274",
+      "hints": [
+        "The hash is MD5.",
+        "Use a common wordlist or an online cracker."
+      ],
+      "solution": "The CSV contains 'admin_alpha,5f4dcc3b5aa765d61d8327deb882cf99'. Cracking the MD5 hash reveals 'password123'. Flag: DWM{p@ssword123}.",
+      "asset_path": "/static/ctf/breach_snippet.csv"
+    },
+    {
+      "id": 5,
+      "title": "Log Hunter",
+      "type": "logs",
+      "difficulty": "Advanced",
+      "points": 500,
+      "prerequisite_id": 3,
+      "scenario": "A server reported multiple failed login attempts. The sysadmin saved the access logs for us to investigate.",
+      "objective": "Find the Base64 encoded payload hidden in the log entries.",
+      "flag_hash": "9847766e7b0c82ec6bcc78d0f2940e921ba30aef3d6dbf06d54a92dddb0a1b8c",
+      "hints": [
+        "Look for unusual URL parameters.",
+        "Identify a string that looks like Base64."
+      ],
+      "solution": "Scanning the logs reveals an entry: GET /login?debug=RFdN{bG9nX2luamVjdGlvbl9kZXRlY3RlZH0=. Decoding the value leads to the flag.",
+      "asset_path": "/static/ctf/server_access.log"
+    }
+  ]
+}

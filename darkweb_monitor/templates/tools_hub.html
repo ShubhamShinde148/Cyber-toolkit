@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Security Tools - Dark Web Monitor{% endblock %}
+
+{% block content %}
+<section class="page-header tools-hub-header">
+    <div class="container">
+        <h1><i class="fas fa-toolbox"></i> Security Tools</h1>
+        <p>Professional cybersecurity toolkit — organized, accessible, and ready to deploy.</p>
+        <div class="tools-search-wrap">
+            <div class="tools-search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="toolsSearchInput" placeholder="Search tools... (e.g. password, osint, scan)" autocomplete="off">
+                <kbd>Ctrl+K</kbd>
+            </div>
+            <span class="tools-search-count" id="toolsSearchCount"></span>
+        </div>
+    </div>
+</section>
+
+<section class="content-section tools-hub-section">
+    <div class="container">
+
+        <!-- No Results State -->
+        <div class="tools-no-results" id="toolsNoResults" style="display:none;">
+            <i class="fas fa-search"></i>
+            <h3>No tools found</h3>
+            <p>Try a different search term like "password", "osint", or "scan".</p>
+        </div>
+
+        <!-- Breach & Leak Detection -->
+        <div class="tools-category" data-category="breach">
+            <div class="tools-category-header">
+                <div class="tools-category-icon"><i class="fas fa-database"></i></div>
+                <div>
+                    <h2>Breach &amp; Leak Detection</h2>
+                    <p>Check if credentials or emails have been exposed in known data breaches.</p>
+                </div>
+            </div>
+            <div class="tools-grid">
+                <a href="{{ url_for('password_check_page') }}" class="tool-card" data-keywords="password breach check leak credential exposure haveibeenpwned">
+                    <div class="tool-card-icon"><i class="fas fa-key"></i></div>
+                    <div class="tool-card-body">
+                        <h3>Password Breach Check</h3>
+                        <p>Check if your password has been exposed in known data breaches using privacy-preserving k-anonymity.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="{{ url_for('email_check_page') }}" class="tool-card" data-keywords="email breach check leak account exposure haveibeenpwned">
+                    <div class="tool-card-icon"><i class="fas fa-envelope-open-text"></i></div>
+                    <div class="tool-card-body">
+                        <h3>Email Breach Check</h3>
+                        <p>Review account breach history and identify which services exposed your email address.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="{{ url_for('breach_timeline_page') }}" class="tool-card" data-keywords="breach timeline history leak data exposure chronological">
+                    <div class="tool-card-icon"><i class="fas fa-timeline"></i></div>
+                    <div class="tool-card-body">
+                        <h3>Breach Timeline</h3>
+                        <p>Visualize the chronological history of data breaches and track exposure events over time.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+        </div>
+
+        <!-- OSINT & Intelligence Tools -->
+        <div class="tools-category" data-category="osint">
+            <div class="tools-category-header">
+                <div class="tools-category-icon"><i class="fas fa-user-secret"></i></div>
+                <div>
+                    <h2>OSINT &amp; Intelligence Tools</h2>
+                    <p>Open-source intelligence gathering for usernames, IPs, domains, and metadata.</p>
+                </div>
+            </div>
+            <div class="tools-grid">
+                <a href="{{ url_for('username_osint_page') }}" class="tool-card" data-keywords="username osint scanner social media footprint presence">
+                    <div class="tool-card-icon"><i class="fas fa-user-secret"></i></div>
+                    <div class="tool-card-body">
+                        <h3>Username OSINT Scanner</h3>
+                        <p>Enumerate public username presence across platforms and discover digital footprints.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="{{ url_for('ip_intelligence_page') }}" class="tool-card" data-keywords="ip intelligence geolocation network address lookup ownership">
+                    <div class="tool-card-icon"><i class="fas fa-network-wired"></i></div>
+                    <div class="tool-card-body">
+                        <h3>IP Intelligence</h3>
+                        <p>Analyze ownership, geolocation context, and recon details for any IP address.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="{{ url_for('metadata_extractor_page') }}" class="tool-card" data-keywords="metadata extractor file document exif hidden data analysis">
+                    <div class="tool-card-icon"><i class="fas fa-file-code"></i></div>
+                    <div class="tool-card-body">
+                        <h3>Metadata Extractor</h3>
+                        <p>Extract hidden metadata from files including EXIF data, document properties, and more.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="{{ url_for('steganography_page') }}" class="tool-card" data-keywords="steganography hide secret message image lsb encode decode hidden">
+                    <div class="tool-card-icon"><i class="fas fa-eye-slash"></i></div>
+                    <div class="tool-card-body">
+                        <h3>Steganography Tool</h3>
+                        <p>Hide secret messages inside images or extract hidden data from encoded images using LSB encoding.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="{{ url_for('domain_scanner_page') }}" class="tool-card" data-keywords="domain scanner security dns resolution posture analysis">
+                    <div class="tool-card-icon"><i class="fas fa-globe"></i></div>
+                    <div class="tool-card-body">
+                        <h3>Domain Security Scanner</h3>
+                        <p>Inspect domain posture, resolution data, and security-relevant exposure indicators.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="{{ url_for('whois_lookup_page') }}" class="tool-card" data-keywords="whois lookup domain registration registrar nameserver">
+                    <div class="tool-card-icon"><i class="fas fa-address-card"></i></div>
+                    <div class="tool-card-body">
+                        <h3>WHOIS Lookup</h3>
+                        <p>Retrieve registrar, registration dates, and nameserver details for any domain.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Network & Security Tools -->
+        <div class="tools-category" data-category="network">
+            <div class="tools-category-header">
+                <div class="tools-category-icon"><i class="fas fa-shield-alt"></i></div>
+                <div>
+                    <h2>Network &amp; Security Tools</h2>
+                    <p>Analyze web technologies, assess risk, and get actionable security recommendations.</p>
+                </div>
+            </div>
+            <div class="tools-grid">
+                <a href="{{ url_for('website_technology_detector_page') }}" class="tool-card" data-keywords="website technology detector fingerprint web server stack headers">
+                    <div class="tool-card-icon"><i class="fas fa-fingerprint"></i></div>
+                    <div class="tool-card-body">
+                        <h3>Website Technology Detector</h3>
+                        <p>Fingerprint exposed web server technologies, frameworks, and runtime stacks.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="{{ url_for('risk_assessment_page') }}" class="tool-card" data-keywords="risk assessment score analysis vulnerability security posture">
+                    <div class="tool-card-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="tool-card-body">
+                        <h3>Risk Assessment Tool</h3>
+                        <p>Evaluate your overall security posture with a comprehensive risk scoring engine.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="{{ url_for('security_advisor_page') }}" class="tool-card" data-keywords="security advisor recommendations hardening best practices">
+                    <div class="tool-card-icon"><i class="fas fa-lightbulb"></i></div>
+                    <div class="tool-card-body">
+                        <h3>Security Advisor</h3>
+                        <p>Get personalized security recommendations and hardening best practices.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="{{ url_for('attack_map_page') }}" class="tool-card" data-keywords="attack map live real-time cyber threat visualization global">
+                    <div class="tool-card-icon"><i class="fas fa-globe-americas"></i></div>
+                    <div class="tool-card-body">
+                        <h3>Live Attack Map</h3>
+                        <p>Real-time visualization of global cyber attacks and threat activity.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="{{ url_for('ip_threat_intel_page') }}" class="tool-card" data-keywords="ip threat intelligence abuse reputation blocklist malicious">
+                    <div class="tool-card-icon"><i class="fas fa-crosshairs"></i></div>
+                    <div class="tool-card-body">
+                        <h3>IP Threat Intel</h3>
+                        <p>Assess IP reputation, abuse reports, and threat intelligence data.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Utility Tools -->
+        <div class="tools-category" data-category="utility">
+            <div class="tools-category-header">
+                <div class="tools-category-icon"><i class="fas fa-wrench"></i></div>
+                <div>
+                    <h2>Utility Tools</h2>
+                    <p>Encoding, hashing, password generation, and batch processing utilities.</p>
+                </div>
+            </div>
+            <div class="tools-grid">
+                <a href="{{ url_for('cyber_tools_page') }}" class="tool-card" data-keywords="hash generator md5 sha256 base64 encoder decoder url jwt dns cyber tools utility">
+                    <div class="tool-card-icon"><i class="fas fa-tools"></i></div>
+                    <div class="tool-card-body">
+                        <h3>Cyber Tools Utilities</h3>
+                        <p>Hash, Base64, URL, JWT, DNS, and text conversion utilities in one workspace.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="{{ url_for('generator_page') }}" class="tool-card" data-keywords="password generator random strong secure memorable pin">
+                    <div class="tool-card-icon"><i class="fas fa-lock"></i></div>
+                    <div class="tool-card-body">
+                        <h3>Password Generator</h3>
+                        <p>Create high-entropy random, memorable, or PIN-style passwords for secure use.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+                <a href="{{ url_for('batch_page') }}" class="tool-card" data-keywords="batch checker bulk processing multiple email password check export">
+                    <div class="tool-card-icon"><i class="fas fa-layer-group"></i></div>
+                    <div class="tool-card-body">
+                        <h3>Batch Checker</h3>
+                        <p>Run bulk password or email exposure checks and export results securely.</p>
+                    </div>
+                    <span class="tool-card-action">Open Tool <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const searchInput = document.getElementById('toolsSearchInput');
+    const searchCount = document.getElementById('toolsSearchCount');
+    const noResults = document.getElementById('toolsNoResults');
+    const categories = document.querySelectorAll('.tools-category');
+    const allCards = document.querySelectorAll('.tool-card');
+    const totalTools = allCards.length;
+
+    function filterTools() {
+        const query = searchInput.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        if (!query) {
+            categories.forEach(c => c.style.display = '');
+            allCards.forEach(c => c.style.display = '');
+            noResults.style.display = 'none';
+            searchCount.textContent = '';
+            return;
+        }
+
+        const terms = query.split(/\s+/);
+
+        categories.forEach(cat => {
+            const cards = cat.querySelectorAll('.tool-card');
+            let catVisible = 0;
+            cards.forEach(card => {
+                const name = card.querySelector('h3').textContent.toLowerCase();
+                const desc = card.querySelector('p').textContent.toLowerCase();
+                const keywords = (card.dataset.keywords || '').toLowerCase();
+                const haystack = name + ' ' + desc + ' ' + keywords;
+                const match = terms.every(t => haystack.includes(t));
+                card.style.display = match ? '' : 'none';
+                if (match) { catVisible++; visibleCount++; }
+            });
+            cat.style.display = catVisible > 0 ? '' : 'none';
+        });
+
+        noResults.style.display = visibleCount === 0 ? '' : 'none';
+        searchCount.textContent = visibleCount + ' of ' + totalTools + ' tools';
+    }
+
+    searchInput.addEventListener('input', filterTools);
+
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+        }
+    });
+})();
+</script>
+{% endblock %}

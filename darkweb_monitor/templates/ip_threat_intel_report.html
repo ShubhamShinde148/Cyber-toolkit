@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IP Threat Intelligence Report — {{ report.ip }}</title>
+<style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI',Arial,sans-serif; background:#0b0f19; color:#e0e0e0; padding:2rem; }
+    .report { max-width:900px; margin:0 auto; }
+    .header { text-align:center; padding:2rem 0; border-bottom:2px solid #00ff88; margin-bottom:2rem; }
+    .header h1 { color:#00ff88; font-size:1.8rem; margin-bottom:.5rem; }
+    .header p { color:#888; font-size:.9rem; }
+    .meta-row { display:flex; justify-content:space-between; margin:1rem 0; }
+    .meta-item { text-align:center; flex:1; }
+    .meta-value { font-size:2rem; font-weight:700; }
+    .meta-label { font-size:.8rem; color:#888; text-transform:uppercase; }
+    .low .meta-value { color:#00ff88; }
+    .medium .meta-value { color:#ffd60a; }
+    .high .meta-value { color:#ff9f0a; }
+    .critical .meta-value { color:#ff3b30; }
+    .section { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:1.5rem; margin:1.5rem 0; }
+    .section h2 { color:#00ff88; font-size:1.1rem; margin-bottom:1rem; border-bottom:1px solid rgba(0,255,136,0.2); padding-bottom:.5rem; }
+    .row { display:flex; justify-content:space-between; padding:.4rem 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.9rem; }
+    .row:last-child { border:none; }
+    .label { color:#888; }
+    .value { color:#e0e0e0; font-weight:500; }
+    .badge { display:inline-block; padding:.15rem .6rem; border-radius:6px; font-size:.8rem; margin:.1rem .2rem; }
+    .badge-port { background:rgba(0,255,136,0.12); color:#00ff88; }
+    .badge-vuln { background:rgba(255,59,48,0.12); color:#ff6b6b; }
+    .recs { list-style:none; }
+    .recs li { padding:.4rem 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:.9rem; }
+    .recs li::before { content:'⚡'; margin-right:.5rem; }
+    .footer { text-align:center; margin-top:2rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.08); font-size:.8rem; color:#555; }
+</style>
+</head>
+<body>
+<div class="report">
+    <div class="header">
+        <h1>🔒 IP Threat Intelligence Report</h1>
+        <p>Dark Web Leak Monitor — SOC Analysis</p>
+        <p style="margin-top:.5rem;">Generated: {{ report.scan_timestamp }}</p>
+    </div>
+
+    <div class="meta-row">
+        <div class="meta-item {{ report.threat_level|lower }}">
+            <div class="meta-value">{{ report.risk_score }}/100</div>
+            <div class="meta-label">Risk Score</div>
+        </div>
+        <div class="meta-item {{ report.threat_level|lower }}">
+            <div class="meta-value">{{ report.threat_level }}</div>
+            <div class="meta-label">Threat Level</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-value" style="color:#e0e0e0;">{{ report.sources_queried|length }}</div>
+            <div class="meta-label">Sources Queried</div>
+        </div>
+    </div>
+
+    <!-- AbuseIPDB -->
+    <div class="section">
+        <h2>AbuseIPDB</h2>
+        <div class="row"><span class="label">IP Address</span><span class="value">{{ report.ip }}</span></div>
+        <div class="row"><span class="label">Abuse Score</span><span class="value">{{ report.abuseipdb.confidence_score }}%</span></div>
+        <div class="row"><span class="label">Country</span><span class="value">{{ report.abuseipdb.country }}</span></div>
+        <div class="row"><span class="label">ISP</span><span class="value">{{ report.abuseipdb.isp }}</span></div>
+        <div class="row"><span class="label">Domain</span><span class="value">{{ report.abuseipdb.domain }}</span></div>
+        <div class="row"><span class="label">Total Reports</span><span class="value">{{ report.abuseipdb.total_reports }}</span></div>
+        <div class="row"><span class="label">Tor Exit Node</span><span class="value">{{ 'Yes' if report.abuseipdb.is_tor else 'No' }}</span></div>
+    </div>
+
+    <!-- AlienVault OTX -->
+    <div class="section">
+        <h2>AlienVault OTX</h2>
+        <div class="row"><span class="label">Pulse Count</span><span class="value">{{ report.otx.pulse_count }}</span></div>
+        <div class="row"><span class="label">Malware Indicators</span><span class="value">{{ report.otx.malware_count }}</span></div>
+        <div class="row"><span class="label">Reputation</span><span class="value">{{ report.otx.reputation }}</span></div>
+    </div>
+
+    <!-- GreyNoise -->
+    <div class="section">
+        <h2>GreyNoise</h2>
+        <div class="row"><span class="label">Classification</span><span class="value">{{ report.greynoise.classification }}</span></div>
+        <div class="row"><span class="label">Internet Noise</span><span class="value">{{ 'Yes' if report.greynoise.noise else 'No' }}</span></div>
+        <div class="row"><span class="label">RIOT (Benign)</span><span class="value">{{ 'Yes' if report.greynoise.riot else 'No' }}</span></div>
+        <div class="row"><span class="label">Name</span><span class="value">{{ report.greynoise.name }}</span></div>
+    </div>
+
+    <!-- Shodan -->
+    <div class="section">
+        <h2>Shodan</h2>
+        <div class="row"><span class="label">Organization</span><span class="value">{{ report.shodan.organization }}</span></div>
+        <div class="row"><span class="label">OS</span><span class="value">{{ report.shodan.os or 'N/A' }}</span></div>
+        <div class="row"><span class="label">Hostnames</span><span class="value">{{ report.shodan.hostnames|join(', ') or 'N/A' }}</span></div>
+        <div class="row">
+            <span class="label">Open Ports ({{ report.shodan.ports|length }})</span>
+            <span class="value">
+                {% for p in report.shodan.ports %}<span class="badge badge-port">{{ p }}</span>{% endfor %}
+                {% if not report.shodan.ports %}None{% endif %}
+            </span>
+        </div>
+        {% if report.shodan.vulns %}
+        <div class="row">
+            <span class="label">Vulnerabilities ({{ report.shodan.vulns|length }})</span>
+            <span class="value">
+                {% for v in report.shodan.vulns %}<span class="badge badge-vuln">{{ v }}</span>{% endfor %}
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Security Recommendations -->
+    <div class="section">
+        <h2>Security Recommendations</h2>
+        <ul class="recs">
+            {% if report.risk_score >= 70 %}
+            <li>CRITICAL: Immediately block this IP at your firewall / WAF.</li>
+            <li>Submit an abuse report to the ISP ({{ report.abuseipdb.isp }}).</li>
+            <li>Review all access logs for connections from {{ report.ip }}.</li>
+            {% endif %}
+            {% if report.risk_score >= 50 %}
+            <li>Add this IP to your threat intelligence watchlist.</li>
+            <li>Enable rate-limiting rules for this source.</li>
+            {% endif %}
+            {% if report.abuseipdb.is_tor %}
+            <li>This IP is a known Tor exit node — evaluate whether Tor traffic should be allowed.</li>
+            {% endif %}
+            {% if report.greynoise.noise %}
+            <li>GreyNoise confirms scanner activity — expect probing attempts.</li>
+            {% endif %}
+            {% if report.shodan.vulns %}
+            <li>Shodan detected {{ report.shodan.vulns|length }} known vulnerabilities on services reachable from this IP.</li>
+            {% endif %}
+            {% if report.otx.pulse_count > 5 %}
+            <li>AlienVault OTX has {{ report.otx.pulse_count }} threat pulses — cross-reference with your SIEM.</li>
+            {% endif %}
+            <li>Continue monitoring this IP periodically for changes in threat posture.</li>
+            <li>Correlate findings with your internal IDS/IPS alerts.</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        Dark Web Leak Monitor — IP Threat Intelligence Report &copy; {{ report.scan_timestamp[:4] }}
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,537 @@
+{% extends "base.html" %}
+
+{% block title %}IP Intelligence - Dark Web Monitor{% endblock %}
+
+{% block content %}
+<section class="hero hero-sm">
+    <div class="hero-content">
+        <h1><i class="fas fa-network-wired"></i> IP Intelligence</h1>
+        <p>Analyze IP addresses for geolocation, threat indicators, and reputation</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-search-location"></i> Analyze IP Address</h2>
+            </div>
+            <div class="card-body">
+                <form id="ipForm">
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fas fa-network-wired"></i></span>
+                        <input type="text" id="ipInput" placeholder="Enter IP address (e.g., 8.8.8.8)" required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-crosshairs"></i> Analyze
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="quick-actions mt-2">
+                    <span class="text-muted">Quick lookup:</span>
+                    <button class="btn btn-outline btn-sm" onclick="checkMyIP()">Check My IP</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden mt-2">
+            <!-- Summary Cards -->
+            <div class="stats-grid">
+                <div class="stat-card" id="ipCard">
+                    <div class="stat-icon"><i class="fas fa-fingerprint"></i></div>
+                    <div class="stat-value" id="analyzedIP">-</div>
+                    <div class="stat-label">Analyzed IP</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="stat-value" id="location">-</div>
+                    <div class="stat-label">Location</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+                    <div class="stat-value" id="threatLevel">-</div>
+                    <div class="stat-label">Threat Level</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-star"></i></div>
+                    <div class="stat-value" id="reputationScore">-</div>
+                    <div class="stat-label">Reputation</div>
+                </div>
+            </div>
+
+            <div class="grid-2 mt-2">
+                <!-- Geolocation -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-globe-americas"></i> Geolocation</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="geoInfo" class="info-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Network Info -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-building"></i> Network Information</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="networkInfo" class="info-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Threat Analysis -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-user-secret"></i> Threat Analysis</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="threatAnalysis" class="threat-indicators"></div>
+                    </div>
+                </div>
+
+                <!-- Blacklist Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-ban"></i> Blacklist Status</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="blacklistStatus" class="blacklist-info"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reputation -->
+            <div class="card mt-2">
+                <div class="card-header">
+                    <h2><i class="fas fa-thumbs-up"></i> Reputation Assessment</h2>
+                </div>
+                <div class="card-body">
+                    <div id="reputationDetails" class="reputation-section"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('ipForm');
+    const resultsSection = document.getElementById('resultsSection');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const ip = document.getElementById('ipInput').value.trim();
+        if (!ip) return;
+        
+        await analyzeIP(ip);
+    });
+    
+    async function analyzeIP(ip) {
+        showLoading('Analyzing IP address...');
+        
+        try {
+            const response = await fetch('/api/ip-intelligence', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ ip: ip })
+            });
+            
+            const data = await response.json();
+            hideLoading();
+            
+            if (data.success) {
+                displayResults(data);
+            } else {
+                showToast(data.error || 'Analysis failed', 'error');
+            }
+        } catch (error) {
+            hideLoading();
+            showToast('Connection error', 'error');
+        }
+    }
+    
+    window.checkMyIP = async function() {
+        showLoading('Detecting your IP...');
+        try {
+            const response = await fetch('https://api.ipify.org?format=json');
+            const data = await response.json();
+            hideLoading();
+            
+            document.getElementById('ipInput').value = data.ip;
+            await analyzeIP(data.ip);
+        } catch (error) {
+            hideLoading();
+            showToast('Could not detect IP', 'error');
+        }
+    };
+    
+    function displayResults(data) {
+        resultsSection.classList.remove('hidden');
+        
+        // Summary
+        document.getElementById('analyzedIP').textContent = data.ip;
+        document.getElementById('location').textContent = data.summary?.location || 'Unknown';
+        
+        const threatLevel = data.threats?.threat_level || 'unknown';
+        const threatEl = document.getElementById('threatLevel');
+        threatEl.textContent = threatLevel.toUpperCase();
+        threatEl.className = 'stat-value threat-' + threatLevel;
+        
+        const repScore = data.reputation?.score || 0;
+        document.getElementById('reputationScore').textContent = repScore + '/100';
+        
+        // Geolocation
+        const geo = data.geolocation || {};
+        document.getElementById('geoInfo').innerHTML = `
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-flag"></i> Country</span>
+                <span class="info-value">${geo.country || 'Unknown'} ${geo.country_code ? '(' + geo.country_code + ')' : ''}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-city"></i> City</span>
+                <span class="info-value">${geo.city || 'Unknown'}${geo.region ? ', ' + geo.region : ''}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-map-pin"></i> Coordinates</span>
+                <span class="info-value">${geo.coordinates?.latitude || '-'}, ${geo.coordinates?.longitude || '-'}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-clock"></i> Timezone</span>
+                <span class="info-value">${geo.timezone || 'Unknown'}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-mailbox"></i> Postal Code</span>
+                <span class="info-value">${geo.postal_code || 'Unknown'}</span>
+            </div>
+        `;
+        
+        // Network Info
+        const net = data.network || {};
+        document.getElementById('networkInfo').innerHTML = `
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-building"></i> ISP</span>
+                <span class="info-value">${net.isp || 'Unknown'}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-sitemap"></i> Organization</span>
+                <span class="info-value">${net.organization || 'Unknown'}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-hashtag"></i> ASN</span>
+                <span class="info-value">${net.asn || 'Unknown'}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-server"></i> Hostname</span>
+                <span class="info-value">${net.hostname || 'N/A'}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-layer-group"></i> Network Type</span>
+                <span class="info-value badge badge-${getNetworkBadge(net.network_type)}">${formatNetworkType(net.network_type)}</span>
+            </div>
+        `;
+        
+        // Threat Analysis
+        const threats = data.threats || {};
+        let threatHTML = `
+            <div class="threat-score-display">
+                <div class="threat-meter">
+                    <div class="threat-meter-fill" style="width: ${threats.threat_score || 0}%"></div>
+                </div>
+                <span class="threat-score-value">Threat Score: ${threats.threat_score || 0}/100</span>
+            </div>
+            <div class="threat-indicators-grid">
+        `;
+        
+        const indicators = [
+            { key: 'is_vpn', icon: 'fa-shield-alt', label: 'VPN' },
+            { key: 'is_proxy', icon: 'fa-mask', label: 'Proxy' },
+            { key: 'is_tor', icon: 'fa-user-secret', label: 'Tor' },
+            { key: 'is_hosting', icon: 'fa-server', label: 'Hosting' },
+            { key: 'is_mobile', icon: 'fa-mobile-alt', label: 'Mobile' }
+        ];
+        
+        for (const ind of indicators) {
+            const isActive = threats[ind.key];
+            threatHTML += `
+                <div class="threat-indicator ${isActive ? 'indicator-active' : 'indicator-inactive'}">
+                    <i class="fas ${ind.icon}"></i>
+                    <span>${ind.label}</span>
+                    <span class="indicator-status">${isActive ? 'Yes' : 'No'}</span>
+                </div>
+            `;
+        }
+        
+        threatHTML += '</div>';
+        
+        if (threats.risk_factors?.length) {
+            threatHTML += '<div class="risk-factors mt-1"><h4>Risk Factors:</h4><ul>';
+            for (const factor of threats.risk_factors) {
+                threatHTML += `<li><i class="fas fa-exclamation-triangle"></i> ${factor}</li>`;
+            }
+            threatHTML += '</ul></div>';
+        }
+        
+        document.getElementById('threatAnalysis').innerHTML = threatHTML;
+        
+        // Blacklist Status
+        const bl = data.blacklists || {};
+        let blHTML = '';
+        
+        if (bl.is_blacklisted) {
+            blHTML = `
+                <div class="blacklist-alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>This IP is BLACKLISTED on ${bl.blacklist_count} list(s)</span>
+                </div>
+                <div class="blacklist-details">
+                    <strong>Listed on:</strong>
+                    <ul>${bl.listed_on?.map(l => `<li>${l}</li>`).join('') || ''}</ul>
+                </div>
+            `;
+        } else {
+            blHTML = `
+                <div class="blacklist-alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <span>This IP is NOT blacklisted</span>
+                </div>
+                <p class="text-muted">Checked against ${bl.checks_performed || 0} blacklist databases.</p>
+            `;
+        }
+        
+        document.getElementById('blacklistStatus').innerHTML = blHTML;
+        
+        // Reputation
+        const rep = data.reputation || {};
+        document.getElementById('reputationDetails').innerHTML = `
+            <div class="reputation-display">
+                <div class="reputation-gauge">
+                    <svg viewBox="0 0 100 50" class="gauge-svg">
+                        <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#333" stroke-width="8"/>
+                        <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="${getReputationColor(rep.score)}" stroke-width="8" stroke-dasharray="${(rep.score / 100) * 126} 126"/>
+                    </svg>
+                    <div class="gauge-value">${rep.score || 0}</div>
+                </div>
+                <div class="reputation-info">
+                    <div class="reputation-category">${(rep.category || 'unknown').toUpperCase()}</div>
+                    <p class="reputation-description">${rep.description || ''}</p>
+                </div>
+            </div>
+        `;
+        
+        // Scroll to results
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function formatNetworkType(type) {
+        const types = {
+            'hosting': 'Hosting/Cloud',
+            'mobile': 'Mobile Network',
+            'vpn_proxy': 'VPN/Proxy',
+            'residential_business': 'Residential/Business',
+            'private': 'Private Network'
+        };
+        return types[type] || type || 'Unknown';
+    }
+    
+    function getNetworkBadge(type) {
+        const badges = {
+            'hosting': 'warning',
+            'mobile': 'info',
+            'vpn_proxy': 'danger',
+            'residential_business': 'success',
+            'private': 'muted'
+        };
+        return badges[type] || 'muted';
+    }
+    
+    function getReputationColor(score) {
+        if (score >= 80) return 'var(--primary)';
+        if (score >= 60) return '#88ff00';
+        if (score >= 40) return '#ffcc00';
+        if (score >= 20) return '#ff6600';
+        return 'var(--danger)';
+    }
+});
+</script>
+
+<style>
+.quick-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.threat-minimal, .threat-low { color: var(--primary); }
+.threat-medium { color: #ffcc00; }
+.threat-high { color: #ff6600; }
+.threat-critical { color: var(--danger); }
+
+.info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.info-label {
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-value {
+    color: var(--text);
+    font-family: var(--font-mono);
+}
+
+.badge-success { background: rgba(0,255,136,0.2); color: var(--primary); }
+.badge-warning { background: rgba(255,204,0,0.2); color: #ffcc00; }
+.badge-danger { background: rgba(255,0,85,0.2); color: var(--danger); }
+.badge-info { background: rgba(0,212,255,0.2); color: var(--secondary); }
+.badge-muted { background: rgba(136,136,136,0.2); color: #888; }
+
+.threat-score-display {
+    margin-bottom: 1.5rem;
+}
+
+.threat-meter {
+    height: 8px;
+    background: #333;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.threat-meter-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), #ffcc00, var(--danger));
+    transition: width 0.5s ease;
+}
+
+.threat-indicators-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.threat-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.threat-indicator i {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.indicator-active {
+    background: rgba(255,0,85,0.2);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+}
+
+.indicator-inactive {
+    background: rgba(0,255,136,0.1);
+    border: 1px solid rgba(0,255,136,0.3);
+    color: var(--primary);
+}
+
+.indicator-status {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    opacity: 0.8;
+}
+
+.risk-factors ul {
+    list-style: none;
+    padding: 0;
+}
+
+.risk-factors li {
+    color: var(--danger);
+    padding: 0.5rem;
+    background: rgba(255,0,85,0.1);
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.blacklist-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+.alert-danger {
+    background: rgba(255,0,85,0.2);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+}
+
+.alert-success {
+    background: rgba(0,255,136,0.1);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+}
+
+.reputation-display {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.reputation-gauge {
+    position: relative;
+    width: 200px;
+}
+
+.gauge-svg {
+    width: 100%;
+    height: auto;
+}
+
+.gauge-value {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2.5rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.reputation-category {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--secondary);
+}
+
+.reputation-description {
+    color: var(--text-muted);
+    max-width: 400px;
+}
+</style>
+{% endblock %}

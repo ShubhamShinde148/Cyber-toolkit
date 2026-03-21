@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Password Generator - Dark Web Leak Monitor{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-lock"></i> Password Generator</h1>
+        <p>Generate cryptographically secure passwords and passphrases</p>
+    </div>
+</section>
+
+<section class="content-section">
+    <div class="container">
+        <div class="generator-container">
+            <!-- Generator Options -->
+            <div class="generator-options">
+                <h2><i class="fas fa-cog"></i> Generator Options</h2>
+                
+                <div class="option-group">
+                    <label>Password Type</label>
+                    <div class="type-selector">
+                        <button type="button" class="type-btn active" data-type="random" onclick="setType('random')">
+                            <i class="fas fa-random"></i>
+                            <span>Random</span>
+                        </button>
+                        <button type="button" class="type-btn" data-type="memorable" onclick="setType('memorable')">
+                            <i class="fas fa-brain"></i>
+                            <span>Memorable</span>
+                        </button>
+                        <button type="button" class="type-btn" data-type="pin" onclick="setType('pin')">
+                            <i class="fas fa-hashtag"></i>
+                            <span>PIN</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="randomOptions" class="options-panel">
+                    <div class="option-group">
+                        <label for="length">Password Length: <span id="lengthValue">16</span></label>
+                        <input type="range" id="length" min="8" max="64" value="16" 
+                               oninput="updateLengthValue(this.value)">
+                    </div>
+                    
+                    <div class="option-group checkboxes">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="uppercase" checked>
+                            <span>Uppercase (A-Z)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="lowercase" checked>
+                            <span>Lowercase (a-z)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="digits" checked>
+                            <span>Numbers (0-9)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="special" checked>
+                            <span>Special (!@#$%)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="memorableOptions" class="options-panel hidden">
+                    <div class="option-group">
+                        <label for="words">Number of Words: <span id="wordsValue">4</span></label>
+                        <input type="range" id="words" min="2" max="8" value="4" 
+                               oninput="document.getElementById('wordsValue').textContent = this.value">
+                    </div>
+                </div>
+                
+                <div id="pinOptions" class="options-panel hidden">
+                    <div class="option-group">
+                        <label for="pinLength">PIN Length: <span id="pinLengthValue">6</span></label>
+                        <input type="range" id="pinLength" min="4" max="12" value="6" 
+                               oninput="document.getElementById('pinLengthValue').textContent = this.value">
+                    </div>
+                </div>
+                
+                <div class="option-group">
+                    <label for="count">Number to Generate: <span id="countValue">1</span></label>
+                    <input type="range" id="count" min="1" max="10" value="1" 
+                           oninput="document.getElementById('countValue').textContent = this.value">
+                </div>
+                
+                <button type="button" class="btn btn-primary btn-block" onclick="generatePassword()">
+                    <i class="fas fa-sync-alt"></i> Generate Password
+                </button>
+            </div>
+            
+            <!-- Generated Passwords -->
+            <div class="generated-passwords">
+                <h2><i class="fas fa-key"></i> Generated Passwords</h2>
+                
+                <div id="passwordsList" class="passwords-list">
+                    <div class="empty-state">
+                        <i class="fas fa-lock"></i>
+                        <p>Click "Generate Password" to create secure passwords</p>
+                    </div>
+                </div>
+                
+                <div id="passwordStats" class="password-stats hidden">
+                    <!-- Stats will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Tips Section -->
+<section class="info-section">
+    <div class="container">
+        <h2 class="section-title">Password Best Practices</h2>
+        <div class="info-grid">
+            <div class="info-card">
+                <i class="fas fa-ruler-horizontal"></i>
+                <h3>Use Long Passwords</h3>
+                <p>Aim for at least 12-16 characters. Longer passwords are exponentially harder to crack.</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-fingerprint"></i>
+                <h3>Make It Unique</h3>
+                <p>Never reuse passwords across different accounts. Each service should have its own unique password.</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-vault"></i>
+                <h3>Use a Password Manager</h3>
+                <p>Store your passwords securely in a password manager. You only need to remember one master password.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentType = 'random';
+
+function setType(type) {
+    currentType = type;
+    
+    // Update button states
+    document.querySelectorAll('.type-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.type === type) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Show/hide relevant options
+    document.getElementById('randomOptions').classList.toggle('hidden', type !== 'random');
+    document.getElementById('memorableOptions').classList.toggle('hidden', type !== 'memorable');
+    document.getElementById('pinOptions').classList.toggle('hidden', type !== 'pin');
+}
+
+function updateLengthValue(value) {
+    document.getElementById('lengthValue').textContent = value;
+}
+
+async function generatePassword() {
+    const count = parseInt(document.getElementById('count').value);
+    
+    let requestData = {
+        type: currentType,
+        count: count
+    };
+    
+    if (currentType === 'random') {
+        requestData.length = parseInt(document.getElementById('length').value);
+        requestData.include_uppercase = document.getElementById('uppercase').checked;
+        requestData.include_lowercase = document.getElementById('lowercase').checked;
+        requestData.include_digits = document.getElementById('digits').checked;
+        requestData.include_special = document.getElementById('special').checked;
+    } else if (currentType === 'memorable') {
+        requestData.words = parseInt(document.getElementById('words').value);
+    } else if (currentType === 'pin') {
+        requestData.length = parseInt(document.getElementById('pinLength').value);
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/api/generate-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData)
+        });
+        
+        const data = await response.json();
+        hideLoading();
+        
+        if (data.error) {
+            showToast(data.error, 'error');
+            return;
+        }
+        
+        displayPasswords(data.passwords);
+        
+    } catch (error) {
+        hideLoading();
+        showToast('An error occurred. Please try again.', 'error');
+        console.error(error);
+    }
+}
+
+function displayPasswords(passwords) {
+    const list = document.getElementById('passwordsList');
+    const stats = document.getElementById('passwordStats');
+    
+    // Handle single password or array
+    const passwordArray = Array.isArray(passwords) ? passwords : [passwords];
+    
+    let listHtml = '';
+    passwordArray.forEach((pwd, index) => {
+        const strengthClass = pwd.strength.toLowerCase().replace('_', '-');
+        listHtml += `
+            <div class="password-item">
+                <div class="password-value">
+                    <code id="pwd-${index}">${pwd.password}</code>
+                </div>
+                <div class="password-actions">
+                    <button class="btn-icon" onclick="copyPassword(${index})" title="Copy">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    <button class="btn-icon" onclick="checkPassword(${index})" title="Check for breaches">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="password-meta">
+                    <span class="strength-badge ${strengthClass}">${pwd.strength}</span>
+                    <span class="entropy">${pwd.entropy} bits</span>
+                    <span class="length">${pwd.length} chars</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    list.innerHTML = listHtml;
+    
+    // Show stats for first password
+    const firstPwd = passwordArray[0];
+    stats.classList.remove('hidden');
+    stats.innerHTML = `
+        <h3>Password Statistics</h3>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-label">Entropy</span>
+                <span class="stat-value">${firstPwd.entropy} bits</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Strength</span>
+                <span class="stat-value">${firstPwd.strength}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Length</span>
+                <span class="stat-value">${firstPwd.length} characters</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Type</span>
+                <span class="stat-value">${firstPwd.memorable ? 'Memorable' : 'Random'}</span>
+            </div>
+        </div>
+    `;
+}
+
+function copyPassword(index) {
+    const passwordElement = document.getElementById(`pwd-${index}`);
+    const password = passwordElement.textContent;
+    
+    navigator.clipboard.writeText(password).then(() => {
+        showToast('Password copied to clipboard!', 'success');
+    }).catch(() => {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = password;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('Password copied to clipboard!', 'success');
+    });
+}
+
+function checkPassword(index) {
+    const passwordElement = document.getElementById(`pwd-${index}`);
+    const password = passwordElement.textContent;
+    
+    // Store password and redirect
+    sessionStorage.setItem('checkPassword', password);
+    window.location.href = '/password-check';
+}
+
+// Check if there's a password to check from generator
+document.addEventListener('DOMContentLoaded', () => {
+    const storedPassword = sessionStorage.getItem('checkPassword');
+    if (storedPassword) {
+        sessionStorage.removeItem('checkPassword');
+        // If we're on password-check page, auto-fill
+        const passwordInput = document.getElementById('password');
+        if (passwordInput) {
+            passwordInput.value = storedPassword;
+        }
+    }
+});
+</script>
+{% endblock %}

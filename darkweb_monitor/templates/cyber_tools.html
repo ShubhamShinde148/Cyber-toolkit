@@ -1,0 +1,1299 @@
+{% extends "base.html" %}
+
+{% block title %}Cyber Tools - Dark Web Leak Monitor{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Cyber Tools Specific Styles */
+    .cyber-tools-header {
+        text-align: center;
+        padding: 3rem 0;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, rgba(0, 212, 255, 0.05) 100%);
+        border-bottom: 1px solid var(--card-border);
+        margin-bottom: 2rem;
+    }
+
+    .cyber-tools-header h1 {
+        font-family: var(--font-display);
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        text-shadow: var(--glow-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .cyber-tools-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+        padding: 0 1rem;
+        max-width: 1400px;
+        margin: 0 auto 3rem;
+    }
+
+    .tool-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem;
+        transition: var(--transition);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .tool-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .tool-card:hover {
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+    }
+
+    .tool-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .tool-card.active {
+        border-color: var(--primary-color);
+        background: rgba(0, 255, 136, 0.05);
+    }
+
+    .tool-card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .tool-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 212, 255, 0.2) 100%);
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--primary-color);
+    }
+
+    .tool-name {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        color: var(--text-primary);
+    }
+
+    .tool-description {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Tool Workspace */
+    .tool-workspace {
+        display: none;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        margin: 2rem auto;
+        max-width: 900px;
+    }
+
+    .tool-workspace.active {
+        display: block;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .workspace-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--card-border);
+    }
+
+    .workspace-title {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .close-workspace {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .close-workspace:hover {
+        color: var(--danger-color);
+    }
+
+    .input-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .input-group label {
+        display: block;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .cyber-input {
+        width: 100%;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--card-border);
+        border-radius: var(--border-radius);
+        color: var(--text-primary);
+        font-family: var(--font-mono);
+        font-size: 1rem;
+        transition: var(--transition);
+        resize: vertical;
+    }
+
+    .cyber-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+    }
+
+    .cyber-input::placeholder {
+        color: var(--text-muted);
+    }
+
+    .options-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .option-btn {
+        padding: 0.5rem 1rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--card-border);
+        border-radius: var(--border-radius);
+        color: var(--text-secondary);
+        font-family: var(--font-body);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .option-btn:hover,
+    .option-btn.active {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        background: rgba(0, 255, 136, 0.1);
+    }
+
+    .process-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border: none;
+        border-radius: var(--border-radius);
+        color: var(--bg-color);
+        font-family: var(--font-display);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .process-btn:hover {
+        box-shadow: var(--glow-primary);
+        transform: translateY(-1px);
+    }
+
+    .process-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .result-area {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--card-border);
+        border-radius: var(--border-radius);
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 400px;
+        overflow-y: auto;
+        display: none;
+    }
+
+    .result-area.show {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .result-area.success {
+        border-color: var(--success-color);
+    }
+
+    .result-area.error {
+        border-color: var(--danger-color);
+        color: var(--danger-color);
+    }
+
+    .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--card-border);
+    }
+
+    .result-title {
+        font-family: var(--font-display);
+        color: var(--primary-color);
+        font-size: 0.9rem;
+    }
+
+    .copy-btn {
+        padding: 0.25rem 0.75rem;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--card-border);
+        border-radius: var(--border-radius-sm);
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .copy-btn:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    /* Hash Results */
+    .hash-results {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .hash-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        padding: 0.75rem;
+        background: var(--bg-tertiary);
+        border-radius: var(--border-radius-sm);
+    }
+
+    .hash-label {
+        font-weight: 600;
+        color: var(--accent-color);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+    }
+
+    .hash-value {
+        word-break: break-all;
+        color: var(--text-primary);
+    }
+
+    /* Strength Meter */
+    .strength-meter {
+        margin: 1rem 0;
+    }
+
+    .strength-bar {
+        height: 8px;
+        background: var(--bg-tertiary);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+
+    .strength-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease, background 0.3s ease;
+    }
+
+    .strength-fill.very-weak { width: 20%; background: var(--danger-color); }
+    .strength-fill.weak { width: 40%; background: #ff6b35; }
+    .strength-fill.fair { width: 60%; background: var(--warning-color); }
+    .strength-fill.strong { width: 80%; background: #7ec850; }
+    .strength-fill.very-strong { width: 100%; background: var(--success-color); }
+
+    .strength-text {
+        text-align: center;
+        font-weight: 600;
+    }
+
+    /* JWT Display */
+    .jwt-section {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: var(--bg-tertiary);
+        border-radius: var(--border-radius-sm);
+    }
+
+    .jwt-section-title {
+        color: var(--accent-color);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+    }
+
+    .jwt-content {
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+    }
+
+    /* Subdomain List */
+    .subdomain-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .subdomain-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem;
+        border-bottom: 1px solid var(--card-border);
+    }
+
+    .subdomain-item:last-child {
+        border-bottom: none;
+    }
+
+    .subdomain-name {
+        color: var(--primary-color);
+    }
+
+    .subdomain-ip {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .cyber-tools-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .tools-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .tool-workspace {
+            margin: 1rem;
+            padding: 1rem;
+        }
+
+        .options-row {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="cyber-tools-header">
+    <div class="container">
+        <h1><i class="fas fa-tools"></i> Cyber Tools</h1>
+        <p>CyberChef-style security toolkit for encoding, hashing, analysis and more</p>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Tool Selection Grid -->
+    <div class="tools-grid" id="toolsGrid">
+        <!-- Hash Generator -->
+        <div class="tool-card" data-tool="hash">
+            <div class="tool-card-header">
+                <div class="tool-icon"><i class="fas fa-hashtag"></i></div>
+                <div class="tool-name">Hash Generator</div>
+            </div>
+            <div class="tool-description">Generate MD5, SHA1, SHA256, SHA512 hashes from text</div>
+        </div>
+
+        <!-- Base64 -->
+        <div class="tool-card" data-tool="base64">
+            <div class="tool-card-header">
+                <div class="tool-icon"><i class="fas fa-code"></i></div>
+                <div class="tool-name">Base64 Encoder/Decoder</div>
+            </div>
+            <div class="tool-description">Encode and decode Base64 strings</div>
+        </div>
+
+        <!-- URL Encoder -->
+        <div class="tool-card" data-tool="url">
+            <div class="tool-card-header">
+                <div class="tool-icon"><i class="fas fa-link"></i></div>
+                <div class="tool-name">URL Encoder/Decoder</div>
+            </div>
+            <div class="tool-description">Encode, decode, and parse URLs</div>
+        </div>
+
+        <!-- JWT Decoder -->
+        <div class="tool-card" data-tool="jwt">
+            <div class="tool-card-header">
+                <div class="tool-icon"><i class="fas fa-key"></i></div>
+                <div class="tool-name">JWT Token Decoder</div>
+            </div>
+            <div class="tool-description">Decode and analyze JSON Web Tokens</div>
+        </div>
+
+        <!-- Password Strength -->
+        <div class="tool-card" data-tool="password-strength">
+            <div class="tool-card-header">
+                <div class="tool-icon"><i class="fas fa-shield-alt"></i></div>
+                <div class="tool-name">Password Strength Analyzer</div>
+            </div>
+            <div class="tool-description">Analyze password strength with detailed feedback</div>
+        </div>
+
+        <!-- IP Lookup -->
+        <div class="tool-card" data-tool="ip-lookup">
+            <div class="tool-card-header">
+                <div class="tool-icon"><i class="fas fa-network-wired"></i></div>
+                <div class="tool-name">IP Intelligence Lookup</div>
+            </div>
+            <div class="tool-description">Get geolocation and threat intelligence for IPs</div>
+        </div>
+
+        <!-- DNS Lookup -->
+        <div class="tool-card" data-tool="dns">
+            <div class="tool-card-header">
+                <div class="tool-icon"><i class="fas fa-server"></i></div>
+                <div class="tool-name">DNS Lookup Tool</div>
+            </div>
+            <div class="tool-description">Query DNS records (A, MX, NS, TXT, etc.)</div>
+        </div>
+
+        <!-- Subdomain Finder -->
+        <div class="tool-card" data-tool="subdomains">
+            <div class="tool-card-header">
+                <div class="tool-icon"><i class="fas fa-sitemap"></i></div>
+                <div class="tool-name">Subdomain Finder</div>
+            </div>
+            <div class="tool-description">Discover subdomains for a target domain</div>
+        </div>
+
+        <!-- Text/Binary Converter -->
+        <div class="tool-card" data-tool="text-binary">
+            <div class="tool-card-header">
+                <div class="tool-icon"><i class="fas fa-exchange-alt"></i></div>
+                <div class="tool-name">Text ↔ Binary Converter</div>
+            </div>
+            <div class="tool-description">Convert between text, binary, hex, decimal, octal</div>
+        </div>
+
+        <!-- ROT13 -->
+        <div class="tool-card" data-tool="rot13">
+            <div class="tool-card-header">
+                <div class="tool-icon"><i class="fas fa-lock"></i></div>
+                <div class="tool-name">ROT13/Caesar Cipher</div>
+            </div>
+            <div class="tool-description">Encode/decode with ROT13, ROT47, Caesar cipher</div>
+        </div>
+    </div>
+
+    <!-- Tool Workspaces -->
+    
+    <!-- Hash Generator Workspace -->
+    <div class="tool-workspace" id="workspace-hash">
+        <div class="workspace-header">
+            <div class="workspace-title">
+                <i class="fas fa-hashtag"></i> Hash Generator
+            </div>
+            <button class="close-workspace" onclick="closeWorkspace()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="input-group">
+            <label>Input Text</label>
+            <textarea class="cyber-input" id="hash-input" rows="3" placeholder="Enter text to hash..."></textarea>
+        </div>
+        <div class="options-row">
+            <button class="option-btn active" data-algo="all">All Hashes</button>
+            <button class="option-btn" data-algo="md5">MD5</button>
+            <button class="option-btn" data-algo="sha1">SHA1</button>
+            <button class="option-btn" data-algo="sha256">SHA256</button>
+            <button class="option-btn" data-algo="sha512">SHA512</button>
+        </div>
+        <button class="process-btn" onclick="processHash()">
+            <i class="fas fa-cog"></i> Generate Hash
+        </button>
+        <div class="result-area" id="hash-result"></div>
+    </div>
+
+    <!-- Base64 Workspace -->
+    <div class="tool-workspace" id="workspace-base64">
+        <div class="workspace-header">
+            <div class="workspace-title">
+                <i class="fas fa-code"></i> Base64 Encoder/Decoder
+            </div>
+            <button class="close-workspace" onclick="closeWorkspace()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="input-group">
+            <label>Input Text</label>
+            <textarea class="cyber-input" id="base64-input" rows="4" placeholder="Enter text to encode or Base64 to decode..."></textarea>
+        </div>
+        <div class="options-row">
+            <button class="option-btn active" data-op="encode">Encode</button>
+            <button class="option-btn" data-op="decode">Decode</button>
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" id="base64-urlsafe"> URL-Safe
+            </label>
+        </div>
+        <button class="process-btn" onclick="processBase64()">
+            <i class="fas fa-cog"></i> Process
+        </button>
+        <div class="result-area" id="base64-result"></div>
+    </div>
+
+    <!-- URL Encoder Workspace -->
+    <div class="tool-workspace" id="workspace-url">
+        <div class="workspace-header">
+            <div class="workspace-title">
+                <i class="fas fa-link"></i> URL Encoder/Decoder
+            </div>
+            <button class="close-workspace" onclick="closeWorkspace()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="input-group">
+            <label>Input</label>
+            <textarea class="cyber-input" id="url-input" rows="3" placeholder="Enter text or URL..."></textarea>
+        </div>
+        <div class="options-row">
+            <button class="option-btn active" data-op="encode">Encode</button>
+            <button class="option-btn" data-op="decode">Decode</button>
+            <button class="option-btn" data-op="parse">Parse URL</button>
+        </div>
+        <button class="process-btn" onclick="processURL()">
+            <i class="fas fa-cog"></i> Process
+        </button>
+        <div class="result-area" id="url-result"></div>
+    </div>
+
+    <!-- JWT Decoder Workspace -->
+    <div class="tool-workspace" id="workspace-jwt">
+        <div class="workspace-header">
+            <div class="workspace-title">
+                <i class="fas fa-key"></i> JWT Token Decoder
+            </div>
+            <button class="close-workspace" onclick="closeWorkspace()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="input-group">
+            <label>JWT Token</label>
+            <textarea class="cyber-input" id="jwt-input" rows="4" placeholder="Paste your JWT token here..."></textarea>
+        </div>
+        <button class="process-btn" onclick="processJWT()">
+            <i class="fas fa-unlock"></i> Decode Token
+        </button>
+        <div class="result-area" id="jwt-result"></div>
+    </div>
+
+    <!-- Password Strength Workspace -->
+    <div class="tool-workspace" id="workspace-password-strength">
+        <div class="workspace-header">
+            <div class="workspace-title">
+                <i class="fas fa-shield-alt"></i> Password Strength Analyzer
+            </div>
+            <button class="close-workspace" onclick="closeWorkspace()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" class="cyber-input" id="password-strength-input" placeholder="Enter password to analyze...">
+        </div>
+        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; cursor: pointer;">
+            <input type="checkbox" id="show-password" onchange="togglePasswordVisibility()"> Show Password
+        </label>
+        <button class="process-btn" onclick="processPasswordStrength()">
+            <i class="fas fa-search"></i> Analyze Strength
+        </button>
+        <div class="result-area" id="password-strength-result"></div>
+    </div>
+
+    <!-- IP Lookup Workspace -->
+    <div class="tool-workspace" id="workspace-ip-lookup">
+        <div class="workspace-header">
+            <div class="workspace-title">
+                <i class="fas fa-network-wired"></i> IP Intelligence Lookup
+            </div>
+            <button class="close-workspace" onclick="closeWorkspace()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="input-group">
+            <label>IP Address</label>
+            <input type="text" class="cyber-input" id="ip-input" placeholder="Enter IP address (e.g., 8.8.8.8)">
+        </div>
+        <button class="process-btn" onclick="processIPLookup()">
+            <i class="fas fa-search"></i> Lookup IP
+        </button>
+        <div class="result-area" id="ip-result"></div>
+    </div>
+
+    <!-- DNS Lookup Workspace -->
+    <div class="tool-workspace" id="workspace-dns">
+        <div class="workspace-header">
+            <div class="workspace-title">
+                <i class="fas fa-server"></i> DNS Lookup Tool
+            </div>
+            <button class="close-workspace" onclick="closeWorkspace()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="input-group">
+            <label>Domain Name</label>
+            <input type="text" class="cyber-input" id="dns-input" placeholder="Enter domain (e.g., example.com)">
+        </div>
+        <div class="options-row">
+            <button class="option-btn active" data-type="all">All Records</button>
+            <button class="option-btn" data-type="A">A</button>
+            <button class="option-btn" data-type="MX">MX</button>
+            <button class="option-btn" data-type="NS">NS</button>
+            <button class="option-btn" data-type="TXT">TXT</button>
+        </div>
+        <button class="process-btn" onclick="processDNS()">
+            <i class="fas fa-search"></i> Query DNS
+        </button>
+        <div class="result-area" id="dns-result"></div>
+    </div>
+
+    <!-- Subdomain Finder Workspace -->
+    <div class="tool-workspace" id="workspace-subdomains">
+        <div class="workspace-header">
+            <div class="workspace-title">
+                <i class="fas fa-sitemap"></i> Subdomain Finder
+            </div>
+            <button class="close-workspace" onclick="closeWorkspace()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="input-group">
+            <label>Target Domain</label>
+            <input type="text" class="cyber-input" id="subdomain-input" placeholder="Enter domain (e.g., example.com)">
+        </div>
+        <button class="process-btn" onclick="processSubdomains()">
+            <i class="fas fa-search"></i> Find Subdomains
+        </button>
+        <div class="result-area" id="subdomain-result"></div>
+    </div>
+
+    <!-- Text/Binary Converter Workspace -->
+    <div class="tool-workspace" id="workspace-text-binary">
+        <div class="workspace-header">
+            <div class="workspace-title">
+                <i class="fas fa-exchange-alt"></i> Text ↔ Binary Converter
+            </div>
+            <button class="close-workspace" onclick="closeWorkspace()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="input-group">
+            <label>Input</label>
+            <textarea class="cyber-input" id="textbin-input" rows="3" placeholder="Enter text, binary, hex, or decimal..."></textarea>
+        </div>
+        <div class="options-row">
+            <button class="option-btn active" data-op="all">All Conversions</button>
+            <button class="option-btn" data-op="to_binary">Text → Binary</button>
+            <button class="option-btn" data-op="from_binary">Binary → Text</button>
+            <button class="option-btn" data-op="to_hex">Text → Hex</button>
+            <button class="option-btn" data-op="from_hex">Hex → Text</button>
+        </div>
+        <button class="process-btn" onclick="processTextBinary()">
+            <i class="fas fa-exchange-alt"></i> Convert
+        </button>
+        <div class="result-area" id="textbin-result"></div>
+    </div>
+
+    <!-- ROT13/Caesar Workspace -->
+    <div class="tool-workspace" id="workspace-rot13">
+        <div class="workspace-header">
+            <div class="workspace-title">
+                <i class="fas fa-lock"></i> ROT13/Caesar Cipher
+            </div>
+            <button class="close-workspace" onclick="closeWorkspace()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="input-group">
+            <label>Input Text</label>
+            <textarea class="cyber-input" id="rot13-input" rows="3" placeholder="Enter text to encode/decode..."></textarea>
+        </div>
+        <div class="options-row">
+            <button class="option-btn active" data-op="rot13">ROT13</button>
+            <button class="option-btn" data-op="rot47">ROT47</button>
+            <button class="option-btn" data-op="caesar">Caesar</button>
+            <button class="option-btn" data-op="atbash">Atbash</button>
+            <button class="option-btn" data-op="reverse">Reverse</button>
+            <button class="option-btn" data-op="brute">Brute Force</button>
+        </div>
+        <div class="input-group" id="caesar-shift-group" style="display: none;">
+            <label>Caesar Shift (1-25)</label>
+            <input type="number" class="cyber-input" id="caesar-shift" value="3" min="1" max="25">
+        </div>
+        <button class="process-btn" onclick="processROT13()">
+            <i class="fas fa-cog"></i> Process
+        </button>
+        <div class="result-area" id="rot13-result"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Cyber Tools JavaScript
+
+let currentTool = null;
+let currentOptions = {};
+
+// Tool card selection
+document.querySelectorAll('.tool-card').forEach(card => {
+    card.addEventListener('click', () => {
+        const toolId = card.dataset.tool;
+        openWorkspace(toolId);
+        
+        // Update card styles
+        document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+    });
+});
+
+// Option button selection
+document.querySelectorAll('.options-row .option-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const row = btn.closest('.options-row');
+        row.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Handle Caesar shift visibility
+        if (btn.dataset.op === 'caesar') {
+            document.getElementById('caesar-shift-group').style.display = 'block';
+        } else if (btn.closest('#workspace-rot13')) {
+            document.getElementById('caesar-shift-group').style.display = 'none';
+        }
+    });
+});
+
+function openWorkspace(toolId) {
+    // Hide all workspaces
+    document.querySelectorAll('.tool-workspace').forEach(ws => ws.classList.remove('active'));
+    
+    // Show selected workspace
+    const workspace = document.getElementById(`workspace-${toolId}`);
+    if (workspace) {
+        workspace.classList.add('active');
+        currentTool = toolId;
+        
+        // Scroll to workspace
+        workspace.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function closeWorkspace() {
+    document.querySelectorAll('.tool-workspace').forEach(ws => ws.classList.remove('active'));
+    document.querySelectorAll('.tool-card').forEach(c => c.classList.remove('active'));
+    currentTool = null;
+}
+
+function showResult(elementId, content, isSuccess = true) {
+    const el = document.getElementById(elementId);
+    el.innerHTML = content;
+    el.classList.add('show');
+    el.classList.toggle('success', isSuccess);
+    el.classList.toggle('error', !isSuccess);
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied to clipboard!', 'success');
+    });
+}
+
+function togglePasswordVisibility() {
+    const input = document.getElementById('password-strength-input');
+    const checkbox = document.getElementById('show-password');
+    input.type = checkbox.checked ? 'text' : 'password';
+}
+
+// API Calls
+async function processHash() {
+    const text = document.getElementById('hash-input').value;
+    if (!text) {
+        showToast('Please enter text to hash', 'error');
+        return;
+    }
+    
+    const activeBtn = document.querySelector('#workspace-hash .option-btn.active');
+    const algorithm = activeBtn.dataset.algo === 'all' ? null : activeBtn.dataset.algo;
+    
+    try {
+        const response = await fetch('/api/tools/hash', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, algorithm })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            const hashes = data.hashes || data.all_hashes;
+            let html = '<div class="result-header"><span class="result-title">Generated Hashes</span><button class="copy-btn" onclick="copyAllHashes()">Copy All</button></div>';
+            html += '<div class="hash-results">';
+            for (const [algo, hash] of Object.entries(hashes)) {
+                html += `<div class="hash-item">
+                    <span class="hash-label">${algo.toUpperCase()}</span>
+                    <span class="hash-value" id="hash-${algo}">${hash}</span>
+                </div>`;
+            }
+            html += '</div>';
+            showResult('hash-result', html);
+        } else {
+            showResult('hash-result', `Error: ${data.error}`, false);
+        }
+    } catch (error) {
+        showResult('hash-result', `Error: ${error.message}`, false);
+    }
+}
+
+function copyAllHashes() {
+    const hashes = [];
+    document.querySelectorAll('.hash-value').forEach(el => {
+        const algo = el.id.replace('hash-', '').toUpperCase();
+        hashes.push(`${algo}: ${el.textContent}`);
+    });
+    copyToClipboard(hashes.join('\n'));
+}
+
+async function processBase64() {
+    const text = document.getElementById('base64-input').value;
+    if (!text) {
+        showToast('Please enter text', 'error');
+        return;
+    }
+    
+    const activeBtn = document.querySelector('#workspace-base64 .option-btn.active');
+    const operation = activeBtn.dataset.op;
+    const urlSafe = document.getElementById('base64-urlsafe').checked;
+    
+    try {
+        const response = await fetch('/api/tools/base64', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, operation, url_safe: urlSafe })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            let html = `<div class="result-header"><span class="result-title">${operation === 'encode' ? 'Encoded' : 'Decoded'} Result</span><button class="copy-btn" onclick="copyToClipboard(\`${data.output.replace(/`/g, '\\`')}\`)">Copy</button></div>`;
+            html += `<div>${data.output}</div>`;
+            showResult('base64-result', html);
+        } else {
+            showResult('base64-result', `Error: ${data.error}`, false);
+        }
+    } catch (error) {
+        showResult('base64-result', `Error: ${error.message}`, false);
+    }
+}
+
+async function processURL() {
+    const text = document.getElementById('url-input').value;
+    if (!text) {
+        showToast('Please enter text or URL', 'error');
+        return;
+    }
+    
+    const activeBtn = document.querySelector('#workspace-url .option-btn.active');
+    const operation = activeBtn.dataset.op;
+    
+    try {
+        const response = await fetch('/api/tools/url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, operation })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            let html = `<div class="result-header"><span class="result-title">Result</span><button class="copy-btn" onclick="copyToClipboard(\`${data.output.replace(/`/g, '\\`').replace(/\n/g, '\\n')}\`)">Copy</button></div>`;
+            html += `<pre>${data.output}</pre>`;
+            showResult('url-result', html);
+        } else {
+            showResult('url-result', `Error: ${data.error}`, false);
+        }
+    } catch (error) {
+        showResult('url-result', `Error: ${error.message}`, false);
+    }
+}
+
+async function processJWT() {
+    const token = document.getElementById('jwt-input').value;
+    if (!token) {
+        showToast('Please enter a JWT token', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/tools/jwt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            let html = '<div class="result-header"><span class="result-title">Decoded Token</span></div>';
+            
+            html += '<div class="jwt-section"><div class="jwt-section-title">Header</div>';
+            html += `<pre class="jwt-content">${JSON.stringify(data.header, null, 2)}</pre></div>`;
+            
+            html += '<div class="jwt-section"><div class="jwt-section-title">Payload</div>';
+            html += `<pre class="jwt-content">${JSON.stringify(data.payload, null, 2)}</pre></div>`;
+            
+            if (data.expiration) {
+                const expiredClass = data.is_expired ? 'color: var(--danger-color)' : 'color: var(--success-color)';
+                html += `<div class="jwt-section"><div class="jwt-section-title">Token Info</div>`;
+                html += `<div>Expires: ${data.expiration} <span style="${expiredClass}">(${data.is_expired ? 'EXPIRED' : 'Valid'})</span></div>`;
+                if (data.issued_at) html += `<div>Issued: ${data.issued_at}</div>`;
+                html += '</div>';
+            }
+            
+            showResult('jwt-result', html);
+        } else {
+            showResult('jwt-result', `Error: ${data.error}`, false);
+        }
+    } catch (error) {
+        showResult('jwt-result', `Error: ${error.message}`, false);
+    }
+}
+
+async function processPasswordStrength() {
+    const password = document.getElementById('password-strength-input').value;
+    if (!password) {
+        showToast('Please enter a password', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/tools/password-strength', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            const strengthClass = data.strength_level.toLowerCase().replace(' ', '-');
+            let html = '<div class="result-header"><span class="result-title">Password Analysis</span></div>';
+            
+            html += `<div class="strength-meter">
+                <div class="strength-bar"><div class="strength-fill ${strengthClass}"></div></div>
+                <div class="strength-text" style="color: ${getStrengthColor(data.strength_score)}">${data.strength_level} (${data.strength_score}/100)</div>
+            </div>`;
+            
+            html += `<div style="margin: 1rem 0;">
+                <div><strong>Entropy:</strong> ${data.entropy_bits} bits</div>
+                <div><strong>Crack Time:</strong> ${data.crack_time}</div>
+                <div><strong>Length:</strong> ${data.length} characters</div>
+            </div>`;
+            
+            html += '<div style="margin: 1rem 0;"><strong>Checks:</strong><ul style="margin-left: 1.5rem;">';
+            data.checks_passed.forEach(check => {
+                html += `<li style="color: var(--success-color)">${check}</li>`;
+            });
+            data.checks_failed.forEach(check => {
+                html += `<li style="color: var(--danger-color)">${check}</li>`;
+            });
+            html += '</ul></div>';
+            
+            if (data.suggestions.length > 0) {
+                html += '<div style="margin: 1rem 0;"><strong>Suggestions:</strong><ul style="margin-left: 1.5rem;">';
+                data.suggestions.forEach(s => {
+                    html += `<li style="color: var(--accent-color)">${s}</li>`;
+                });
+                html += '</ul></div>';
+            }
+            
+            showResult('password-strength-result', html);
+        } else {
+            showResult('password-strength-result', `Error: ${data.error}`, false);
+        }
+    } catch (error) {
+        showResult('password-strength-result', `Error: ${error.message}`, false);
+    }
+}
+
+function getStrengthColor(score) {
+    if (score < 20) return 'var(--danger-color)';
+    if (score < 40) return '#ff6b35';
+    if (score < 60) return 'var(--warning-color)';
+    if (score < 80) return '#7ec850';
+    return 'var(--success-color)';
+}
+
+async function processIPLookup() {
+    const ip = document.getElementById('ip-input').value;
+    if (!ip) {
+        showToast('Please enter an IP address', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/tools/ip-lookup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ip })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            let html = '<div class="result-header"><span class="result-title">IP Intelligence</span></div>';
+            html += `<pre>${data.formatted}</pre>`;
+            showResult('ip-result', html);
+        } else {
+            showResult('ip-result', `Error: ${data.error}`, false);
+        }
+    } catch (error) {
+        showResult('ip-result', `Error: ${error.message}`, false);
+    }
+}
+
+async function processDNS() {
+    const domain = document.getElementById('dns-input').value;
+    if (!domain) {
+        showToast('Please enter a domain', 'error');
+        return;
+    }
+    
+    const activeBtn = document.querySelector('#workspace-dns .option-btn.active');
+    const recordType = activeBtn.dataset.type;
+    const recordTypes = recordType === 'all' ? null : [recordType];
+    
+    try {
+        const response = await fetch('/api/tools/dns', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ domain, record_types: recordTypes })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            let html = '<div class="result-header"><span class="result-title">DNS Records</span></div>';
+            html += `<pre>${data.formatted}</pre>`;
+            showResult('dns-result', html);
+        } else {
+            showResult('dns-result', `Error: ${data.error}`, false);
+        }
+    } catch (error) {
+        showResult('dns-result', `Error: ${error.message}`, false);
+    }
+}
+
+async function processSubdomains() {
+    const domain = document.getElementById('subdomain-input').value;
+    if (!domain) {
+        showToast('Please enter a domain', 'error');
+        return;
+    }
+    
+    document.querySelector('#workspace-subdomains .process-btn').disabled = true;
+    document.querySelector('#workspace-subdomains .process-btn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning...';
+    
+    try {
+        const response = await fetch('/api/tools/subdomains', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ domain, quick: true })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            let html = `<div class="result-header"><span class="result-title">Found ${data.total_found} Subdomains</span></div>`;
+            
+            if (data.subdomains.length > 0) {
+                html += '<div class="subdomain-list">';
+                data.subdomains.forEach(sub => {
+                    html += `<div class="subdomain-item">
+                        <span class="subdomain-name">${sub.subdomain}</span>
+                        <span class="subdomain-ip">${sub.ip}</span>
+                    </div>`;
+                });
+                html += '</div>';
+            } else {
+                html += '<div>No subdomains found.</div>';
+            }
+            
+            showResult('subdomain-result', html);
+        } else {
+            showResult('subdomain-result', `Error: ${data.error}`, false);
+        }
+    } catch (error) {
+        showResult('subdomain-result', `Error: ${error.message}`, false);
+    } finally {
+        document.querySelector('#workspace-subdomains .process-btn').disabled = false;
+        document.querySelector('#workspace-subdomains .process-btn').innerHTML = '<i class="fas fa-search"></i> Find Subdomains';
+    }
+}
+
+async function processTextBinary() {
+    const text = document.getElementById('textbin-input').value;
+    if (!text) {
+        showToast('Please enter text', 'error');
+        return;
+    }
+    
+    const activeBtn = document.querySelector('#workspace-text-binary .option-btn.active');
+    const operation = activeBtn.dataset.op;
+    
+    try {
+        const response = await fetch('/api/tools/text-binary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, operation })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            let html = '<div class="result-header"><span class="result-title">Conversion Result</span></div>';
+            
+            if (operation === 'all') {
+                html += '<div class="hash-results">';
+                for (const [format, value] of Object.entries(data.conversions)) {
+                    if (format !== 'original') {
+                        html += `<div class="hash-item">
+                            <span class="hash-label">${format.toUpperCase()}</span>
+                            <span class="hash-value">${value}</span>
+                        </div>`;
+                    }
+                }
+                html += '</div>';
+            } else {
+                html += `<div>${data.output}</div>`;
+            }
+            
+            showResult('textbin-result', html);
+        } else {
+            showResult('textbin-result', `Error: ${data.error}`, false);
+        }
+    } catch (error) {
+        showResult('textbin-result', `Error: ${error.message}`, false);
+    }
+}
+
+async function processROT13() {
+    const text = document.getElementById('rot13-input').value;
+    if (!text) {
+        showToast('Please enter text', 'error');
+        return;
+    }
+    
+    const activeBtn = document.querySelector('#workspace-rot13 .option-btn.active');
+    const operation = activeBtn.dataset.op;
+    const shift = parseInt(document.getElementById('caesar-shift').value) || 3;
+    
+    try {
+        const response = await fetch('/api/tools/rot13', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, operation, shift })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            let html = `<div class="result-header"><span class="result-title">${data.operation} Result</span><button class="copy-btn" onclick="copyToClipboard(\`${(data.output || '').replace(/`/g, '\\`')}\`)">Copy</button></div>`;
+            
+            if (operation === 'brute') {
+                html += '<div class="hash-results">';
+                for (const [rot, value] of Object.entries(data.results)) {
+                    html += `<div class="hash-item">
+                        <span class="hash-label">${rot}</span>
+                        <span class="hash-value">${value}</span>
+                    </div>`;
+                }
+                html += '</div>';
+            } else {
+                html += `<div style="font-size: 1.1rem;">${data.output}</div>`;
+            }
+            
+            showResult('rot13-result', html);
+        } else {
+            showResult('rot13-result', `Error: ${data.error}`, false);
+        }
+    } catch (error) {
+        showResult('rot13-result', `Error: ${error.message}`, false);
+    }
+}
+
+// Toast notification function (uses existing if available)
+function showToast(message, type = 'info') {
+    if (typeof window.showToast === 'function') {
+        window.showToast(message, type);
+        return;
+    }
+    
+    const container = document.getElementById('toastContainer') || document.body;
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        background: var(--card-bg);
+        border: 1px solid ${type === 'error' ? 'var(--danger-color)' : 'var(--primary-color)'};
+        border-radius: var(--border-radius);
+        color: var(--text-primary);
+        z-index: 10000;
+        animation: fadeIn 0.3s ease;
+    `;
+    toast.textContent = message;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+</script>
+{% endblock %}

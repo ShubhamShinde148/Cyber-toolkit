@@ -1,0 +1,522 @@
+{% extends "base.html" %}
+
+{% block title %}Share Your Feedback - Dark Web Leak Monitor{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Feedback Form Page Styles */
+.feedback-page-container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.feedback-card {
+    background: linear-gradient(145deg, rgba(10, 14, 23, 0.98), rgba(5, 8, 15, 0.99));
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 20px;
+    padding: 50px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 0 60px rgba(0, 255, 136, 0.1),
+        0 25px 50px -12px rgba(0, 0, 0, 0.6);
+}
+
+.feedback-card::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color), var(--primary-color));
+    z-index: -1;
+    opacity: 0.4;
+    filter: blur(15px);
+    animation: cardGlow 4s ease-in-out infinite;
+}
+
+@keyframes cardGlow {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.5; }
+}
+
+.feedback-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.feedback-icon-large {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    font-size: 36px;
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+}
+
+.feedback-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 12px;
+    background: linear-gradient(135deg, #ffffff, var(--primary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.feedback-subtitle {
+    color: var(--text-secondary);
+    font-size: 16px;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Star Rating */
+.rating-container {
+    margin-bottom: 32px;
+}
+
+.rating-label-text {
+    display: block;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.star-rating-form {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    gap: 8px;
+}
+
+.star-rating-form input[type="radio"] {
+    display: none;
+}
+
+.star-rating-form label {
+    cursor: pointer;
+    font-size: 42px;
+    color: #3d4555;
+    transition: all 0.2s ease;
+}
+
+.star-rating-form label:hover,
+.star-rating-form label:hover ~ label {
+    color: #FFD700;
+    transform: scale(1.1);
+}
+
+.star-rating-form input[type="radio"]:checked ~ label {
+    color: #FFD700;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+.rating-description {
+    text-align: center;
+    margin-top: 12px;
+    height: 24px;
+    font-size: 14px;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+/* Form Fields */
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.form-label i {
+    color: var(--primary-color);
+}
+
+.form-textarea,
+.form-input {
+    width: 100%;
+    padding: 16px 20px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    resize: vertical;
+}
+
+.form-textarea:focus,
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.form-textarea {
+    min-height: 140px;
+}
+
+.form-textarea::placeholder,
+.form-input::placeholder {
+    color: #4a5568;
+}
+
+.char-counter-form {
+    text-align: right;
+    font-size: 12px;
+    color: #4a5568;
+    margin-top: 8px;
+}
+
+.char-counter-form.warning {
+    color: var(--warning-color);
+}
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    padding: 18px 32px;
+    background: linear-gradient(135deg, var(--primary-color), #00cc6a);
+    color: #0a0e17;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 255, 136, 0.4);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Success State */
+.success-container {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.success-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, var(--primary-color), #00ff88);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+    font-size: 48px;
+    color: #0a0e17;
+    animation: successPulse 2s ease-in-out infinite;
+}
+
+@keyframes successPulse {
+    0%, 100% { box-shadow: 0 0 30px rgba(0, 255, 136, 0.4); }
+    50% { box-shadow: 0 0 50px rgba(0, 255, 136, 0.6); }
+}
+
+.success-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 28px;
+    color: var(--primary-color);
+    margin: 0 0 16px;
+}
+
+.success-message {
+    color: var(--text-secondary);
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0 0 30px;
+}
+
+.back-home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.back-home-btn:hover {
+    background: var(--primary-color);
+    color: #0a0e17;
+}
+
+/* Error Alert */
+.alert-error {
+    background: rgba(255, 68, 68, 0.1);
+    border: 1px solid rgba(255, 68, 68, 0.3);
+    color: #ff6b6b;
+    padding: 16px 20px;
+    border-radius: 10px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.alert-error i {
+    font-size: 20px;
+}
+
+/* Page Name Field */
+.page-hint {
+    font-size: 12px;
+    color: #4a5568;
+    margin-top: 6px;
+}
+
+/* Privacy Note */
+.privacy-note {
+    text-align: center;
+    font-size: 12px;
+    color: #4a5568;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.privacy-note i {
+    margin-right: 6px;
+    color: var(--primary-color);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .feedback-card {
+        padding: 30px 20px;
+    }
+    
+    .feedback-title {
+        font-size: 22px;
+    }
+    
+    .star-rating-form label {
+        font-size: 32px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="feedback-page-container">
+    <div class="feedback-card">
+        {% if success %}
+        <!-- Success State -->
+        <div class="success-container">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2 class="success-title">Thank You!</h2>
+            <p class="success-message">{{ message }}</p>
+            <a href="{{ url_for('index') }}" class="back-home-btn">
+                <i class="fas fa-home"></i>
+                Back to Home
+            </a>
+        </div>
+        {% else %}
+        <!-- Feedback Form -->
+        <div class="feedback-header">
+            <div class="feedback-icon-large">
+                <i class="fas fa-comment-dots"></i>
+            </div>
+            <h1 class="feedback-title">Share Your Feedback</h1>
+            <p class="feedback-subtitle">
+                Help us improve Dark Web Leak Monitor.<br>
+                Your feedback is valuable to us!
+            </p>
+        </div>
+        
+        {% if error %}
+        <div class="alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+        
+        <form action="{{ url_for('submit_feedback_form') }}" method="POST" id="feedbackPageForm">
+            <!-- Star Rating -->
+            <div class="rating-container">
+                <span class="rating-label-text">Rate Your Experience</span>
+                <div class="star-rating-form">
+                    <input type="radio" name="rating" id="star5" value="5" required>
+                    <label for="star5" title="Excellent">★</label>
+                    <input type="radio" name="rating" id="star4" value="4">
+                    <label for="star4" title="Great">★</label>
+                    <input type="radio" name="rating" id="star3" value="3">
+                    <label for="star3" title="Good">★</label>
+                    <input type="radio" name="rating" id="star2" value="2">
+                    <label for="star2" title="Fair">★</label>
+                    <input type="radio" name="rating" id="star1" value="1">
+                    <label for="star1" title="Poor">★</label>
+                </div>
+                <div class="rating-description" id="ratingDesc"></div>
+            </div>
+            
+            <!-- Feedback Message -->
+            <div class="form-group">
+                <label class="form-label" for="feedbackMessage">
+                    <i class="fas fa-pencil-alt"></i>
+                    Your Feedback
+                </label>
+                <textarea 
+                    id="feedbackMessage" 
+                    name="feedback" 
+                    class="form-textarea" 
+                    placeholder="What did you like? What can we improve? Share your thoughts..."
+                    maxlength="500"
+                ></textarea>
+                <div class="char-counter-form">
+                    <span id="charCountForm">0</span>/500
+                </div>
+            </div>
+            
+            <!-- Page Name (Optional) -->
+            <div class="form-group">
+                <label class="form-label" for="pageName">
+                    <i class="fas fa-file-alt"></i>
+                    Page / Feature (Optional)
+                </label>
+                <input 
+                    type="text" 
+                    id="pageName" 
+                    name="page" 
+                    class="form-input" 
+                    placeholder="e.g., Email Checker, Password Generator..."
+                    maxlength="200"
+                >
+                <p class="page-hint">Which page or feature is this feedback about?</p>
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" class="submit-btn" id="submitFeedbackBtn">
+                <i class="fas fa-paper-plane"></i>
+                Submit Feedback
+            </button>
+            
+            <p class="privacy-note">
+                <i class="fas fa-shield-alt"></i>
+                Your feedback is confidential and helps us improve our service.
+            </p>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Rating descriptions
+    const ratingDescriptions = {
+        1: 'Poor - Needs major improvement',
+        2: 'Fair - Below expectations',
+        3: 'Good - Met expectations',
+        4: 'Great - Above average',
+        5: 'Excellent - Outstanding experience!'
+    };
+    
+    // Star rating interaction
+    const radioButtons = document.querySelectorAll('.star-rating-form input[type="radio"]');
+    const ratingDesc = document.getElementById('ratingDesc');
+    
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', function() {
+            const value = parseInt(this.value);
+            ratingDesc.textContent = ratingDescriptions[value];
+        });
+    });
+    
+    // Character counter
+    const feedbackTextarea = document.getElementById('feedbackMessage');
+    const charCountSpan = document.getElementById('charCountForm');
+    
+    if (feedbackTextarea && charCountSpan) {
+        feedbackTextarea.addEventListener('input', function() {
+            const count = this.value.length;
+            charCountSpan.textContent = count;
+            
+            if (count >= 450) {
+                charCountSpan.parentElement.classList.add('warning');
+            } else {
+                charCountSpan.parentElement.classList.remove('warning');
+            }
+        });
+    }
+    
+    // Form submission
+    const form = document.getElementById('feedbackPageForm');
+    const submitBtn = document.getElementById('submitFeedbackBtn');
+    
+    if (form && submitBtn) {
+        form.addEventListener('submit', function(e) {
+            // Check if rating is selected
+            const selectedRating = document.querySelector('.star-rating-form input[type="radio"]:checked');
+            
+            if (!selectedRating) {
+                e.preventDefault();
+                ratingDesc.textContent = 'Please select a rating!';
+                ratingDesc.style.color = '#ff6b6b';
+                setTimeout(() => {
+                    ratingDesc.textContent = '';
+                    ratingDesc.style.color = '';
+                }, 3000);
+                return;
+            }
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        });
+    }
+});
+</script>
+{% endblock %}

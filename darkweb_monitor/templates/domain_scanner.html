@@ -1,0 +1,447 @@
+{% extends "base.html" %}
+
+{% block title %}Domain Security Scanner - Dark Web Monitor{% endblock %}
+
+{% block content %}
+<section class="hero hero-sm">
+    <div class="hero-content">
+        <h1><i class="fas fa-globe"></i> Domain Security Scanner</h1>
+        <p>Analyze domain configuration, email security, and SSL/TLS settings</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-search"></i> Scan Domain</h2>
+            </div>
+            <div class="card-body">
+                <form id="domainForm">
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fas fa-globe"></i></span>
+                        <input type="text" id="domainInput" placeholder="example.com" required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-shield-alt"></i> Scan
+                        </button>
+                    </div>
+                    <div class="checkbox-group mt-1">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="fullScan" checked>
+                            <span>Full scan (includes subdomain enumeration)</span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden mt-2">
+            <!-- Security Grade -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-trophy"></i> Security Score</h2>
+                </div>
+                <div class="card-body text-center">
+                    <div class="security-grade-large" id="securityGrade">-</div>
+                    <div class="security-score" id="securityScore">
+                        <span class="score-value">0</span>/100
+                    </div>
+                    <div id="domainName" class="domain-display"></div>
+                </div>
+            </div>
+
+            <!-- Security Details Grid -->
+            <div class="grid-2 mt-2">
+                <!-- DNS Records -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-server"></i> DNS Records</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="dnsRecords" class="record-list"></div>
+                    </div>
+                </div>
+
+                <!-- SSL/TLS Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-lock"></i> SSL/TLS Status</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="sslStatus" class="status-list"></div>
+                    </div>
+                </div>
+
+                <!-- Email Security -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-envelope-open-text"></i> Email Security</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="email-grade-container">
+                            <div class="email-grade" id="emailGrade">-</div>
+                            <div class="email-score" id="emailScore">Score: 0/100</div>
+                        </div>
+                        <div id="emailSecurity" class="security-checklist"></div>
+                    </div>
+                </div>
+
+                <!-- Subdomains -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-sitemap"></i> Discovered Subdomains</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="subdomains" class="subdomain-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Issues & Recommendations -->
+            <div class="grid-2 mt-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-exclamation-triangle"></i> Security Issues</h2>
+                    </div>
+                    <div class="card-body">
+                        <ul id="issuesList" class="issues-list"></ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-lightbulb"></i> Recommendations</h2>
+                    </div>
+                    <div class="card-body">
+                        <ul id="recommendationsList" class="recommendations-list"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('domainForm');
+    const resultsSection = document.getElementById('resultsSection');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const domain = document.getElementById('domainInput').value.trim();
+        const fullScan = document.getElementById('fullScan').checked;
+        
+        if (!domain) return;
+        
+        showLoading('Analyzing domain security...');
+        
+        try {
+            const response = await fetch('/api/domain-scan', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ domain: domain, full_scan: fullScan })
+            });
+            
+            const data = await response.json();
+            hideLoading();
+            
+            if (data.success) {
+                displayResults(data);
+            } else {
+                showToast(data.error || 'Scan failed', 'error');
+            }
+        } catch (error) {
+            hideLoading();
+            showToast('Connection error', 'error');
+        }
+    });
+    
+    function displayResults(data) {
+        resultsSection.classList.remove('hidden');
+        
+        // Security Grade
+        const gradeEl = document.getElementById('securityGrade');
+        gradeEl.textContent = data.security_grade;
+        gradeEl.className = 'security-grade-large grade-' + data.security_grade.replace('+', '-plus');
+        
+        document.querySelector('#securityScore .score-value').textContent = data.security_score;
+        document.getElementById('domainName').textContent = data.domain;
+        
+        // DNS Records
+        const dnsDiv = document.getElementById('dnsRecords');
+        const dns = data.dns || {};
+        dnsDiv.innerHTML = `
+            <div class="record-row">
+                <span class="record-label">IPv4 (A)</span>
+                <span class="record-value">${dns.has_ipv4 ? '✅ ' + (dns.records?.A?.join(', ') || 'Yes') : '❌ None'}</span>
+            </div>
+            <div class="record-row">
+                <span class="record-label">IPv6 (AAAA)</span>
+                <span class="record-value">${dns.has_ipv6 ? '✅ Enabled' : '⚠️ Not configured'}</span>
+            </div>
+            <div class="record-row">
+                <span class="record-label">Mail Servers (MX)</span>
+                <span class="record-value">${dns.mx_records?.length ? '✅ ' + dns.mx_records.length + ' record(s)' : '❌ None'}</span>
+            </div>
+            <div class="record-row">
+                <span class="record-label">Nameservers</span>
+                <span class="record-value">${dns.nameservers?.length || 0} configured</span>
+            </div>
+        `;
+        
+        // SSL Status
+        const sslDiv = document.getElementById('sslStatus');
+        const ssl = data.ssl || {};
+        sslDiv.innerHTML = `
+            <div class="status-item ${ssl.has_https ? 'status-good' : 'status-bad'}">
+                <i class="fas ${ssl.has_https ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                <span>HTTPS Enabled</span>
+            </div>
+            <div class="status-item ${ssl.certificate_valid ? 'status-good' : 'status-bad'}">
+                <i class="fas ${ssl.certificate_valid ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                <span>Valid Certificate</span>
+            </div>
+            <div class="status-item ${ssl.redirects_to_https ? 'status-good' : 'status-warn'}">
+                <i class="fas ${ssl.redirects_to_https ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span>HTTP to HTTPS Redirect</span>
+            </div>
+        `;
+        
+        if (ssl.issues?.length) {
+            sslDiv.innerHTML += `
+                <div class="ssl-issues mt-1">
+                    ${ssl.issues.map(i => `<div class="issue-item"><i class="fas fa-exclamation-triangle"></i> ${i}</div>`).join('')}
+                </div>
+            `;
+        }
+        
+        // Email Security
+        const emailSec = data.email_security || {};
+        document.getElementById('emailGrade').textContent = emailSec.grade || '-';
+        document.getElementById('emailGrade').className = 'email-grade grade-' + (emailSec.grade || 'F');
+        document.getElementById('emailScore').textContent = `Score: ${emailSec.score || 0}/100`;
+        
+        const emailDiv = document.getElementById('emailSecurity');
+        emailDiv.innerHTML = `
+            <div class="check-item ${emailSec.spf?.exists ? 'check-pass' : 'check-fail'}">
+                <i class="fas ${emailSec.spf?.exists ? 'fa-check' : 'fa-times'}"></i>
+                <span>SPF Record</span>
+                ${emailSec.spf?.record ? `<code class="record-code">${truncate(emailSec.spf.record, 50)}</code>` : ''}
+            </div>
+            <div class="check-item ${emailSec.dmarc?.exists ? 'check-pass' : 'check-fail'}">
+                <i class="fas ${emailSec.dmarc?.exists ? 'fa-check' : 'fa-times'}"></i>
+                <span>DMARC Record</span>
+                ${emailSec.dmarc?.policy ? `<span class="badge">Policy: ${emailSec.dmarc.policy}</span>` : ''}
+            </div>
+            <div class="check-item ${emailSec.dkim?.likely_exists ? 'check-pass' : 'check-warn'}">
+                <i class="fas ${emailSec.dkim?.likely_exists ? 'fa-check' : 'fa-question'}"></i>
+                <span>DKIM</span>
+                <span class="text-muted">${emailSec.dkim?.note || ''}</span>
+            </div>
+        `;
+        
+        // Subdomains
+        const subDiv = document.getElementById('subdomains');
+        const subs = data.subdomains_found || [];
+        if (subs.length) {
+            subDiv.innerHTML = subs.map(s => `
+                <div class="subdomain-item">
+                    <i class="fas fa-sitemap"></i>
+                    <span>${s}</span>
+                </div>
+            `).join('');
+        } else {
+            subDiv.innerHTML = '<p class="text-muted">No subdomains discovered</p>';
+        }
+        
+        // Issues
+        const issuesDiv = document.getElementById('issuesList');
+        const issues = data.issues || [];
+        if (issues.length) {
+            issuesDiv.innerHTML = issues.map(i => `
+                <li class="issue-item"><i class="fas fa-exclamation-circle"></i> ${i}</li>
+            `).join('');
+        } else {
+            issuesDiv.innerHTML = '<li class="no-issues"><i class="fas fa-check-circle"></i> No critical issues found</li>';
+        }
+        
+        // Recommendations
+        const recsDiv = document.getElementById('recommendationsList');
+        const recs = data.recommendations || [];
+        if (recs.length) {
+            recsDiv.innerHTML = recs.map(r => `
+                <li class="rec-item"><i class="fas fa-lightbulb"></i> ${r}</li>
+            `).join('');
+        } else {
+            recsDiv.innerHTML = '<li class="text-muted">No recommendations - your domain looks secure!</li>';
+        }
+        
+        // Scroll to results
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function truncate(str, len) {
+        return str && str.length > len ? str.substring(0, len) + '...' : str;
+    }
+});
+</script>
+
+<style>
+.security-grade-large {
+    font-size: 5rem;
+    font-family: var(--font-display);
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.grade-A-plus, .grade-A { color: var(--primary); text-shadow: 0 0 30px var(--primary); }
+.grade-B { color: #88ff00; text-shadow: 0 0 30px #88ff00; }
+.grade-C { color: #ffcc00; text-shadow: 0 0 30px #ffcc00; }
+.grade-D { color: #ff6600; text-shadow: 0 0 30px #ff6600; }
+.grade-F { color: var(--danger); text-shadow: 0 0 30px var(--danger); }
+
+.security-score {
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+.score-value {
+    font-size: 2rem;
+    color: var(--primary);
+    font-weight: bold;
+}
+
+.domain-display {
+    margin-top: 1rem;
+    font-family: var(--font-mono);
+    color: var(--secondary);
+    font-size: 1.2rem;
+}
+
+.record-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.record-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.record-label {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+.record-value {
+    color: var(--text);
+}
+
+.status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+.status-good { color: var(--primary); background: rgba(0,255,136,0.1); }
+.status-bad { color: var(--danger); background: rgba(255,0,85,0.1); }
+.status-warn { color: #ffcc00; background: rgba(255,204,0,0.1); }
+
+.email-grade-container {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.email-grade {
+    font-size: 3rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+}
+
+.security-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.check-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.check-pass { color: var(--primary); }
+.check-fail { color: var(--danger); }
+.check-warn { color: #ffcc00; }
+
+.record-code {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    background: rgba(0,0,0,0.3);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-left: auto;
+}
+
+.subdomain-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.subdomain-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--secondary);
+    font-family: var(--font-mono);
+}
+
+.issues-list, .recommendations-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.issue-item {
+    padding: 0.75rem;
+    background: rgba(255,0,85,0.1);
+    border-left: 3px solid var(--danger);
+    margin-bottom: 0.5rem;
+    border-radius: 0 8px 8px 0;
+}
+
+.no-issues {
+    color: var(--primary);
+    padding: 0.75rem;
+    background: rgba(0,255,136,0.1);
+    border-radius: 8px;
+}
+
+.rec-item {
+    padding: 0.75rem;
+    background: rgba(0,212,255,0.1);
+    border-left: 3px solid var(--secondary);
+    margin-bottom: 0.5rem;
+    border-radius: 0 8px 8px 0;
+}
+</style>
+{% endblock %}

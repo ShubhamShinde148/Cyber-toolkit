@@ -1,0 +1,88 @@
+<!-- Chatbot Widget Component -->
+
+<!-- Floating Chatbot Button -->
+<div class="chatbot-fab" id="chatbotFab" title="Cybersecurity Assistant">
+    <div class="chatbot-fab-icon">
+        <i class="fas fa-robot"></i>
+    </div>
+    <div class="chatbot-fab-pulse"></div>
+    <div class="chatbot-fab-notification" id="chatbotNotification" style="display: none;">
+        <span>1</span>
+    </div>
+</div>
+
+<!-- Chatbot Window -->
+<div class="chatbot-window" id="chatbotWindow">
+    <!-- Header -->
+    <div class="chatbot-header">
+        <div class="chatbot-header-info">
+            <div class="chatbot-avatar">
+                <i class="fas fa-shield-alt"></i>
+                <span class="chatbot-status-indicator"></span>
+            </div>
+            <div class="chatbot-header-text">
+                <h3>CyberGuard AI</h3>
+                <span class="chatbot-status">Cybersecurity Assistant</span>
+            </div>
+        </div>
+        <div class="chatbot-header-actions">
+            <button class="chatbot-fullscreen-btn" id="chatbotFullscreen" title="Fullscreen">
+                <i class="fas fa-expand"></i>
+            </button>
+            <button class="chatbot-clear-btn" id="chatbotClear" title="Clear Chat">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+            <button class="chatbot-close-btn" id="chatbotClose" title="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Messages Container -->
+    <div class="chatbot-messages" id="chatbotMessages">
+        <!-- Welcome Message -->
+        <div class="chatbot-message bot">
+            <div class="chatbot-message-avatar">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="chatbot-message-content">
+                <p>Hey! 👋 How can I help you today?</p>
+            </div>
+        </div>
+
+        <!-- Quick Suggestions -->
+        <div class="chatbot-suggestions" id="chatbotSuggestions">
+            <button class="suggestion-btn" data-message="How do I check if my password was breached?">
+                <i class="fas fa-key"></i> Password breach check
+            </button>
+            <button class="suggestion-btn" data-message="Explain ethical hacking for beginners">
+                <i class="fas fa-user-secret"></i> Ethical hacking
+            </button>
+            <button class="suggestion-btn" data-message="What is Linux and why is it used in cybersecurity?">
+                <i class="fab fa-linux"></i> Linux explained
+            </button>
+            <button class="suggestion-btn" data-message="How can AI help in cybersecurity?">
+                <i class="fas fa-robot"></i> AI in security
+            </button>
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="chatbot-input-area">
+        <div class="chatbot-input-container">
+            <textarea 
+                class="chatbot-input" 
+                id="chatbotInput" 
+                placeholder="Ask me anything..."
+                rows="1"
+            ></textarea>
+            <button class="chatbot-send-btn" id="chatbotSend" title="Send message">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+        <div class="chatbot-disclaimer">
+            <i class="fas fa-info-circle"></i>
+            Powered by CyberGuard AI
+        </div>
+    </div>
+</div>

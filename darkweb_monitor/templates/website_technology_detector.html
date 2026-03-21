@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Website Technology Detector - Dark Web Monitor{% endblock %}
+
+{% block extra_css %}
+<style>
+    .technology-list {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .technology-chip {
+        padding: 1rem;
+        border: 1px solid var(--card-border);
+        border-radius: var(--border-radius);
+        background: rgba(0, 255, 136, 0.04);
+    }
+
+    .technology-name {
+        display: block;
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+    }
+
+    .technology-source {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .technology-value {
+        color: var(--text-primary);
+        font-family: var(--font-mono);
+        word-break: break-word;
+    }
+
+    .header-grid {
+        display: grid;
+        gap: 0.85rem;
+    }
+
+    .header-row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        background: var(--bg-secondary);
+        border: 1px solid var(--card-border);
+    }
+
+    .header-label {
+        color: var(--accent-color);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .header-value {
+        color: var(--text-primary);
+        font-family: var(--font-mono);
+        word-break: break-word;
+    }
+
+    .detector-note {
+        margin-top: 0.75rem;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    @media (max-width: 768px) {
+        .technology-chip,
+        .header-row {
+            padding: 0.85rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero hero-sm">
+    <div class="hero-content">
+        <h1><i class="fas fa-fingerprint"></i> Website Technology Detector</h1>
+        <p>Inspect HTTP response headers to identify exposed web server and runtime technologies</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-globe"></i> Analyze Website</h2>
+            </div>
+            <div class="card-body">
+                <form id="technologyDetectorForm">
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fas fa-link"></i></span>
+                        <input type="text" id="websiteUrl" placeholder="google.com" required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-magnifying-glass"></i> Detect
+                        </button>
+                    </div>
+                </form>
+                <p class="detector-note">Enter a domain or full URL. Private and localhost targets are blocked, and HTTPS is tried first when no scheme is provided.</p>
+            </div>
+        </div>
+
+        <div id="resultsSection" class="hidden mt-2">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-globe"></i></div>
+                    <div class="stat-value" id="finalUrlValue">-</div>
+                    <div class="stat-label">Resolved URL</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-code-branch"></i></div>
+                    <div class="stat-value" id="redirectValue">-</div>
+                    <div class="stat-label">Redirected</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-server"></i></div>
+                    <div class="stat-value" id="statusCodeValue">-</div>
+                    <div class="stat-label">HTTP Status</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+                    <div class="stat-value" id="serverValue">-</div>
+                    <div class="stat-label">Server Header</div>
+                </div>
+            </div>
+
+            <div class="grid-2 mt-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-microchip"></i> Detected Technologies</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="technology-list" id="technologyList"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-table"></i> Header Snapshot</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="header-grid" id="headerGrid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('technologyDetectorForm');
+    const resultsSection = document.getElementById('resultsSection');
+
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const websiteUrl = document.getElementById('websiteUrl').value.trim();
+        if (!websiteUrl) {
+            return;
+        }
+
+        showLoading('Inspecting website headers...');
+
+        try {
+            const response = await fetch('/api/website-technology-detector', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ url: websiteUrl })
+            });
+
+            const data = await response.json();
+            hideLoading();
+
+            if (data.success) {
+                displayResults(data);
+            } else {
+                resultsSection.classList.add('hidden');
+                showToast(data.error || 'Detection failed', 'error');
+            }
+        } catch (error) {
+            hideLoading();
+            resultsSection.classList.add('hidden');
+            showToast('Connection error', 'error');
+        }
+    });
+
+    function displayResults(data) {
+        resultsSection.classList.remove('hidden');
+
+        document.getElementById('finalUrlValue').textContent = data.final_url || '-';
+        document.getElementById('redirectValue').textContent = data.redirected ? 'Yes' : 'No';
+        document.getElementById('statusCodeValue').textContent = data.status_code || '-';
+        document.getElementById('serverValue').textContent = renderValue(data.headers && data.headers.Server);
+
+        const technologyList = document.getElementById('technologyList');
+        technologyList.innerHTML = (data.detected_technologies || []).map(function(technology) {
+            return `
+                <div class="technology-chip">
+                    <span class="technology-name">${escapeHtml(technology.name || 'Unknown')}</span>
+                    <div class="technology-source">${escapeHtml(technology.source || 'Header')}</div>
+                    <div class="technology-value">${escapeHtml(technology.value || 'No additional value')}</div>
+                </div>
+            `;
+        }).join('');
+
+        const headerGrid = document.getElementById('headerGrid');
+        const headerItems = [
+            ['Server', data.headers && data.headers.Server],
+            ['X-Powered-By', data.headers && data.headers['X-Powered-By']],
+            ['Content-Type', data.headers && data.headers['Content-Type']]
+        ];
+
+        headerGrid.innerHTML = headerItems.map(function(item) {
+            return `
+                <div class="header-row">
+                    <span class="header-label">${escapeHtml(item[0])}</span>
+                    <span class="header-value">${escapeHtml(renderValue(item[1]))}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderValue(value) {
+        return value || 'Not disclosed';
+    }
+
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, function(character) {
+            const entities = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            };
+
+            return entities[character] || character;
+        });
+    }
+});
+</script>
+{% endblock %}

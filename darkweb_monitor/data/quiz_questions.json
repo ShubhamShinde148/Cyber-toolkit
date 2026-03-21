@@ -1,0 +1,1542 @@
+{
+  "osint": {
+    "beginner": [
+      {
+        "question": "What does OSINT stand for?",
+        "options": [
+          "Open Source Intelligence",
+          "Online Security Internet Network Tool",
+          "Operational Security Internet Network Tool",
+          "Open System Internal Network Technology"
+        ],
+        "answer": "Open Source Intelligence"
+      },
+      {
+        "question": "Which of the following is an example of an OSINT source?",
+        "options": [
+          "Confidential corporate emails",
+          "Public social media posts",
+          "Private medical records",
+          "Classified military documents"
+        ],
+        "answer": "Public social media posts"
+      },
+      {
+        "question": "What is the primary purpose of OSINT?",
+        "options": [
+          "To hack into systems",
+          "To gather information from publicly available sources",
+          "To encrypt sensitive data",
+          "To create malware"
+        ],
+        "answer": "To gather information from publicly available sources"
+      },
+      {
+        "question": "Which search engine is commonly used for advanced OSINT gathering?",
+        "options": [
+          "Ask Jeeves",
+          "Google (using Google Dorks)",
+          "Bing Video Search",
+          "AOL Search"
+        ],
+        "answer": "Google (using Google Dorks)"
+      },
+      {
+        "question": "What is EXIF data?",
+        "options": [
+          "A type of computer virus",
+          "Metadata hidden within image files",
+          "A secure file transfer protocol",
+          "An encryption algorithm"
+        ],
+        "answer": "Metadata hidden within image files"
+      },
+      {
+        "question": "Why is 'sock puppet' a term used in OSINT?",
+        "options": [
+          "It's a type of malware that targets socks proxies",
+          "A fake online identity used for investigation purposes",
+          "A tool for scanning network ports",
+          "A method of encrypting emails"
+        ],
+        "answer": "A fake online identity used for investigation purposes"
+      },
+      {
+        "question": "Which of these is NOT an OSINT technique?",
+        "options": [
+          "Searching public records",
+          "Brute-forcing a password",
+          "Analyzing WHOIS data for a domain",
+          "Reviewing public satellite imagery"
+        ],
+        "answer": "Brute-forcing a password"
+      },
+      {
+        "question": "What is the purpose of a reverse image search?",
+        "options": [
+          "To change the colors of an image",
+          "To find where an image has been published online",
+          "To compress an image file",
+          "To add a watermark to an image"
+        ],
+        "answer": "To find where an image has been published online"
+      },
+      {
+        "question": "What does 'WHOIS' information reveal?",
+        "options": [
+          "The password of an email account",
+          "Registration details and ownership of a domain name",
+          "The IP address of the person visiting a website",
+          "The source code of a web application"
+        ],
+        "answer": "Registration details and ownership of a domain name"
+      },
+      {
+        "question": "Is OSINT considered illegal?",
+        "options": [
+          "Yes, it is a form of cybercrime",
+          "No, because it relies on publicly accessible information",
+          "Only if used against government targets",
+          "Yes, if you use a VPN"
+        ],
+        "answer": "No, because it relies on publicly accessible information"
+      }
+    ],
+    "intermediate": [
+      {
+        "question": "What is the primary function of the 'theHarvester' tool?",
+        "options": [
+          "Cracking Wi-Fi passwords",
+          "Gathering emails, subdomains, and IPs from public sources",
+          "Conducting DDOS attacks",
+          "Encrypting hard drives"
+        ],
+        "answer": "Gathering emails, subdomains, and IPs from public sources"
+      },
+      {
+        "question": "Which Google Dork operator restricts results to a specific website?",
+        "options": [
+          "inurl:",
+          "filetype:",
+          "site:",
+          "intitle:"
+        ],
+        "answer": "site:"
+      },
+      {
+        "question": "What kind of information does Shodan search for?",
+        "options": [
+          "Text documents on the web",
+          "Internet-connected devices and their open ports",
+          "Social media profiles",
+          "Archived versions of old websites"
+        ],
+        "answer": "Internet-connected devices and their open ports"
+      },
+      {
+        "question": "Which of the following describes 'Metadata' in the context of OSINT?",
+        "options": [
+          "Data that describes other data (e.g., camera model used for a photo)",
+          "Highly classified intelligence",
+          "The source code of a malware program",
+          "A database of known threat actors"
+        ],
+        "answer": "Data that describes other data (e.g., camera model used for a photo)"
+      },
+      {
+        "question": "What is the purpose of the Wayback Machine (archive.org)?",
+        "options": [
+          "To predict future cyber attacks",
+          "To view historical versions of websites that may have changed or been deleted",
+          "To search the Dark Web",
+          "To generate complex passwords"
+        ],
+        "answer": "To view historical versions of websites that may have changed or been deleted"
+      },
+      {
+        "question": "How can MX records be useful in OSINT?",
+        "options": [
+          "They reveal the geographic coordinates of a server",
+          "They identify the mail exchange servers used by a domain",
+          "They show the administrative password for a website",
+          "They list all subdomains attached to a main domain"
+        ],
+        "answer": "They identify the mail exchange servers used by a domain"
+      },
+      {
+        "question": "What does a 'DNS dump' typically aim to find?",
+        "options": [
+          "Hidden directories on a web server",
+          "All registered subdomains and related DNS records for a target",
+          "Vulnerabilities in a web application's login page",
+          "Open SSH ports on a network"
+        ],
+        "answer": "All registered subdomains and related DNS records for a target"
+      },
+      {
+        "question": "In OSINT, what is 'Maltego' primarily used for?",
+        "options": [
+          "Visualizing relationships and links between different pieces of information",
+          "Cracking WPA2 handshakes",
+          "Scanning for SQL injection vulnerabilities",
+          "Anonymizing web traffic"
+        ],
+        "answer": "Visualizing relationships and links between different pieces of information"
+      },
+      {
+        "question": "Which Google Dork finds files of a specific type (like PDFs)?",
+        "options": [
+          "type:",
+          "ext:",
+          "filetype:",
+          "format:"
+        ],
+        "answer": "filetype:"
+      },
+      {
+        "question": "What does checking historical WHOIS records reveal that current records might not?",
+        "options": [
+          "The current IP address of the server",
+          "Previous owners before privacy protection was enabled",
+          "The source code of the website",
+          "Active SSL/TLS certificates"
+        ],
+        "answer": "Previous owners before privacy protection was enabled"
+      }
+    ],
+    "advanced": [
+      {
+        "question": "Which statement best describes the difference between passive and active OSINT gathering?",
+        "options": [
+          "Passive uses automated tools, active uses manual searches.",
+          "Passive relies on third-party data without touching the target systems; Active involves direct interaction with the target.",
+          "Passive is legal, active is illegal.",
+          "Passive gathers data from the surface web, active from the dark web."
+        ],
+        "answer": "Passive relies on third-party data without touching the target systems; Active involves direct interaction with the target."
+      },
+      {
+        "question": "How can Certificate Transparency (CT) logs be leveraged in OSINT?",
+        "options": [
+          "To forge SSL certificates for a target domain",
+          "To discover newly registered subdomains and internal hostnames of an organization",
+          "To crack the private key of a web server",
+          "To launch a DDOS attack on the CA (Certificate Authority)"
+        ],
+        "answer": "To discover newly registered subdomains and internal hostnames of an organization"
+      },
+      {
+        "question": "What is 'SOCMINT' an abbreviation for?",
+        "options": [
+          "Secure Operations Center Management and Intelligence",
+          "Social Media Intelligence",
+          "Signal Operations and Communications Middleware Interface",
+          "Software Oriented Computing Metrics Integration"
+        ],
+        "answer": "Social Media Intelligence"
+      },
+      {
+        "question": "In the context of tracking people, what are 'BSSIDs' and how are they used in OSINT (e.g., via WiGLE)?",
+        "options": [
+          "Browser Security Session IDs used to hijack sessions",
+          "MAC addresses of Wi-Fi access points used to geolocate devices or individuals",
+          "Base Station Secure Identifiers used in cellular interception",
+          "Biometric Signature System Identification utilized for facial recognition"
+        ],
+        "answer": "MAC addresses of Wi-Fi access points used to geolocate devices or individuals"
+      },
+      {
+        "question": "Which of the following best describes the use of 'Spiderfoot'?",
+        "options": [
+          "A tool strictly used for crawling the Dark Web for stolen credentials.",
+          "An automated OSINT framework that queries over 100 public data sources simultaneously.",
+          "A specialized crawler designed to find vulnerabilities in Apache web servers.",
+          "A network packet sniffer used for Man-in-the-Middle attacks."
+        ],
+        "answer": "An automated OSINT framework that queries over 100 public data sources simultaneously."
+      },
+      {
+        "question": "If an OSINT analyst finds an AWS S3 bucket named 'companyx-backups', what is the potential security risk?",
+        "options": [
+          "The bucket might be publicly readable, exposing sensitive corporate data.",
+          "The bucket name is too short, violating AWS naming conventions.",
+          "The bucket is automatically encrypted and cannot be accessed.",
+          "S3 buckets are honeypots and should never be analyzed."
+        ],
+        "answer": "The bucket might be publicly readable, exposing sensitive corporate data."
+      },
+      {
+        "question": "What advanced technique can determine if an individual is using a specific online service (like a forum or social network) without them posting?",
+        "options": [
+          "Username enumeration via the 'forgot password' or registration forms",
+          "Sending a phishing email with a tracking pixel",
+          "Using a port scanner on their home IP address",
+          "Intercepting their ISP traffic"
+        ],
+        "answer": "Username enumeration via the 'forgot password' or registration forms"
+      },
+      {
+        "question": "How can 'favicon hashes' be used in Shodan searches?",
+        "options": [
+          "To encrypt your search queries to hide from Shodan",
+          "To find other instances of a specific web application or phishing framework by its icon signature",
+          "To generate secure passwords based on website icons",
+          "To bypass WAF (Web Application Firewall) protections"
+        ],
+        "answer": "To find other instances of a specific web application or phishing framework by its icon signature"
+      },
+      {
+        "question": "In corporate OSINT, what information can often be gleaned from analyzing a company's ASN (Autonomous System Number)?",
+        "options": [
+          "The passwords of their network administrators",
+          "The specific IP ranges legally owned and routed by the organization",
+          "The physical floor plan of their data center",
+          "Their future marketing strategy"
+        ],
+        "answer": "The specific IP ranges legally owned and routed by the organization"
+      },
+      {
+        "question": "What is the primary OPSEC (Operational Security) concern when resolving a target's domain name directly from your own machine during an OSINT investigation?",
+        "options": [
+          "It might infect your machine with malware.",
+          "The DNS query might be logged by the target's authoritative nameserver, revealing your IP address.",
+          "It uses too much bandwidth.",
+          "It violates the Terms of Service of your ISP."
+        ],
+        "answer": "The DNS query might be logged by the target's authoritative nameserver, revealing your IP address."
+      }
+    ]
+  },
+  "web_security": {
+    "beginner": [
+      {
+        "question": "What does HTTPS stand for?",
+        "options": [
+          "HyperText Transfer Protocol Secure",
+          "High Transmission Translation Protocol System",
+          "Hyperlink Text Transfer Protocol Standard",
+          "HyperText Transmission Procedure Secure"
+        ],
+        "answer": "HyperText Transfer Protocol Secure"
+      },
+      {
+        "question": "What is the main visual indicator that a website is using a secure connection (HTTPS)?",
+        "options": [
+          "The website loads much faster",
+          "There is a padlock icon in the browser's address bar",
+          "The website background is green",
+          "There are no advertisements on the page"
+        ],
+        "answer": "There is a padlock icon in the browser's address bar"
+      },
+      {
+        "question": "What kind of attack involves an attacker tricking a user into clicking a malicious link they believe is safe?",
+        "options": [
+          "Phishing",
+          "SQL Injection",
+          "DDoS",
+          "Ransomware"
+        ],
+        "answer": "Phishing"
+      },
+      {
+        "question": "Why is it dangerous to use public Wi-Fi without a VPN for sensitive transactions?",
+        "options": [
+          "Because the internet speed is usually too slow",
+          "Because public networks are often unencrypted, allowing others to intercept data",
+          "Because the website will block access from public IPs",
+          "Because it consumes more battery power"
+        ],
+        "answer": "Because public networks are often unencrypted, allowing others to intercept data"
+      },
+      {
+        "question": "What is the primary purpose of a web cookie?",
+        "options": [
+          "To block computer viruses",
+          "To store user data and preferences locally for a website",
+          "To encrypt internet traffic",
+          "To speed up the internet connection"
+        ],
+        "answer": "To store user data and preferences locally for a website"
+      },
+      {
+        "question": "Which of these is considered a strong password?",
+        "options": [
+          "password123",
+          "MyDogNameIsBuster",
+          "12345678",
+          "Tr#y5L!q@9zT"
+        ],
+        "answer": "Tr#y5L!q@9zT"
+      },
+      {
+        "question": "What does '2FA' stand for?",
+        "options": [
+          "Two-File Authentication",
+          "Two-Factor Authentication",
+          "Transfer-Format Authorization",
+          "Triple-Firewall Access"
+        ],
+        "answer": "Two-Factor Authentication"
+      },
+      {
+        "question": "Why should you keep your web browser and plugins updated?",
+        "options": [
+          "To change the color scheme of the browser",
+          "To patch security vulnerabilities that attackers could plug into",
+          "To increase the size of the hard drive",
+          "To prevent the browser from using RAM"
+        ],
+        "answer": "To patch security vulnerabilities that attackers could plug into"
+      },
+      {
+        "question": "What is a 'pop-up blocker' used for?",
+        "options": [
+          "To prevent unwanted secondary browser windows from opening automatically",
+          "To stop people from calling your phone",
+          "To prevent the computer from overheating",
+          "To block emails from unknown senders"
+        ],
+        "answer": "To prevent unwanted secondary browser windows from opening automatically"
+      },
+      {
+        "question": "If your browser warns you that a website's security certificate is invalid, what should you do?",
+        "options": [
+          "Ignore the warning and proceed",
+          "Enter your credit card details quickly",
+          "Do not proceed, as the connection is not secure",
+          "Restart your computer"
+        ],
+        "answer": "Do not proceed, as the connection is not secure"
+      }
+    ],
+    "intermediate": [
+      {
+        "question": "What does XSS stand for in web security?",
+        "options": [
+          "Cross-Site Scripting",
+          "Extended Secure Sockets",
+          "External Style Sheets",
+          "XML Signature Scheme"
+        ],
+        "answer": "Cross-Site Scripting"
+      },
+      {
+        "question": "Which vulnerability occurs when user input is incorrectly passed to a database query without sanitization?",
+        "options": [
+          "Cross-Site Request Forgery (CSRF)",
+          "SQL Injection (SQLi)",
+          "Buffer Overflow",
+          "Directory Traversal"
+        ],
+        "answer": "SQL Injection (SQLi)"
+      },
+      {
+        "question": "What is the purpose of the 'HttpOnly' flag on a cookie?",
+        "options": [
+          "It forces the cookie to only be sent over HTTPS.",
+          "It prevents client-side scripts (like JavaScript) from accessing the cookie.",
+          "It ensures the cookie is only used for HTTP traffic, not FTP.",
+          "It deletes the cookie when the browser is closed."
+        ],
+        "answer": "It prevents client-side scripts (like JavaScript) from accessing the cookie."
+      },
+      {
+        "question": "What attack leverages a user's authenticated session to perform unwanted actions on a web application?",
+        "options": [
+          "SQL Injection",
+          "Cross-Site Scripting (XSS)",
+          "Cross-Site Request Forgery (CSRF)",
+          "Man-in-the-Middle (MitM)"
+        ],
+        "answer": "Cross-Site Request Forgery (CSRF)"
+      },
+      {
+        "question": "How does a Content Security Policy (CSP) help protect a website?",
+        "options": [
+          "By encrypting the database at rest.",
+          "By restricting the domains from which scripts, images, and other resources can be loaded.",
+          "By automatically blocking all IP addresses from foreign countries.",
+          "By enforcing strong password policies."
+        ],
+        "answer": "By restricting the domains from which scripts, images, and other resources can be loaded."
+      },
+      {
+        "question": "What is 'Directory Traversal' (or Path Traversal)?",
+        "options": [
+          "An attack that aims to access files and directories stored outside the web root folder.",
+          "A method of mapping a website's structure using automated bots.",
+          "A technique to bypass CAPTCHA forms.",
+          "A vulnerability in routing protocols."
+        ],
+        "answer": "An attack that aims to access files and directories stored outside the web root folder."
+      },
+      {
+        "question": "Which HTTP header is commonly used to prevent Clickjacking attacks?",
+        "options": [
+          "X-XSS-Protection",
+          "Strict-Transport-Security",
+          "X-Frame-Options",
+          "Content-Type"
+        ],
+        "answer": "X-Frame-Options"
+      },
+      {
+        "question": "In the context of APIs, what does an Insecure Direct Object Reference (IDOR) vulnerability allow?",
+        "options": [
+          "Executing arbitrary code on the server.",
+          "Accessing other users' data by simply changing an ID parameter in a request.",
+          "Cracking the API authentication token.",
+          "Triggering a Denial of Service attack."
+        ],
+        "answer": "Accessing other users' data by simply changing an ID parameter in a request."
+      },
+      {
+        "question": "What is the OWASP Top 10?",
+        "options": [
+          "A list of the top 10 most secure web frameworks.",
+          "A widely recognized document listing the ten most critical web application security risks.",
+          "A group of elite hackers.",
+          "The top 10 antivirus programs recommended for web servers."
+        ],
+        "answer": "A widely recognized document listing the ten most critical web application security risks."
+      },
+      {
+        "question": "What does CORS stand for, and what does it regulate?",
+        "options": [
+          "Cross-Origin Resource Sharing; it dictates which external domains can interact with the API in a browser.",
+          "Centralized Online Routing System; it routes web traffic to prevent DDoS.",
+          "Cryptographic Object Rendering Standard; it ensures images are encrypted.",
+          "Cross-Object Relational Security; it secures database queries."
+        ],
+        "answer": "Cross-Origin Resource Sharing; it dictates which external domains can interact with the API in a browser."
+      }
+    ],
+    "advanced": [
+      {
+        "question": "Which of the following describes a 'Blind SQL Injection' attack?",
+        "options": [
+          "The attacker uses a blindfold while typing commands.",
+          "The application does not return detailed database errors, so the attacker infers data point-by-point via True/False conditions or time delays.",
+          "The injection payload encrypts the database, making it blind to the administrator.",
+          "The attack relies solely on manipulating HTTP headers rather than input fields."
+        ],
+        "answer": "The application does not return detailed database errors, so the attacker infers data point-by-point via True/False conditions or time delays."
+      },
+      {
+        "question": "What is 'Server-Side Request Forgery' (SSRF) and why is it dangerous?",
+        "options": [
+          "It forces the user's browser to send requests to the server, resulting in CSRF.",
+          "It tricks the server into making requests on behalf of the attacker, often allowing access to internal systems or cloud metadata APIs.",
+          "It alters the server's response headers to downgrade HTTPS to HTTP.",
+          "It forges the SSL certificate of the server."
+        ],
+        "answer": "It tricks the server into making requests on behalf of the attacker, often allowing access to internal systems or cloud metadata APIs."
+      },
+      {
+        "question": "How can an XML External Entity (XXE) vulnerability be exploited?",
+        "options": [
+          "By injecting malicious JavaScript into an XML tag.",
+          "By manipulating the Doctype Definition (DTD) to force the server to read local files or make internal network requests.",
+          "By overflowing the buffer of the XML parser to execute arbitrary code.",
+          "By tricking the user into downloading an infected XML file."
+        ],
+        "answer": "By manipulating the Doctype Definition (DTD) to force the server to read local files or make internal network requests."
+      },
+      {
+        "question": "What is the role of the 'SameSite' attribute in a cookie?",
+        "options": [
+          "To ensure the cookie can only be read by the same device that created it.",
+          "To mitigate CSRF attacks by controlling whether cookies are sent with cross-site requests.",
+          "To prevent XSS attacks by restricting JavaScript access.",
+          "To mandate that the cookie is only valid on the exact same IP address."
+        ],
+        "answer": "To mitigate CSRF attacks by controlling whether cookies are sent with cross-site requests."
+      },
+      {
+        "question": "Explain 'HTTP Request Smuggling'.",
+        "options": [
+          "Encrypting HTTP requests so firewalls cannot inspect them.",
+          "Exploiting discrepancies in how a front-end proxy and a back-end server parse the 'Content-Length' and 'Transfer-Encoding' headers.",
+          "Sending oversized HTTP requests to cause a buffer overflow.",
+          "Stealing authentication tokens from the HTTP Authorization header."
+        ],
+        "answer": "Exploiting discrepancies in how a front-end proxy and a back-end server parse the 'Content-Length' and 'Transfer-Encoding' headers."
+      },
+      {
+        "question": "What vulnerability arises when an application securely deserializes objects without validating the content, leading to arbitrary code execution?",
+        "options": [
+          "Insecure Direct Object Reference",
+          "Unvalidated Redirects",
+          "Insecure Deserialization",
+          "XML Injection"
+        ],
+        "answer": "Insecure Deserialization"
+      },
+      {
+        "question": "How does 'DOM-based XSS' differ from 'Reflected XSS'?",
+        "options": [
+          "DOM XSS occurs strictly on the client-side without the payload ever reaching or bouncing back from the server.",
+          "DOM XSS requires the payload to be stored in a database first.",
+          "Reflected XSS targets the Document Object Model, while DOM XSS targets the HTTP headers.",
+          "There is no difference; they are synonymous."
+        ],
+        "answer": "DOM XSS occurs strictly on the client-side without the payload ever reaching or bouncing back from the server."
+      },
+      {
+        "question": "What is the primary security flaw with JSON Web Tokens (JWT) if the 'alg' header can be manipulated to 'None'?",
+        "options": [
+          "The token becomes unencrypted but valid.",
+          "The server bypasses signature verification, allowing forged tokens to be accepted.",
+          "The token expires immediately.",
+          "The server crashes, causing a DoS."
+        ],
+        "answer": "The server bypasses signature verification, allowing forged tokens to be accepted."
+      },
+      {
+        "question": "What does HTTP Strict Transport Security (HSTS) achieve?",
+        "options": [
+          "It forces the browser to only connect to the server via HTTPS, protecting against SSL-stripping MitM attacks.",
+          "It encrypts the payload before it leaves the browser.",
+          "It restricts the HTTP methods allowed (e.g., blocking TRACE and OPTIONS).",
+          "It forces users to use strong passwords."
+        ],
+        "answer": "It forces the browser to only connect to the server via HTTPS, protecting against SSL-stripping MitM attacks."
+      },
+      {
+        "question": "In a Server-Side Template Injection (SSTI) attack, what is the ultimate goal of the attacker?",
+        "options": [
+          "To change the CSS styling of the website.",
+          "To inject native template syntax to steal data or achieve Remote Code Execution (RCE).",
+          "To inject SQL commands into the template engine.",
+          "To steal the session cookies of other users."
+        ],
+        "answer": "To inject native template syntax to steal data or achieve Remote Code Execution (RCE)."
+      }
+    ]
+  },
+  "network_security": {
+    "beginner": [
+      {
+        "question": "What does a Firewall do?",
+        "options": [
+          "It physically protects computer hardware from overheating.",
+          "It acts as a barrier that monitors and controls incoming and outgoing network traffic based on security rules.",
+          "It speeds up the internet connection.",
+          "It automatically encrypts all files on a hard drive."
+        ],
+        "answer": "It acts as a barrier that monitors and controls incoming and outgoing network traffic based on security rules."
+      },
+      {
+        "question": "What does 'VPN' stand for?",
+        "options": [
+          "Virtual Private Network",
+          "Visual Processing Node",
+          "Virtual Public Name",
+          "Variable Protocol Net"
+        ],
+        "answer": "Virtual Private Network"
+      },
+      {
+        "question": "Why is it important to change the default password on a home Wi-Fi router?",
+        "options": [
+          "To increase the Wi-Fi range.",
+          "Because default passwords are often known to attackers or easily searchable.",
+          "To make the internet connection faster.",
+          "Because the router will not work with a default password."
+        ],
+        "answer": "Because default passwords are often known to attackers or easily searchable."
+      },
+      {
+        "question": "What is 'Malware'?",
+        "options": [
+          "A type of hardware component.",
+          "Software specifically designed to disrupt, damage, or gain unauthorized access to a computer system.",
+          "A secure method of sending emails.",
+          "A tool used to monitor network traffic."
+        ],
+        "answer": "Software specifically designed to disrupt, damage, or gain unauthorized access to a computer system."
+      },
+      {
+        "question": "What is the function of an Antivirus program?",
+        "options": [
+          "To cool down the CPU.",
+          "To detect, prevent, and remove malicious software from a computer.",
+          "To organize files into folders.",
+          "To update the operating system."
+        ],
+        "answer": "To detect, prevent, and remove malicious software from a computer."
+      },
+      {
+        "question": "What does an IP address do?",
+        "options": [
+          "It identifies a device on a network so it can send and receive data.",
+          "It stores the user's password.",
+          "It encrypts emails.",
+          "It blocks pop-up ads."
+        ],
+        "answer": "It identifies a device on a network so it can send and receive data."
+      },
+      {
+        "question": "What does 'Wi-Fi' stand for?",
+        "options": [
+          "Wireless Fidelity",
+          "Wide Frame",
+          "Wireless Fiber",
+          "It doesn't stand for anything; it is a trademarked name."
+        ],
+        "answer": "It doesn't stand for anything; it is a trademarked name."
+      },
+      {
+        "question": "What is a 'Botnet'?",
+        "options": [
+          "A network of infected computers controlled by an attacker, often used for DDoS attacks.",
+          "A helpful AI assistant on a website.",
+          "A type of secure firewall.",
+          "A network exclusively used by robots."
+        ],
+        "answer": "A network of infected computers controlled by an attacker, often used for DDoS attacks."
+      },
+      {
+        "question": "What is the safest type of Wi-Fi security for a home network?",
+        "options": [
+          "WEP",
+          "Open (No password)",
+          "WPA2 or WPA3",
+          "MAC Filtering only"
+        ],
+        "answer": "WPA2 or WPA3"
+      },
+      {
+        "question": "What does 'update your system' mean in relation to security?",
+        "options": [
+          "Buying a new computer.",
+          "Installing the latest software patches to fix known vulnerabilities.",
+          "Changing your desktop background.",
+          "Turning the computer off and on again."
+        ],
+        "answer": "Installing the latest software patches to fix known vulnerabilities."
+      }
+    ],
+    "intermediate": [
+      {
+        "question": "What is the difference between an IDS and an IPS?",
+        "options": [
+          "IDS blocks threats, IPS only detects them.",
+          "IDS detects intrusions and alerts administrators; IPS detects intrusions and automatically takes action to block them.",
+          "IDS is for internal networks, IPS is for external networks.",
+          "There is no difference; they are synonymous."
+        ],
+        "answer": "IDS detects intrusions and alerts administrators; IPS detects intrusions and automatically takes action to block them."
+      },
+      {
+        "question": "What port is typically used for secure SSH connections?",
+        "options": [
+          "21",
+          "22",
+          "23",
+          "80"
+        ],
+        "answer": "22"
+      },
+      {
+        "question": "How does a Denial of Service (DoS) attack differ from a Distributed Denial of Service (DDoS) attack?",
+        "options": [
+          "DoS targets a server; DDoS targets a database.",
+          "DoS uses a single source attacker; DDoS uses multiple distributed sources (like a botnet).",
+          "DoS steals data; DDoS only disrupts service.",
+          "DoS is legal; DDoS is illegal."
+        ],
+        "answer": "DoS uses a single source attacker; DDoS uses multiple distributed sources (like a botnet)."
+      },
+      {
+        "question": "What is 'ARP Spoofing' (or ARP Poisoning)?",
+        "options": [
+          "A technique to crack passwords over a network.",
+          "Associating the attacker's MAC address with the IP address of a legitimate host, leading to traffic interception.",
+          "Sending malformed packets to crash a router.",
+          "Encrypting network traffic to hide it from administrators."
+        ],
+        "answer": "Associating the attacker's MAC address with the IP address of a legitimate host, leading to traffic interception."
+      },
+      {
+        "question": "What is the purpose of a DMZ (Demilitarized Zone) in network security?",
+        "options": [
+          "To completely block all internet access.",
+          "To host public-facing services (like web servers) in an isolated subnetwork to protect the internal network.",
+          "To store encrypted databases.",
+          "To provide a safe zone for malware analysis."
+        ],
+        "answer": "To host public-facing services (like web servers) in an isolated subnetwork to protect the internal network."
+      },
+      {
+        "question": "Which protocol is utilized to translate domain names into IP addresses?",
+        "options": [
+          "DHCP",
+          "HTTP",
+          "DNS",
+          "FTP"
+        ],
+        "answer": "DNS"
+      },
+      {
+        "question": "What is 'MAC spoofing'?",
+        "options": [
+          "Changing the factory-assigned Media Access Control address of a network interface to disguise identity or bypass access controls.",
+          "A type of Apple computer virus.",
+          "Intercepting communications between two network nodes.",
+          "Hashing a MAC address for security."
+        ],
+        "answer": "Changing the factory-assigned Media Access Control address of a network interface to disguise identity or bypass access controls."
+      },
+      {
+        "question": "In the TCP 3-way handshake, what is the sequence of flags exchanged?",
+        "options": [
+          "SYN -> FIN -> ACK",
+          "SYN -> SYN-ACK -> ACK",
+          "ACK -> SYN -> SYN-ACK",
+          "RST -> SYN -> ACK"
+        ],
+        "answer": "SYN -> SYN-ACK -> ACK"
+      },
+      {
+        "question": "What is the primary function of a Proxy Server in a corporate network environment?",
+        "options": [
+          "To act as an intermediary for requests from clients seeking resources from other servers, often providing caching and filtering.",
+          "To generate IP addresses for new devices.",
+          "To provide wireless connectivity.",
+          "To encrypt all database files."
+        ],
+        "answer": "To act as an intermediary for requests from clients seeking resources from other servers, often providing caching and filtering."
+      },
+      {
+        "question": "What does a 'Honeypot' do in network security?",
+        "options": [
+          "It blocks spam emails.",
+          "It acts as a decoy system designed to lure attackers to study their methods or divert them from real assets.",
+          "It stores all administrative passwords securely.",
+          "It boosts the range of a Wi-Fi signal."
+        ],
+        "answer": "It acts as a decoy system designed to lure attackers to study their methods or divert them from real assets."
+      }
+    ],
+    "advanced": [
+      {
+        "question": "Explain a 'SYN Flood' attack.",
+        "options": [
+          "Sending massive amounts of UDP traffic to overwhelming a server.",
+          "An attacker sends a succession of TCP SYN requests without completing the handshake, consuming server resources until legitimate traffic is denied.",
+          "Injecting malicious code into a database via web forms.",
+          "Forging ping requests to mask the attacker's IP."
+        ],
+        "answer": "An attacker sends a succession of TCP SYN requests without completing the handshake, consuming server resources until legitimate traffic is denied."
+      },
+      {
+        "question": "What is 'BGP Hijacking'?",
+        "options": [
+          "Stealing a user's session cookie.",
+          "Illegitimate routing of internet traffic by falsely announcing ownership of IP address blocks to an ISP.",
+          "Cracking the WPA3 encryption key.",
+          "Overwhelming a DNS server with queries."
+        ],
+        "answer": "Illegitimate routing of internet traffic by falsely announcing ownership of IP address blocks to an ISP."
+      },
+      {
+        "question": "How does 802.1X standard improve network security?",
+        "options": [
+          "It provides stronger Wi-Fi encryption than WPA3.",
+          "It provides port-based Network Access Control, ensuring devices authenticate before connecting to a LAN or WLAN.",
+          "It automatically blocks DDOS attacks.",
+          "It encrypts all hard drives on the network."
+        ],
+        "answer": "It provides port-based Network Access Control, ensuring devices authenticate before connecting to a LAN or WLAN."
+      },
+      {
+        "question": "What is a 'VLAN Hopping' attack?",
+        "options": [
+          "Physically moving computers between different network switches.",
+          "Exploiting switch port configurations or DTP to send traffic to another virtual LAN without passing through a router.",
+          "Using a VPN to bypass firewall rules.",
+          "Intercepting traffic between two remote branch offices."
+        ],
+        "answer": "Exploiting switch port configurations or DTP to send traffic to another virtual LAN without passing through a router."
+      },
+      {
+        "question": "Why would an attacker use 'IP Fragmentation'?",
+        "options": [
+          "To make the internet connection faster.",
+          "To break a malicious payload into smaller packets, potentially bypassing basic IDS/IPS inspections.",
+          "To prevent packet loss over long distances.",
+          "To hide their MAC address."
+        ],
+        "answer": "To break a malicious payload into smaller packets, potentially bypassing basic IDS/IPS inspections."
+      },
+      {
+        "question": "What is the purpose of 'DNSSEC'?",
+        "options": [
+          "It encrypts DNS queries to hide them from ISPs.",
+          "It adds cryptographic signatures to DNS records to ensure authenticity and integrity, mitigating DNS spoofing.",
+          "It speeds up DNS resolution times.",
+          "It replaces IP addresses with alphanumeric characters."
+        ],
+        "answer": "It adds cryptographic signatures to DNS records to ensure authenticity and integrity, mitigating DNS spoofing."
+      },
+      {
+        "question": "What is 'Zero Trust Architecture'?",
+        "options": [
+          "A model where no device or user is inherently trusted, requiring continuous authentication regardless of their location on the network.",
+          "A network without any firewalls.",
+          "A security policy that bans all third-party software.",
+          "A system that relies entirely on perimeter defenses."
+        ],
+        "answer": "A model where no device or user is inherently trusted, requiring continuous authentication regardless of their location on the network."
+      },
+      {
+        "question": "In the context of network defense, what is 'Sinkholing'?",
+        "options": [
+          "Dropping a database table during an emergency.",
+          "Redirecting malicious traffic (e.g., botnet communications) to a controlled IP address for analysis or to neutralize the threat.",
+          "Deleting log files to save space.",
+          "Blocking all incoming traffic on a router."
+        ],
+        "answer": "Redirecting malicious traffic (e.g., botnet communications) to a controlled IP address for analysis or to neutralize the threat."
+      },
+      {
+        "question": "Which of these is a characteristic of an 'APT' (Advanced Persistent Threat)?",
+        "options": [
+          "A script kiddie running an automated scanner.",
+          "A fast, destructive attack aiming for immediate chaos.",
+          "A highly resourced, stealthy attack group that maintains long-term presence on a network for espionage or specific goals.",
+          "A random phishing email campaign."
+        ],
+        "answer": "A highly resourced, stealthy attack group that maintains long-term presence on a network for espionage or specific goals."
+      },
+      {
+        "question": "What is an 'Evil Twin' attack in wireless networking?",
+        "options": [
+          "Using two identical routers to double the network speed.",
+          "A rogue Wi-Fi access point set up to masquerade as a legitimate one to eavesdrop on users.",
+          "Hacking two computers simultaneously.",
+          "Copying the hard drive of a server."
+        ],
+        "answer": "A rogue Wi-Fi access point set up to masquerade as a legitimate one to eavesdrop on users."
+      }
+    ]
+  },
+  "cryptography": {
+    "beginner": [
+      {
+        "question": "What is the main goal of Cryptography?",
+        "options": [
+          "To compress data so it takes up less space.",
+          "To protect and secure information by transforming it into an unreadable format.",
+          "To translate languages.",
+          "To build faster computer processors."
+        ],
+        "answer": "To protect and secure information by transforming it into an unreadable format."
+      },
+      {
+        "question": "What is 'Encryption'?",
+        "options": [
+          "The process of recovering deleted files.",
+          "The process of converting plain text into scrambled ciphertext.",
+          "The process of converting ciphertext back clearly.",
+          "A method to permanently delete data."
+        ],
+        "answer": "The process of converting plain text into scrambled ciphertext."
+      },
+      {
+        "question": "What is the difference between encryption and decryption?",
+        "options": [
+          "Encryption scrambles data; Decryption unscrambles it back to its original form.",
+          "Encryption is for emails; Decryption is for files.",
+          "Encryption is fast; Decryption is slow.",
+          "There is no difference."
+        ],
+        "answer": "Encryption scrambles data; Decryption unscrambles it back to its original form."
+      },
+      {
+        "question": "What is a 'Cipher'?",
+        "options": [
+          "A brand of computer.",
+          "An algorithm or method for performing encryption or decryption.",
+          "A type of computer virus.",
+          "A network cable."
+        ],
+        "answer": "An algorithm or method for performing encryption or decryption."
+      },
+      {
+        "question": "What is a 'Key' in cryptography?",
+        "options": [
+          "A physical metal key used to turn on a server.",
+          "A piece of information (usually a string of numbers/letters) used by an algorithm to encrypt or decrypt data.",
+          "The password to a Wi-Fi network.",
+          "A button on a keyboard."
+        ],
+        "answer": "A piece of information (usually a string of numbers/letters) used by an algorithm to encrypt or decrypt data."
+      },
+      {
+        "question": "Which ancient cipher shifts letters of the alphabet by a fixed number of positions?",
+        "options": [
+          "The Enigma Machine",
+          "The Caesar Cipher",
+          "RSA Algorithm",
+          "Base64 Encoding"
+        ],
+        "answer": "The Caesar Cipher"
+      },
+      {
+        "question": "Why shouldn't you share your private encryption key?",
+        "options": [
+          "Because it is too long to easily type.",
+          "Because anyone with the private key can decrypt your secure messages.",
+          "Because it will break the computer.",
+          "Because it costs money every time it is shared."
+        ],
+        "answer": "Because anyone with the private key can decrypt your secure messages."
+      },
+      {
+        "question": "What is a digitally 'signed' document?",
+        "options": [
+          "A document with a scanned image of a handwritten signature.",
+          "A document that uses cryptography to verify the sender's identity and ensure the document hasn't been altered.",
+          "A document sent over a VPN.",
+          "A document that is password protected."
+        ],
+        "answer": "A document that uses cryptography to verify the sender's identity and ensure the document hasn't been altered."
+      },
+      {
+        "question": "What does a 'Hash' function do?",
+        "options": [
+          "It takes input data and returns a fixed-length string of characters, acting as a unique digital fingerprint.",
+          "It encrypts data so it can be decrypted later.",
+          "It organizes a hard drive.",
+          "It blocks viruses."
+        ],
+        "answer": "It takes input data and returns a fixed-length string of characters, acting as a unique digital fingerprint."
+      },
+      {
+        "question": "What is plain text?",
+        "options": [
+          "Text written only in black and white.",
+          "Data that is in its normal, readable, unencrypted form.",
+          "Text without any HTML styling.",
+          "A type of encryption."
+        ],
+        "answer": "Data that is in its normal, readable, unencrypted form."
+      }
+    ],
+    "intermediate": [
+      {
+        "question": "What is the fundamental difference between Symmetric and Asymmetric encryption?",
+        "options": [
+          "Symmetric is used by computers; Asymmetric is used by mobile phones.",
+          "Symmetric uses one key for both encryption and decryption; Asymmetric uses a pair of keys (Public and Private).",
+          "Symmetric encryption is slow; Asymmetric is fast.",
+          "Symmetric encryption does not use algorithms."
+        ],
+        "answer": "Symmetric uses one key for both encryption and decryption; Asymmetric uses a pair of keys (Public and Private)."
+      },
+      {
+        "question": "Which of these is a widely used Symmetric encryption algorithm?",
+        "options": [
+          "RSA",
+          "AES (Advanced Encryption Standard)",
+          "SHA-256",
+          "Diffie-Hellman"
+        ],
+        "answer": "AES (Advanced Encryption Standard)"
+      },
+      {
+        "question": "What does RSA stand for, and what type of encryption is it?",
+        "options": [
+          "Random Secure Algorithm; Symmetric",
+          "Rivest–Shamir–Adleman; Asymmetric (Public Key Cryptography)",
+          "Rapid System Access; Hashing",
+          "Remote Server Authentication; Network Protocol"
+        ],
+        "answer": "Rivest–Shamir–Adleman; Asymmetric (Public Key Cryptography)"
+      },
+      {
+        "question": "Why is 'Salting' a password important before hashing it?",
+        "options": [
+          "It encrypts the password twice.",
+          "It adds random data to the password, ensuring identical passwords yield different hashes, thus defeating Rainbow Tables.",
+          "It makes the password easier to remember.",
+          "It prevents the user from changing their password."
+        ],
+        "answer": "It adds random data to the password, ensuring identical passwords yield different hashes, thus defeating Rainbow Tables."
+      },
+      {
+        "question": "What is a 'Rainbow Table' attack?",
+        "options": [
+          "An attack on Wi-Fi routers using multiple frequencies.",
+          "Using a massive precomputed database of plaintext passwords and their corresponding hashes to quickly crack compromised hashes.",
+          "A phishing attack using colorful emails.",
+          "An attack that tries every possible cipher key."
+        ],
+        "answer": "Using a massive precomputed database of plaintext passwords and their corresponding hashes to quickly crack compromised hashes."
+      },
+      {
+        "question": "Which of the following is a cryptographic Hash Function?",
+        "options": [
+          "AES-256",
+          "RSA-2048",
+          "SHA-256",
+          "DES"
+        ],
+        "answer": "SHA-256"
+      },
+      {
+        "question": "What is the purpose of a PKI (Public Key Infrastructure)?",
+        "options": [
+          "To manage, distribute, and revoke digital certificates and public-key encryption resources securely.",
+          "To create a private network within a company.",
+          "To store passwords securely.",
+          "To scan for viruses."
+        ],
+        "answer": "To manage, distribute, and revoke digital certificates and public-key encryption resources securely."
+      },
+      {
+        "question": "What is 'Steganography'?",
+        "options": [
+          "Encrypting data multiple times.",
+          "The practice of concealing a secret message, file, or image within another non-secret file or image.",
+          "The study of ancient ciphers.",
+          "A method of cracking passwords."
+        ],
+        "answer": "The practice of concealing a secret message, file, or image within another non-secret file or image."
+      },
+      {
+        "question": "In SSL/TLS, what is a 'Handshake'?",
+        "options": [
+          "A physical interaction between administrators.",
+          "The initial negotiation process establishing a secure connection involving determining algorithms, verifying identity, and exchanging session keys.",
+          "The process of terminating a secure connection.",
+          "Sending data without encryption."
+        ],
+        "answer": "The initial negotiation process establishing a secure connection involving determining algorithms, verifying identity, and exchanging session keys."
+      },
+      {
+        "question": "Why was the DES (Data Encryption Standard) algorithm replaced by AES?",
+        "options": [
+          "DES was too slow.",
+          "DES's 56-bit key length became too short and vulnerable to brute-force attacks.",
+          "DES was not compatible with Windows.",
+          "DES could not be used over the internet."
+        ],
+        "answer": "DES's 56-bit key length became too short and vulnerable to brute-force attacks."
+      }
+    ],
+    "advanced": [
+      {
+        "question": "What is 'Perfect Forward Secrecy' (PFS)?",
+        "options": [
+          "A guarantee that data will be sent perfectly without packet loss.",
+          "A property where the compromise of long-term keys does not compromise past session keys, protecting historic encrypted communications.",
+          "An encryption algorithm that cannot be broken by quantum computers.",
+          "A method of storing data offline."
+        ],
+        "answer": "A property where the compromise of long-term keys does not compromise past session keys, protecting historic encrypted communications."
+      },
+      {
+        "question": "How does Elliptic-Curve Cryptography (ECC) compare to RSA?",
+        "options": [
+          "ECC is primarily a symmetric algorithm, while RSA is asymmetric.",
+          "ECC provides similar levels of security as RSA but with significantly smaller key sizes, improving efficiency.",
+          "RSA provides smaller keys and faster computation than ECC.",
+          "ECC is obsolete and no longer used."
+        ],
+        "answer": "ECC provides similar levels of security as RSA but with significantly smaller key sizes, improving efficiency."
+      },
+      {
+        "question": "Which attack exploits the fact that an attacker can measure the time an algorithm takes to process different inputs?",
+        "options": [
+          "Chosen Ciphertext Attack",
+          "Timing Attack (a type of side-channel attack)",
+          "Brute-force Attack",
+          "Man-in-the-Middle Attack"
+        ],
+        "answer": "Timing Attack (a type of side-channel attack)"
+      },
+      {
+        "question": "What is a 'Collision' in hash functions?",
+        "options": [
+          "When two different inputs produce the exact same hash output.",
+          "When a hash function crashes the server.",
+          "When the hash function takes too long to compute.",
+          "When a hash is successfully reversed to plain text."
+        ],
+        "answer": "When two different inputs produce the exact same hash output."
+      },
+      {
+        "question": "What makes Quantum Computers a threat to current modern cryptography (like RSA and ECC)?",
+        "options": [
+          "They can guess passwords faster.",
+          "They can infect networks extremely quickly.",
+          "Shor's Algorithm running on a sufficient quantum computer could efficiently solve the integer factorization and discrete logarithm problems these systems rely on.",
+          "They can bypass firewalls using quantum tunneling."
+        ],
+        "answer": "Shor's Algorithm running on a sufficient quantum computer could efficiently solve the integer factorization and discrete logarithm problems these systems rely on."
+      },
+      {
+        "question": "In cryptographic modes of operation, why is ECB (Electronic Codebook) mode generally considered insecure?",
+        "options": [
+          "It uses a weak key.",
+          "Identical plaintext blocks are encrypted into identical ciphertext blocks, allowing patterns in the underlying data (like image features) to remain visible.",
+          "It cannot encrypt text, only numbers.",
+          "It requires too much processing power."
+        ],
+        "answer": "Identical plaintext blocks are encrypted into identical ciphertext blocks, allowing patterns in the underlying data (like image features) to remain visible."
+      },
+      {
+        "question": "What is the primary function of the Diffie-Hellman algorithm?",
+        "options": [
+          "To hash passwords.",
+          "To securely exchange cryptographic keys over a public channel without sending the key itself.",
+          "To digitally sign documents.",
+          "To encrypt entire hard drives."
+        ],
+        "answer": "To securely exchange cryptographic keys over a public channel without sending the key itself."
+      },
+      {
+        "question": "What is Homomorphic Encryption?",
+        "options": [
+          "Encryption that only works on local networks.",
+          "A form of encryption that allows computations to be performed on ciphertext, generating an encrypted result that matches the result of operations on plaintext.",
+          "A flawed encryption method that has been deprecated.",
+          "Encryption that changes its algorithm randomly."
+        ],
+        "answer": "A form of encryption that allows computations to be performed on ciphertext, generating an encrypted result that matches the result of operations on plaintext."
+      },
+      {
+        "question": "What is a 'nonce' in cryptography?",
+        "options": [
+          "A nonsense word used as a password.",
+          "A 'number used once' in cryptographic communications to prevent replay attacks and ensure uniqueness.",
+          "A type of weak cipher.",
+          "The amount of time a key is valid."
+        ],
+        "answer": "A 'number used once' in cryptographic communications to prevent replay attacks and ensure uniqueness."
+      },
+      {
+        "question": "What is PBKDF2 (Password-Based Key Derivation Function 2) designed to do?",
+        "options": [
+          "To exchange keys rapidly over the internet.",
+          "To generate random passwords.",
+          "To reduce vulnerabilities to brute-force attacks by applying a pseudorandom function (like HMAC) to an input password along with a salt and repeating the process many times (key stretching).",
+          "To encrypt network traffic efficiently."
+        ],
+        "answer": "To reduce vulnerabilities to brute-force attacks by applying a pseudorandom function (like HMAC) to an input password along with a salt and repeating the process many times (key stretching)."
+      }
+    ]
+  },
+  "cybersecurity_basics": {
+    "beginner": [
+      {
+        "question": "What is 'Cybersecurity'?",
+        "options": [
+          "Repairing broken computer hardware.",
+          "The practice of protecting systems, networks, and programs from digital attacks.",
+          "Building websites.",
+          "A type of computer program that cleans your desktop."
+        ],
+        "answer": "The practice of protecting systems, networks, and programs from digital attacks."
+      },
+      {
+        "question": "What is a 'Hacker' generally?",
+        "options": [
+          "Only someone who breaks the law.",
+          "A person who uses computers to gain unauthorized access to data, though some hack legally to find vulnerabilities.",
+          "A computer technician.",
+          "A type of virus."
+        ],
+        "answer": "A person who uses computers to gain unauthorized access to data, though some hack legally to find vulnerabilities."
+      },
+      {
+        "question": "What does a 'White Hat' hacker do?",
+        "options": [
+          "Steals money from banks.",
+          "Hacks systems legally and ethically to find and fix security flaws before malicious hackers can.",
+          "Creates computer viruses.",
+          "Sells stolen data on the dark web."
+        ],
+        "answer": "Hacks systems legally and ethically to find and fix security flaws before malicious hackers can."
+      },
+      {
+        "question": "What does it mean to 'back up' your data?",
+        "options": [
+          "To copy and save data to a different location to prevent loss in case of hardware failure or a cyber attack.",
+          "To send your data back to the manufacturer.",
+          "To delete old files.",
+          "To compress files to make them smaller."
+        ],
+        "answer": "To copy and save data to a different location to prevent loss in case of hardware failure or a cyber attack."
+      },
+      {
+        "question": "What is 'Social Engineering'?",
+        "options": [
+          "Building social networks like Facebook.",
+          "The use of deception to manipulate individuals into divulging confidential or personal information.",
+          "A degree in engineering.",
+          "Upgrading office computer networks."
+        ],
+        "answer": "The use of deception to manipulate individuals into divulging confidential or personal information."
+      },
+      {
+        "question": "Why shouldn't you write your passwords on a sticky note attached to your monitor?",
+        "options": [
+          "Because the ink will fade.",
+          "Because anyone walking by your desk can see and steal your password.",
+          "Because it looks messy.",
+          "Because the sticky note might damage the screen."
+        ],
+        "answer": "Because anyone walking by your desk can see and steal your password."
+      },
+      {
+        "question": "What is considered PII?",
+        "options": [
+          "Public Information Index",
+          "Personally Identifiable Information (like Social Security numbers, full names, addresses).",
+          "Personal Internet Interface",
+          "Private Internal IP"
+        ],
+        "answer": "Personally Identifiable Information (like Social Security numbers, full names, addresses)."
+      },
+      {
+        "question": "What is the primary danger of opening unexpected email attachments?",
+        "options": [
+          "It uses up too much internet data.",
+          "The attachment could contain malware that infects your computer.",
+          "It will immediately forward the email to your contacts.",
+          "It costs money to open attachments."
+        ],
+        "answer": "The attachment could contain malware that infects your computer."
+      },
+      {
+        "question": "What does an 'Incognito' or 'Private' browser window do?",
+        "options": [
+          "It makes your internet activity completely invisible to your ISP and employer.",
+          "It prevents your browser from storing history, cookies, and site data locally on your computer after you close the window.",
+          "It blocks all computer viruses.",
+          "It encrypts your hard drive."
+        ],
+        "answer": "It prevents your browser from storing history, cookies, and site data locally on your computer after you close the window."
+      },
+      {
+        "question": "What is the CIA Triad in cybersecurity?",
+        "options": [
+          "Central Intelligence Agency, Investigation, Action.",
+          "Confidentiality, Integrity, Availability.",
+          "Computers, Internet, Applications.",
+          "Cybersecurity, Information, Architecture."
+        ],
+        "answer": "Confidentiality, Integrity, Availability."
+      }
+    ],
+    "intermediate": [
+      {
+        "question": "In the CIA Triad, what does 'Integrity' refer to?",
+        "options": [
+          "Keeping data secret.",
+          "Ensuring data is reliable, accurate, and has not been altered by unauthorized parties.",
+          "Ensuring data is always accessible.",
+          "The moral character of the network administrator."
+        ],
+        "answer": "Ensuring data is reliable, accurate, and has not been altered by unauthorized parties."
+      },
+      {
+        "question": "What is the Principle of Least Privilege?",
+        "options": [
+          "Giving users access to the absolute minimum resources necessary to perform their job functions.",
+          "Allowing everyone administrator access to save time.",
+          "Only securing the least important files.",
+          "Restricting physical access to servers."
+        ],
+        "answer": "Giving users access to the absolute minimum resources necessary to perform their job functions."
+      },
+      {
+        "question": "What is a 'Vulnerability' in cybersecurity terms?",
+        "options": [
+          "A confirmed hack.",
+          "A flaw or weakness in a system's design, implementation, or operation that could be exploited.",
+          "A malicious software program.",
+          "A hacker trying to enter the network."
+        ],
+        "answer": "A flaw or weakness in a system's design, implementation, or operation that could be exploited."
+      },
+      {
+        "question": "What differentiates a 'Threat' from a 'Risk'?",
+        "options": [
+          "Threat is the potential for harm; Risk is the probability of that harm occurring and its impact.",
+          "They mean exactly the same thing.",
+          "Threat relates to software; Risk relates to hardware.",
+          "Threats are external; Risks are internal."
+        ],
+        "answer": "Threat is the potential for harm; Risk is the probability of that harm occurring and its impact."
+      },
+      {
+        "question": "What is 'Penetration Testing' (Pen Testing)?",
+        "options": [
+          "Testing how deeply a Wi-Fi signal can penetrate building walls.",
+          "An authorized simulated cyberattack on a computer system performed to evaluate its security.",
+          "Testing the physical security of a building.",
+          "Writing a new virus to see what happens."
+        ],
+        "answer": "An authorized simulated cyberattack on a computer system performed to evaluate its security."
+      },
+      {
+        "question": "What is a 'Keylogger'?",
+        "options": [
+          "A tool used by administrators to write secure passwords.",
+          "A type of spyware that records every keystroke a user makes on their keyboard.",
+          "A physical device to store keys.",
+          "A program that encrypts a keyboard."
+        ],
+        "answer": "A type of spyware that records every keystroke a user makes on their keyboard."
+      },
+      {
+        "question": "What is 'Multi-Factor Authentication' (MFA)?",
+        "options": [
+          "Using the same password on multiple websites.",
+          "Requiring two or more distinct types of verification (e.g., something you know, something you have, something you are) to access an account.",
+          "Having multiple people log into one account.",
+          "A firewall that blocks multiple IPs."
+        ],
+        "answer": "Requiring two or more distinct types of verification (e.g., something you know, something you have, something you are) to access an account."
+      },
+      {
+        "question": "What is the purpose of 'Patch Management'?",
+        "options": [
+          "Repairing physical cables.",
+          "The systematic process of identifying, acquiring, installing, and verifying updates for products and systems.",
+          "Managing employee security badges.",
+          "Designing new software features."
+        ],
+        "answer": "The systematic process of identifying, acquiring, installing, and verifying updates for products and systems."
+      },
+      {
+        "question": "What is 'Shoulder Surfing'?",
+        "options": [
+          "A physical security breach where someone looks over another person's shoulder to steal sensitive information like a password.",
+          "A type of internet browser hijacking.",
+          "Carrying a server on your shoulder.",
+          "A social engineering tactic via phone."
+        ],
+        "answer": "A physical security breach where someone looks over another person's shoulder to steal sensitive information like a password."
+      },
+      {
+        "question": "What is an Incident Response Plan?",
+        "options": [
+          "A document explaining how to use a computer.",
+          "A predefined set of instructions or procedures to detect, respond to, and limit consequences of a malicious cyber attack.",
+          "A plan to purchase new software.",
+          "A map of the network."
+        ],
+        "answer": "A predefined set of instructions or procedures to detect, respond to, and limit consequences of a malicious cyber attack."
+      }
+    ],
+    "advanced": [
+      {
+        "question": "What is the 'MITRE ATT&CK' framework?",
+        "options": [
+          "A software tool for launching DDOS attacks.",
+          "A globally-accessible knowledge base of adversary tactics and techniques based on real-world observations.",
+          "A military strategy for physical combat.",
+          "An encryption algorithm."
+        ],
+        "answer": "A globally-accessible knowledge base of adversary tactics and techniques based on real-world observations."
+      },
+      {
+        "question": "In threat modeling, what does the STRIDE acronym stand for?",
+        "options": [
+          "Security, Threat, Risk, Incident, Defense, Evasion",
+          "Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege",
+          "System, Technology, Range, Intelligence, Data, Encryption",
+          "Secure Transmission Route Interface Data Encryption"
+        ],
+        "answer": "Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege"
+      },
+      {
+        "question": "What characterizes a 'Zero-Day' vulnerability?",
+        "options": [
+          "A theoretical vulnerability that cannot be exploited.",
+          "A software vulnerability that is discovered by attackers before the vendor is aware of it or has released a patch.",
+          "A vulnerability that takes zero days to fix.",
+          "A bug that only occurs on the first day of the year."
+        ],
+        "answer": "A software vulnerability that is discovered by attackers before the vendor is aware of it or has released a patch."
+      },
+      {
+        "question": "What is 'Lateral Movement' in the context of a cyber attack?",
+        "options": [
+          "Moving a computer from one desk to another.",
+          "Techniques that an attacker uses, after gaining initial access, to move through a network searching for higher-value assets and elevated privileges.",
+          "A data exfiltration technique.",
+          "A method to bypass a web application firewall."
+        ],
+        "answer": "Techniques that an attacker uses, after gaining initial access, to move through a network searching for higher-value assets and elevated privileges."
+      },
+      {
+        "question": "Explain 'Living off the Land' (LotL) techniques.",
+        "options": [
+          "Using physical access to break into a data center.",
+          "Attackers using legitimate, pre-installed administration tools (like PowerShell, WMI) already present in the environment to execute malicious actions, making detection harder.",
+          "Stealing hardware instead of software.",
+          "Using unpatched vulnerabilities in old operating systems."
+        ],
+        "answer": "Attackers using legitimate, pre-installed administration tools (like PowerShell, WMI) already present in the environment to execute malicious actions, making detection harder."
+      },
+      {
+        "question": "What is 'Defense in Depth'?",
+        "options": [
+          "A military strategy involving deep trenches.",
+          "An information assurance concept in which multiple layers of security controls are placed throughout an IT system.",
+          "Using the deepest possible encryption key length.",
+          "Relying solely on a very strong perimeter firewall."
+        ],
+        "answer": "An information assurance concept in which multiple layers of security controls are placed throughout an IT system."
+      },
+      {
+        "question": "In digital forensics, what is the 'Chain of Custody'?",
+        "options": [
+          "A chronological documentation that records the sequence of custody, control, transfer, analysis, and disposition of digital evidence.",
+          "A method of linking malware samples together.",
+          "The process of encrypting hard drives sequentially.",
+          "A block-chain encryption ledger."
+        ],
+        "answer": "A chronological documentation that records the sequence of custody, control, transfer, analysis, and disposition of digital evidence."
+      },
+      {
+        "question": "What is the purpose of 'Threat Hunting'?",
+        "options": [
+          "Waiting for an IDS alert to trigger.",
+          "The proactive, iterative searching through networks to detect and isolate advanced threats that evade existing security solutions.",
+          "Automated vulnerability scanning.",
+          "Applying patches to known bugs."
+        ],
+        "answer": "The proactive, iterative searching through networks to detect and isolate advanced threats that evade existing security solutions."
+      },
+      {
+        "question": "What does 'Data Exfiltration' refer to?",
+        "options": [
+          "Compressing data to save space.",
+          "The unauthorized copying, transfer, or retrieval of data from a computer or server.",
+          "Encrypting data at rest.",
+          "Running an antivirus scan."
+        ],
+        "answer": "The unauthorized copying, transfer, or retrieval of data from a computer or server."
+      },
+      {
+        "question": "What is 'Heuristics-based' detection in anti-malware software?",
+        "options": [
+          "Detecting malware based purely on a known list of signatures (hashes).",
+          "Analyzing the code for suspicious properties or behavioral patterns to identify previously unknown malware, rather than relying on exact viral signatures.",
+          "Checking the file size of the download.",
+          "Preventing the download of any executable file."
+        ],
+        "answer": "Analyzing the code for suspicious properties or behavioral patterns to identify previously unknown malware, rather than relying on exact viral signatures."
+      }
+    ]
+  }
+}

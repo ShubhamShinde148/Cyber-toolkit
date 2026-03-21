@@ -1,0 +1,860 @@
+{% extends "base.html" %}
+
+{% block title %}Metadata Extractor - Dark Web Monitor{% endblock %}
+
+{% block content %}
+<section class="hero hero-sm">
+    <div class="hero-content">
+        <h1><i class="fas fa-file-search"></i> Metadata Forensics Extractor</h1>
+        <p>Extract hidden metadata from images, PDFs, and documents for forensic analysis</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <!-- Upload Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-upload"></i> Upload File for Analysis</h2>
+            </div>
+            <div class="card-body">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h3>Drag & Drop your file here</h3>
+                    <p>or click to browse</p>
+                    <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.pdf,.docx" hidden>
+                    <div class="upload-info">
+                        <span class="badge badge-cyan"><i class="fas fa-image"></i> JPG</span>
+                        <span class="badge badge-green"><i class="fas fa-image"></i> PNG</span>
+                        <span class="badge badge-red"><i class="fas fa-file-pdf"></i> PDF</span>
+                        <span class="badge badge-blue"><i class="fas fa-file-word"></i> DOCX</span>
+                    </div>
+                    <p class="upload-limit">Maximum file size: 50MB</p>
+                </div>
+                
+                <div id="selectedFile" class="selected-file hidden">
+                    <div class="file-preview">
+                        <i class="fas fa-file file-icon" id="fileTypeIcon"></i>
+                        <div class="file-details">
+                            <span class="file-name" id="fileName">-</span>
+                            <span class="file-size" id="fileSize">-</span>
+                        </div>
+                        <button class="btn btn-sm btn-outline" id="removeFile" title="Remove file">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <button class="btn btn-primary btn-lg" id="analyzeBtn">
+                        <i class="fas fa-search"></i> Extract Metadata
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="alert alert-info mt-1">
+            <i class="fas fa-shield-alt"></i>
+            <div>
+                <strong>Privacy First:</strong> Files are analyzed in memory only and are never stored on our servers. 
+                All processing happens securely and files are immediately discarded after analysis.
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden mt-2">
+            <!-- Summary Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-clipboard-list"></i> Extraction Summary</h2>
+                </div>
+                <div class="card-body">
+                    <div class="metadata-summary">
+                        <div class="summary-item">
+                            <div class="summary-icon"><i class="fas fa-file"></i></div>
+                            <div class="summary-content">
+                                <span class="summary-label">File Type</span>
+                                <span class="summary-value" id="resultFileType">-</span>
+                            </div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-icon"><i class="fas fa-hdd"></i></div>
+                            <div class="summary-content">
+                                <span class="summary-label">File Size</span>
+                                <span class="summary-value" id="resultFileSize">-</span>
+                            </div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-icon"><i class="fas fa-database"></i></div>
+                            <div class="summary-content">
+                                <span class="summary-label">Metadata Fields</span>
+                                <span class="summary-value" id="resultFieldCount">-</span>
+                            </div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="summary-content">
+                                <span class="summary-label">Security Flags</span>
+                                <span class="summary-value" id="resultFlags">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Flags Alert -->
+            <div id="securityFlagsAlert" class="alert alert-warning mt-1 hidden">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>Security Findings:</strong>
+                    <ul id="securityFlagsList" class="mt-half"></ul>
+                </div>
+            </div>
+
+            <!-- GPS Location Card -->
+            <div id="gpsCard" class="card mt-1 hidden">
+                <div class="card-header">
+                    <h2><i class="fas fa-map-marker-alt"></i> GPS Location Detected</h2>
+                    <span class="badge badge-red"><i class="fas fa-exclamation-circle"></i> Privacy Risk</span>
+                </div>
+                <div class="card-body">
+                    <div class="gps-data">
+                        <div class="gps-coordinates">
+                            <div class="coord-item">
+                                <span class="coord-label">Latitude</span>
+                                <span class="coord-value" id="gpsLatitude">-</span>
+                            </div>
+                            <div class="coord-item">
+                                <span class="coord-label">Longitude</span>
+                                <span class="coord-value" id="gpsLongitude">-</span>
+                            </div>
+                            <div class="coord-item coord-full">
+                                <span class="coord-label">Formatted</span>
+                                <span class="coord-value" id="gpsFormatted">-</span>
+                            </div>
+                        </div>
+                        <div class="gps-actions">
+                            <a id="googleMapsLink" href="#" target="_blank" class="btn btn-primary">
+                                <i class="fab fa-google"></i> View on Google Maps
+                            </a>
+                            <a id="osmLink" href="#" target="_blank" class="btn btn-outline">
+                                <i class="fas fa-map"></i> View on OpenStreetMap
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metadata Grid -->
+            <div class="grid-2 mt-2">
+                <!-- Camera Info -->
+                <div id="cameraCard" class="card hidden">
+                    <div class="card-header">
+                        <h2><i class="fas fa-camera"></i> Camera Information</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="cameraInfo" class="metadata-list"></div>
+                    </div>
+                </div>
+
+                <!-- Author Info -->
+                <div id="authorCard" class="card hidden">
+                    <div class="card-header">
+                        <h2><i class="fas fa-user"></i> Author Information</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="authorInfo" class="metadata-list"></div>
+                    </div>
+                </div>
+
+                <!-- Date/Time Info -->
+                <div id="datetimeCard" class="card hidden">
+                    <div class="card-header">
+                        <h2><i class="fas fa-calendar-alt"></i> Date & Time Information</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="datetimeInfo" class="metadata-list"></div>
+                    </div>
+                </div>
+
+                <!-- Software Info -->
+                <div id="softwareCard" class="card hidden">
+                    <div class="card-header">
+                        <h2><i class="fas fa-code"></i> Software Information</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="softwareInfo" class="metadata-list"></div>
+                    </div>
+                </div>
+
+                <!-- Document Info -->
+                <div id="documentCard" class="card hidden">
+                    <div class="card-header">
+                        <h2><i class="fas fa-file-alt"></i> Document Information</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="documentInfo" class="metadata-list"></div>
+                    </div>
+                </div>
+
+                <!-- Image Info -->
+                <div id="imageCard" class="card hidden">
+                    <div class="card-header">
+                        <h2><i class="fas fa-image"></i> Image Information</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="imageInfo" class="metadata-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Metadata -->
+            <div class="card mt-2">
+                <div class="card-header">
+                    <h2><i class="fas fa-list-alt"></i> All Extracted Metadata</h2>
+                    <button class="btn btn-sm btn-outline" id="copyMetadataBtn">
+                        <i class="fas fa-copy"></i> Copy JSON
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="metadata-search">
+                        <input type="text" id="metadataSearch" placeholder="Search metadata fields..." class="input-search">
+                    </div>
+                    <div id="allMetadata" class="metadata-table"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="card mt-2">
+            <div class="card-header">
+                <h2><i class="fas fa-info-circle"></i> What Metadata Can Reveal</h2>
+            </div>
+            <div class="card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-camera"></i></div>
+                        <h4>Camera Details</h4>
+                        <p>Device make, model, lens info, and camera settings used to capture images.</p>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <h4>GPS Location</h4>
+                        <p>Exact coordinates where a photo was taken - a major privacy concern.</p>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-user-secret"></i></div>
+                        <h4>Author Identity</h4>
+                        <p>Names, usernames, and email addresses embedded in documents.</p>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-history"></i></div>
+                        <h4>Timestamps</h4>
+                        <p>Creation, modification, and access dates for forensic timeline analysis.</p>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-laptop-code"></i></div>
+                        <h4>Software Used</h4>
+                        <p>Applications used to create or edit the file, revealing tools and versions.</p>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-fingerprint"></i></div>
+                        <h4>Hidden Data</h4>
+                        <p>Revision history, comments, and other embedded information.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+/* Upload Zone Styles */
+.upload-zone {
+    border: 2px dashed var(--primary);
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(0, 246, 255, 0.02);
+}
+
+.upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--secondary);
+    background: rgba(0, 246, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+.upload-zone .upload-icon {
+    font-size: 4rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.upload-zone h3 {
+    color: var(--text);
+    margin-bottom: 0.5rem;
+}
+
+.upload-zone p {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.upload-info {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.upload-limit {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Selected File */
+.selected-file {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.file-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0, 246, 255, 0.05);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.file-icon {
+    font-size: 2.5rem;
+    color: var(--primary);
+}
+
+.file-details {
+    text-align: left;
+}
+
+.file-name {
+    display: block;
+    font-weight: 600;
+    color: var(--text);
+    word-break: break-all;
+}
+
+.file-size {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Metadata Summary */
+.metadata-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.summary-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(0, 246, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 246, 255, 0.1);
+}
+
+.summary-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 10px;
+    font-size: 1.5rem;
+    color: var(--bg);
+}
+
+.summary-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.summary-value {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* GPS Data */
+.gps-data {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.gps-coordinates {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.coord-item {
+    padding: 1rem;
+    background: rgba(255, 87, 87, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid #ff5757;
+}
+
+.coord-full {
+    grid-column: 1 / -1;
+}
+
+.coord-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.coord-value {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--text);
+}
+
+.gps-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Metadata List */
+.metadata-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.metadata-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.75rem;
+    background: rgba(0, 246, 255, 0.02);
+    border-radius: 6px;
+    border-left: 2px solid var(--primary);
+}
+
+.metadata-key {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    margin-right: 1rem;
+}
+
+.metadata-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--text);
+    text-align: right;
+    word-break: break-all;
+}
+
+/* Metadata Table */
+.metadata-table {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 1rem;
+}
+
+.metadata-search {
+    margin-bottom: 1rem;
+}
+
+.input-search {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(0, 246, 255, 0.05);
+    border: 1px solid rgba(0, 246, 255, 0.2);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.input-search:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.info-item {
+    text-align: center;
+    padding: 1.5rem;
+    background: rgba(0, 246, 255, 0.02);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 246, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.info-item:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px);
+}
+
+.info-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(0, 246, 255, 0.1), rgba(188, 19, 254, 0.1));
+    border-radius: 50%;
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.info-item h4 {
+    color: var(--text);
+    margin-bottom: 0.5rem;
+}
+
+.info-item p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Alert styles */
+.alert {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    align-items: flex-start;
+}
+
+.alert-info {
+    background: rgba(0, 246, 255, 0.1);
+    border: 1px solid rgba(0, 246, 255, 0.3);
+    color: var(--text);
+}
+
+.alert-info > i {
+    color: var(--primary);
+    font-size: 1.2rem;
+    margin-top: 0.1rem;
+}
+
+.alert-warning {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    color: var(--text);
+}
+
+.alert-warning > i {
+    color: #ffc107;
+    font-size: 1.2rem;
+    margin-top: 0.1rem;
+}
+
+.alert ul {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.alert li {
+    margin-bottom: 0.25rem;
+}
+
+/* Badge colors */
+.badge-cyan { background: rgba(0, 246, 255, 0.2); color: #00f6ff; }
+.badge-green { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+.badge-red { background: rgba(255, 87, 87, 0.2); color: #ff5757; }
+.badge-blue { background: rgba(66, 135, 245, 0.2); color: #4287f5; }
+
+/* Utility */
+.mt-half { margin-top: 0.5rem; }
+.hidden { display: none !important; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const selectedFile = document.getElementById('selectedFile');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const fileTypeIcon = document.getElementById('fileTypeIcon');
+    const removeFileBtn = document.getElementById('removeFile');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const resultsSection = document.getElementById('resultsSection');
+    
+    let currentFile = null;
+    let extractedData = null;
+    
+    // File type icons mapping
+    const fileIcons = {
+        'jpg': 'fa-file-image',
+        'jpeg': 'fa-file-image',
+        'png': 'fa-file-image',
+        'pdf': 'fa-file-pdf',
+        'docx': 'fa-file-word'
+    };
+    
+    // Click to browse
+    uploadZone.addEventListener('click', () => fileInput.click());
+    
+    // Drag and drop handlers
+    uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('drag-over');
+    });
+    
+    uploadZone.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('drag-over');
+    });
+    
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('drag-over');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFile(files[0]);
+        }
+    });
+    
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFile(e.target.files[0]);
+        }
+    });
+    
+    // Remove file
+    removeFileBtn.addEventListener('click', () => {
+        currentFile = null;
+        fileInput.value = '';
+        uploadZone.classList.remove('hidden');
+        selectedFile.classList.add('hidden');
+        resultsSection.classList.add('hidden');
+    });
+    
+    // Analyze button
+    analyzeBtn.addEventListener('click', analyzeFile);
+    
+    function handleFile(file) {
+        // Validate file type
+        const ext = file.name.split('.').pop().toLowerCase();
+        const allowedExts = ['jpg', 'jpeg', 'png', 'pdf', 'docx'];
+        
+        if (!allowedExts.includes(ext)) {
+            showToast('Unsupported file type. Allowed: JPG, PNG, PDF, DOCX', 'error');
+            return;
+        }
+        
+        // Validate file size (50MB)
+        if (file.size > 50 * 1024 * 1024) {
+            showToast('File too large. Maximum size: 50MB', 'error');
+            return;
+        }
+        
+        currentFile = file;
+        
+        // Update UI
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        fileTypeIcon.className = 'fas ' + (fileIcons[ext] || 'fa-file') + ' file-icon';
+        
+        uploadZone.classList.add('hidden');
+        selectedFile.classList.remove('hidden');
+    }
+    
+    async function analyzeFile() {
+        if (!currentFile) return;
+        
+        showLoading('Extracting metadata...');
+        
+        try {
+            const formData = new FormData();
+            formData.append('file', currentFile);
+            
+            const response = await fetch('/api/metadata-extract', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            hideLoading();
+            
+            if (data.success) {
+                extractedData = data;
+                displayResults(data);
+                showToast('Metadata extracted successfully!', 'success');
+            } else {
+                showToast(data.error || 'Extraction failed', 'error');
+            }
+        } catch (error) {
+            hideLoading();
+            showToast('Connection error: ' + error.message, 'error');
+        }
+    }
+    
+    function displayResults(data) {
+        resultsSection.classList.remove('hidden');
+        
+        // Summary
+        document.getElementById('resultFileType').textContent = data.file_type;
+        document.getElementById('resultFileSize').textContent = data.file_size_formatted;
+        document.getElementById('resultFieldCount').textContent = Object.keys(data.metadata || {}).length;
+        document.getElementById('resultFlags').textContent = data.security_flags?.length || 0;
+        
+        // Security flags
+        const flagsAlert = document.getElementById('securityFlagsAlert');
+        const flagsList = document.getElementById('securityFlagsList');
+        
+        if (data.security_flags && data.security_flags.length > 0) {
+            flagsAlert.classList.remove('hidden');
+            flagsList.innerHTML = data.security_flags.map(flag => {
+                const flagText = flag.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+                return `<li>${flagText}</li>`;
+            }).join('');
+        } else {
+            flagsAlert.classList.add('hidden');
+        }
+        
+        // GPS Data
+        const gpsCard = document.getElementById('gpsCard');
+        if (data.gps_data) {
+            gpsCard.classList.remove('hidden');
+            document.getElementById('gpsLatitude').textContent = data.gps_data.latitude.toFixed(6);
+            document.getElementById('gpsLongitude').textContent = data.gps_data.longitude.toFixed(6);
+            document.getElementById('gpsFormatted').textContent = data.gps_data.formatted;
+            document.getElementById('googleMapsLink').href = data.gps_data.maps_url;
+            document.getElementById('osmLink').href = data.gps_data.osm_url;
+        } else {
+            gpsCard.classList.add('hidden');
+        }
+        
+        // Category cards
+        displayCategory('cameraCard', 'cameraInfo', data.camera_info);
+        displayCategory('authorCard', 'authorInfo', data.author_info);
+        displayCategory('datetimeCard', 'datetimeInfo', data.datetime_info);
+        displayCategory('softwareCard', 'softwareInfo', data.software_info);
+        displayCategory('documentCard', 'documentInfo', data.document_info);
+        displayCategory('imageCard', 'imageInfo', data.image_info);
+        
+        // All metadata
+        displayAllMetadata(data.metadata);
+        
+        // Scroll to results
+        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    
+    function displayCategory(cardId, containerId, data) {
+        const card = document.getElementById(cardId);
+        const container = document.getElementById(containerId);
+        
+        if (data && Object.keys(data).length > 0) {
+            card.classList.remove('hidden');
+            container.innerHTML = Object.entries(data).map(([key, value]) => `
+                <div class="metadata-row">
+                    <span class="metadata-key">${formatKey(key)}</span>
+                    <span class="metadata-value">${escapeHtml(String(value))}</span>
+                </div>
+            `).join('');
+        } else {
+            card.classList.add('hidden');
+        }
+    }
+    
+    function displayAllMetadata(metadata) {
+        const container = document.getElementById('allMetadata');
+        
+        if (!metadata || Object.keys(metadata).length === 0) {
+            container.innerHTML = '<p class="text-muted">No metadata found</p>';
+            return;
+        }
+        
+        const rows = Object.entries(metadata).map(([key, value]) => {
+            const valueStr = typeof value === 'object' ? JSON.stringify(value) : String(value);
+            return `
+                <div class="metadata-row" data-key="${escapeHtml(key.toLowerCase())}" data-value="${escapeHtml(valueStr.toLowerCase())}">
+                    <span class="metadata-key">${escapeHtml(key)}</span>
+                    <span class="metadata-value">${escapeHtml(valueStr)}</span>
+                </div>
+            `;
+        }).join('');
+        
+        container.innerHTML = rows;
+    }
+    
+    // Metadata search
+    document.getElementById('metadataSearch').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#allMetadata .metadata-row');
+        
+        rows.forEach(row => {
+            const key = row.dataset.key || '';
+            const value = row.dataset.value || '';
+            const match = key.includes(query) || value.includes(query);
+            row.style.display = match ? '' : 'none';
+        });
+    });
+    
+    // Copy metadata JSON
+    document.getElementById('copyMetadataBtn').addEventListener('click', function() {
+        if (extractedData) {
+            navigator.clipboard.writeText(JSON.stringify(extractedData, null, 2))
+                .then(() => showToast('Metadata copied to clipboard!', 'success'))
+                .catch(() => showToast('Failed to copy', 'error'));
+        }
+    });
+    
+    // Utility functions
+    function formatFileSize(bytes) {
+        const units = ['B', 'KB', 'MB', 'GB'];
+        let i = 0;
+        while (bytes >= 1024 && i < units.length - 1) {
+            bytes /= 1024;
+            i++;
+        }
+        return bytes.toFixed(2) + ' ' + units[i];
+    }
+    
+    function formatKey(key) {
+        return key
+            .replace(/_/g, ' ')
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, str => str.toUpperCase())
+            .trim();
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+});
+</script>
+{% endblock %}

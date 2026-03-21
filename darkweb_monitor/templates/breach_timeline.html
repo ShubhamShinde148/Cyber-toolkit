@@ -1,0 +1,600 @@
+{% extends "base.html" %}
+
+{% block title %}Breach Timeline - Dark Web Monitor{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<section class="hero hero-sm">
+    <div class="hero-content">
+        <h1><i class="fas fa-history"></i> Breach Timeline</h1>
+        <p>Visualize your data breach history and exposure trends</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <!-- Input Section -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-search"></i> Analyze Email Breaches</h2>
+            </div>
+            <div class="card-body">
+                <form id="breachForm">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" class="cyber-input" placeholder="Enter email to analyze" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-chart-line"></i> Generate Timeline
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden mt-2">
+            <!-- Summary Stats -->
+            <div class="timeline-stats">
+                <div class="timeline-stat-card">
+                    <div class="stat-icon"><i class="fas fa-database"></i></div>
+                    <div class="stat-value" id="totalBreaches">0</div>
+                    <div class="stat-label">Total Breaches</div>
+                </div>
+                <div class="timeline-stat-card severity-high">
+                    <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="stat-value" id="highSeverity">0</div>
+                    <div class="stat-label">High Severity</div>
+                </div>
+                <div class="timeline-stat-card">
+                    <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="stat-value" id="firstBreach">-</div>
+                    <div class="stat-label">First Breach</div>
+                </div>
+                <div class="timeline-stat-card">
+                    <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                    <div class="stat-value" id="lastBreach">-</div>
+                    <div class="stat-label">Latest Breach</div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-row">
+                <!-- Timeline Chart -->
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-area"></i> Breach Timeline</h2>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Data Types Distribution -->
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-pie"></i> Exposed Data Types</h2>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="dataTypesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yearly Breakdown -->
+            <div class="card mt-2">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-bar"></i> Yearly Breakdown</h2>
+                </div>
+                <div class="card-body">
+                    <canvas id="yearlyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Breach List -->
+            <div class="card mt-2">
+                <div class="card-header">
+                    <h2><i class="fas fa-list"></i> All Breaches</h2>
+                </div>
+                <div class="card-body">
+                    <div id="breachList" class="breach-list"></div>
+                </div>
+            </div>
+
+            <!-- Exposure Analytics -->
+            <div class="card mt-2">
+                <div class="card-header">
+                    <h2><i class="fas fa-analytics"></i> Exposure Analytics</h2>
+                </div>
+                <div class="card-body">
+                    <div class="analytics-grid">
+                        <div class="analytics-item">
+                            <h4>Most Common Exposures</h4>
+                            <div id="commonExposures" class="tag-cloud"></div>
+                        </div>
+                        <div class="analytics-item">
+                            <h4>Severity Distribution</h4>
+                            <canvas id="severityChart" height="150"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('breachForm');
+    const resultsSection = document.getElementById('resultsSection');
+    let charts = {};
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        
+        showLoading('Analyzing breach history...');
+        
+        try {
+            const response = await fetch('/api/breach-timeline', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email })
+            });
+            
+            const data = await response.json();
+            hideLoading();
+            
+            if (data.success) {
+                displayResults(data);
+            } else {
+                showToast(data.error || 'Failed to analyze breaches', 'error');
+            }
+        } catch (error) {
+            hideLoading();
+            showToast('Connection error', 'error');
+        }
+    });
+    
+    function displayResults(data) {
+        resultsSection.classList.remove('hidden');
+        
+        // Summary stats
+        const summary = data.summary || {};
+        document.getElementById('totalBreaches').textContent = summary.total_breaches || 0;
+        document.getElementById('highSeverity').textContent = summary.high_severity_count || 0;
+        document.getElementById('firstBreach').textContent = summary.earliest_breach || '-';
+        document.getElementById('lastBreach').textContent = summary.latest_breach || '-';
+        
+        // Render charts
+        renderTimelineChart(data.chart_data);
+        renderDataTypesChart(data.chart_data);
+        renderYearlyChart(data.yearly_trends);
+        renderSeverityChart(data.chart_data?.severity_distribution);
+        
+        // Common exposures
+        displayCommonExposures(data.chart_data?.data_types);
+        
+        // Breach list
+        displayBreachList(data.breaches || []);
+        
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function renderTimelineChart(chartData) {
+        const ctx = document.getElementById('timelineChart').getContext('2d');
+        
+        if (charts.timeline) charts.timeline.destroy();
+        
+        const config = chartData?.line || {
+            labels: [],
+            datasets: [{
+                label: 'Breaches',
+                data: [],
+                borderColor: '#00ff88',
+                backgroundColor: 'rgba(0,255,136,0.1)',
+                fill: true
+            }]
+        };
+        
+        charts.timeline = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: config.labels,
+                datasets: config.datasets.map(ds => ({
+                    ...ds,
+                    borderColor: '#00ff88',
+                    backgroundColor: 'rgba(0,255,136,0.1)',
+                    fill: true,
+                    tension: 0.4
+                }))
+            },
+            options: getChartOptions('Breaches Over Time')
+        });
+    }
+    
+    function renderDataTypesChart(chartData) {
+        const ctx = document.getElementById('dataTypesChart').getContext('2d');
+        
+        if (charts.dataTypes) charts.dataTypes.destroy();
+        
+        const config = chartData?.doughnut || {
+            labels: ['No Data'],
+            datasets: [{ data: [1] }]
+        };
+        
+        charts.dataTypes = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: config.labels,
+                datasets: [{
+                    data: config.datasets[0]?.data || [1],
+                    backgroundColor: [
+                        '#00ff88', '#00d4ff', '#ff0055', '#ffcc00', '#8b5cf6',
+                        '#06b6d4', '#f97316', '#ec4899', '#10b981', '#6366f1'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: '#a0a0b0',
+                            font: { family: "'JetBrains Mono', monospace" }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function renderYearlyChart(yearlyData) {
+        const ctx = document.getElementById('yearlyChart').getContext('2d');
+        
+        if (charts.yearly) charts.yearly.destroy();
+        
+        const years = Object.keys(yearlyData || {}).sort();
+        const counts = years.map(y => yearlyData[y]?.breach_count || 0);
+        
+        charts.yearly = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: years,
+                datasets: [{
+                    label: 'Breaches per Year',
+                    data: counts,
+                    backgroundColor: years.map((_, i) => 
+                        i === years.length - 1 ? '#ff0055' : 
+                        i === years.length - 2 ? '#ff6600' : '#00ff88'
+                    ),
+                    borderRadius: 8
+                }]
+            },
+            options: getChartOptions('Yearly Distribution')
+        });
+    }
+    
+    function renderSeverityChart(severityDist) {
+        const ctx = document.getElementById('severityChart').getContext('2d');
+        
+        if (charts.severity) charts.severity.destroy();
+        
+        const labels = Object.keys(severityDist || { low: 0, medium: 0, high: 0, critical: 0 });
+        const data = labels.map(l => severityDist?.[l] || 0);
+        
+        charts.severity = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+                datasets: [{
+                    data: data,
+                    backgroundColor: ['#00ff88', '#ffcc00', '#ff6600', '#ff0055'],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a0a0b0' } },
+                    y: { grid: { display: false }, ticks: { color: '#a0a0b0' } }
+                }
+            }
+        });
+    }
+    
+    function displayCommonExposures(dataTypes) {
+        const container = document.getElementById('commonExposures');
+        const types = Object.entries(dataTypes || {}).sort((a, b) => b[1] - a[1]).slice(0, 12);
+        
+        container.innerHTML = types.map(([type, count]) => `
+            <span class="exposure-tag" style="--size: ${Math.min(1.5, 0.8 + count * 0.1)}em">
+                ${type} <small>(${count})</small>
+            </span>
+        `).join('') || '<span class="text-muted">No exposure data</span>';
+    }
+    
+    function displayBreachList(breaches) {
+        const container = document.getElementById('breachList');
+        
+        container.innerHTML = breaches.map(breach => `
+            <div class="breach-item severity-${breach.severity?.toLowerCase() || 'low'}">
+                <div class="breach-date">
+                    <span class="breach-year">${breach.year || 'Unknown'}</span>
+                    ${breach.date ? `<span class="breach-month">${formatDate(breach.date)}</span>` : ''}
+                </div>
+                <div class="breach-info">
+                    <h4 class="breach-name">${breach.name || 'Unknown Breach'}</h4>
+                    <p class="breach-source">${breach.source || ''}</p>
+                    <div class="breach-data-types">
+                        ${(breach.data_types || []).map(dt => `<span class="data-tag">${dt}</span>`).join('')}
+                    </div>
+                </div>
+                <div class="breach-severity">
+                    <span class="severity-badge severity-${breach.severity?.toLowerCase() || 'low'}">
+                        ${breach.severity || 'Unknown'}
+                    </span>
+                </div>
+            </div>
+        `).join('') || '<p class="text-muted text-center">No breaches found for this email</p>';
+    }
+    
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    
+    function getChartOptions(title) {
+        return {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                title: { display: false }
+            },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(255,255,255,0.1)' },
+                    ticks: { color: '#a0a0b0', font: { family: "'JetBrains Mono', monospace" } }
+                },
+                y: {
+                    grid: { color: 'rgba(255,255,255,0.1)' },
+                    ticks: { color: '#a0a0b0', font: { family: "'JetBrains Mono', monospace" } },
+                    beginAtZero: true
+                }
+            }
+        };
+    }
+});
+</script>
+
+<style>
+.timeline-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.timeline-stat-card {
+    background: rgba(26,26,46,0.9);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.timeline-stat-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px);
+}
+
+.timeline-stat-card.severity-high {
+    border-color: var(--danger);
+}
+
+.timeline-stat-card.severity-high .stat-icon,
+.timeline-stat-card.severity-high .stat-value {
+    color: var(--danger);
+}
+
+.stat-icon {
+    font-size: 1.5rem;
+    color: var(--primary);
+    margin-bottom: 0.75rem;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.stat-label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.charts-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.chart-card {
+    min-height: 350px;
+}
+
+.chart-card canvas {
+    max-height: 300px;
+}
+
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.analytics-item h4 {
+    margin: 0 0 1rem;
+    color: var(--secondary);
+    font-family: var(--font-display);
+}
+
+.tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.exposure-tag {
+    background: rgba(0,255,136,0.1);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: var(--size, 0.9em);
+}
+
+.exposure-tag small {
+    opacity: 0.7;
+}
+
+.breach-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.breach-item {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    background: rgba(26,26,46,0.8);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    border-left: 4px solid var(--primary);
+    transition: all 0.3s;
+}
+
+.breach-item:hover {
+    background: rgba(26,26,46,1);
+}
+
+.breach-item.severity-critical { border-left-color: #ff0055; }
+.breach-item.severity-high { border-left-color: #ff6600; }
+.breach-item.severity-medium { border-left-color: #ffcc00; }
+.breach-item.severity-low { border-left-color: var(--primary); }
+
+.breach-date {
+    text-align: center;
+    min-width: 70px;
+}
+
+.breach-year {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--text);
+}
+
+.breach-month {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.breach-info {
+    flex: 1;
+}
+
+.breach-name {
+    margin: 0 0 0.25rem;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+}
+
+.breach-source {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin: 0 0 0.75rem;
+}
+
+.breach-data-types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.data-tag {
+    background: rgba(0,212,255,0.1);
+    border: 1px solid var(--secondary);
+    color: var(--secondary);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+}
+
+.severity-badge {
+    padding: 0.4rem 0.75rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.severity-badge.severity-critical {
+    background: rgba(255,0,85,0.2);
+    color: #ff0055;
+}
+
+.severity-badge.severity-high {
+    background: rgba(255,102,0,0.2);
+    color: #ff6600;
+}
+
+.severity-badge.severity-medium {
+    background: rgba(255,204,0,0.2);
+    color: #ffcc00;
+}
+
+.severity-badge.severity-low {
+    background: rgba(0,255,136,0.2);
+    color: var(--primary);
+}
+
+@media (max-width: 768px) {
+    .charts-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .breach-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .breach-date {
+        text-align: left;
+    }
+    
+    .breach-severity {
+        width: 100%;
+        text-align: right;
+    }
+}
+</style>
+{% endblock %}
