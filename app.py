@@ -145,6 +145,31 @@ def health():
         'modular_ready': modular_ready
     }), 200
 
+
+@app.route('/api/db-status')
+def db_status():
+    """Operational DB status check for Railway/local diagnostics."""
+    if db is None:
+        return jsonify({
+            'connected': False,
+            'firebase_ready': firebase_ready,
+            'error': 'Firestore client is not initialized'
+        }), 503
+    try:
+        resolve_awaitable(db.collection('quiz_certificates').limit(1).get())
+        synced_now = _sync_local_certificates_to_firestore(limit=25)
+        return jsonify({
+            'connected': True,
+            'firebase_ready': firebase_ready,
+            'synced_local_certificates': synced_now
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'connected': False,
+            'firebase_ready': firebase_ready,
+            'error': str(e)
+        }), 503
+
 # login_manager = LoginManager()
 # login_manager.init_app(app)
 # login_manager.login_view = 'login'
@@ -1835,6 +1860,59 @@ def _load_local_certificate_record(certificate_id):
     return None
 
 
+def _upsert_certificate_to_firestore(certificate_id, cert_record):
+    """Upsert a certificate into Firestore. Returns True when persisted."""
+    if db is None:
+        return False
+    try:
+        payload = dict(cert_record or {})
+        if not payload.get('certificate_id'):
+            payload['certificate_id'] = certificate_id
+        db.collection('quiz_certificates').document(certificate_id).set(payload, merge=True)
+        verify_doc = resolve_awaitable(db.collection('quiz_certificates').document(certificate_id).get())
+        return bool(getattr(verify_doc, 'exists', False))
+    except Exception as e:
+        print(f'[CERT] ERROR upserting {certificate_id} to Firestore: {e}')
+        return False
+
+
+def _sync_local_certificates_to_firestore(limit=100):
+    """Sync local JSON certificate records to Firestore when DB is available."""
+    if db is None:
+        return 0
+    synced = 0
+    try:
+        cert_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'certificates')
+        if not os.path.isdir(cert_dir):
+            return 0
+
+        for name in sorted(os.listdir(cert_dir)):
+            if synced >= limit:
+                break
+            if not name.endswith('.json'):
+                continue
+
+            json_path = os.path.join(cert_dir, name)
+            cert_id = os.path.splitext(name)[0]
+            if not cert_id.startswith('DWM-CERT-'):
+                continue
+
+            doc = resolve_awaitable(db.collection('quiz_certificates').document(cert_id).get())
+            if getattr(doc, 'exists', False):
+                continue
+
+            try:
+                with open(json_path, 'r', encoding='utf-8') as jf:
+                    data = json.load(jf)
+                if isinstance(data, dict) and _upsert_certificate_to_firestore(cert_id, data):
+                    synced += 1
+            except Exception as e:
+                print(f'[CERT] ERROR syncing local record {cert_id}: {e}')
+    except Exception as e:
+        print(f'[CERT] ERROR scanning local certificates for sync: {e}')
+    return synced
+
+
 def _send_certificate_email(to_email, participant_name, certificate_id, result, pdf_bytes):
     """Send certificate PDF as email attachment to the user.
 
@@ -2017,6 +2095,12 @@ def api_quiz_submit():
         
         firestore_enabled = db is not None
 
+        # Try to backfill any previously local-only certificates now that DB is online.
+        if firestore_enabled:
+            synced_count = _sync_local_certificates_to_firestore(limit=50)
+            if synced_count:
+                print(f'[CERT] Backfilled {synced_count} local certificate IDs to Firestore')
+
         # Prevent duplicate only when Firestore is available.
         if firestore_enabled:
             dup_check = db.collection('quiz_certificates') \
@@ -2094,12 +2178,9 @@ def api_quiz_submit():
         }
         db_verified = False
         if firestore_enabled:
-            db.collection('quiz_certificates').document(certificate_id).set(cert_record)
-            print(f'[CERT] Firestore record saved: {certificate_id}')
-
-            # ── 4b. Verify certificate record was persisted in Firestore ──
-            verify_doc = resolve_awaitable(db.collection('quiz_certificates').document(certificate_id).get())
-            db_verified = bool(getattr(verify_doc, 'exists', False))
+            db_verified = _upsert_certificate_to_firestore(certificate_id, cert_record)
+            if db_verified:
+                print(f'[CERT] Firestore record saved: {certificate_id}')
             if not db_verified:
                 return jsonify({
                     'success': False,
@@ -2259,11 +2340,14 @@ def download_saved_certificate(certificate_id):
     if not re.match(r'^DWM-CERT-\d{4}-[A-Z0-9]+$', certificate_id):
         return jsonify({'success': False, 'error': 'Invalid certificate ID format'}), 400
 
-    # Verify via DB when available; otherwise serve local file fallback.
+    # Verify via DB when available; if missing there, fallback to local and backfill.
     if db is not None:
         doc = resolve_awaitable(db.collection('quiz_certificates').document(certificate_id).get())
         if not getattr(doc, 'exists', False):
-            return jsonify({'success': False, 'error': 'Certificate not found'}), 404
+            local_record = _load_local_certificate_record(certificate_id)
+            if not local_record:
+                return jsonify({'success': False, 'error': 'Certificate not found'}), 404
+            _upsert_certificate_to_firestore(certificate_id, local_record)
 
     _, pdf_path, _ = _local_certificate_paths(certificate_id)
     if not os.path.isfile(pdf_path):
@@ -2288,6 +2372,10 @@ def certificate_page(certificate_id):
             doc = resolve_awaitable(db.collection('quiz_certificates').document(certificate_id).get())
             if getattr(doc, 'exists', False):
                 cert = doc.to_dict() if doc else None
+            else:
+                cert = _load_local_certificate_record(certificate_id)
+                if cert:
+                    _upsert_certificate_to_firestore(certificate_id, cert)
         else:
             cert = _load_local_certificate_record(certificate_id)
         if cert is None:
@@ -2317,6 +2405,10 @@ def verify_certificate(certificate_id):
             doc = resolve_awaitable(db.collection('quiz_certificates').document(certificate_id).get())
             if getattr(doc, 'exists', False):
                 cert = doc.to_dict() if doc else {}
+            else:
+                cert = _load_local_certificate_record(certificate_id)
+                if cert:
+                    _upsert_certificate_to_firestore(certificate_id, cert)
         else:
             cert = _load_local_certificate_record(certificate_id)
 
@@ -2403,6 +2495,10 @@ def api_verify_certificate_public():
             doc = resolve_awaitable(db.collection('quiz_certificates').document(cert_id).get())
             if getattr(doc, 'exists', False):
                 cert = doc.to_dict() if doc else {}
+            else:
+                cert = _load_local_certificate_record(cert_id)
+                if cert:
+                    _upsert_certificate_to_firestore(cert_id, cert)
         else:
             cert = _load_local_certificate_record(cert_id)
 
