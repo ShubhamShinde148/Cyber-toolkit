@@ -25,6 +25,7 @@ import asyncio
 import io
 import re
 import uuid
+import base64
 import requests
 from urllib.parse import urlsplit
 from dotenv import load_dotenv
@@ -82,16 +83,36 @@ import firebase_admin
 from firebase_admin import credentials, firestore, auth as firebase_auth
 from google.cloud.firestore_v1.base_query import FieldFilter
 
-# Use absolute path for Firebase credentials
+# Firebase bootstrap for local and Railway deployment.
 cred_path = os.path.join(os.path.dirname(__file__), "darkweb-monitor-fee1c-firebase-adminsdk-fbsvc-be2b34d535.json")
-db = firestore.client()
+firebase_ready = False
 
-cred = credentials.Certificate(cred_path)
-if not firebase_admin._apps:
-    firebase_admin.initialize_app(cred)
-db = firestore.client()
+try:
+    if not firebase_admin._apps:
+        # Option 1: raw JSON in env var (recommended for Railway)
+        if os.getenv("FIREBASE_CREDENTIALS_JSON"):
+            cred_info = json.loads(os.getenv("FIREBASE_CREDENTIALS_JSON"))
+            firebase_admin.initialize_app(credentials.Certificate(cred_info))
+        # Option 2: base64-encoded JSON in env var
+        elif os.getenv("FIREBASE_CREDENTIALS_BASE64"):
+            decoded = base64.b64decode(os.getenv("FIREBASE_CREDENTIALS_BASE64")).decode("utf-8")
+            cred_info = json.loads(decoded)
+            firebase_admin.initialize_app(credentials.Certificate(cred_info))
+        # Option 3: local key file for development
+        elif os.path.exists(cred_path):
+            firebase_admin.initialize_app(credentials.Certificate(cred_path))
+        else:
+            raise RuntimeError(
+                "Firebase credentials not found. Set FIREBASE_CREDENTIALS_JSON "
+                "or FIREBASE_CREDENTIALS_BASE64 in Railway variables."
+            )
 
-print("Firebase connected successfully")
+    db = firestore.client()
+    firebase_ready = True
+    print("Firebase connected successfully")
+except Exception as firebase_err:
+    db = None
+    print(f"[WARN] Firebase not initialized: {firebase_err}")
 
 app = Flask(__name__, 
             static_folder='static',
@@ -113,6 +134,14 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['REMEMBER_COOKIE_HTTPONLY'] = True
 CORS(app)
+
+@app.route('/health')
+def health():
+    return jsonify({
+        'status': 'ok',
+        'service': 'dark-web-monitor',
+        'firebase_ready': firebase_ready
+    }), 200
 
 # login_manager = LoginManager()
 # login_manager.init_app(app)
