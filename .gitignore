@@ -1,0 +1,123 @@
+# Dark Web Leak Monitor - .gitignore
+# Full-stack safe defaults for Node.js + Python projects.
+
+# ==================== Environment & Secrets ====================
+.env
+.env.*
+*.env
+!.env.example
+!.env.sample
+secrets.py
+config.local.py
+*firebase-adminsdk*.json
+
+# ==================== Node.js ====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.npm/
+.yarn/
+.parcel-cache/
+.next/
+.nuxt/
+.svelte-kit/
+coverage/
+
+# ==================== Python ====================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+.venv/
+venv/
+ENV/
+env/
+.virtualenv/
+
+# ==================== IDE / Editor ====================
+.vscode/
+*.code-workspace
+.idea/
+*.iml
+*.ipr
+*.iws
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
+
+# ==================== OS Files ====================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ==================== Project Specific ====================
+# Exports folder contents (keep folder tracked)
+exports/*.html
+exports/*.pdf
+exports/*.json
+!exports/.gitkeep
+
+# Logs and temporary files
+*.log
+logs/
+*.tmp
+*.temp
+.tmp/
+temp/
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploaded/generated files
+uploads/
+certificates/
+darkweb-monitor-certificates*/
+test_certificate.pdf
+breach_report.pdf

@@ -1,0 +1,122 @@
+:root {
+    /* Systematic Color Palette - SOC Professional */
+    --soc-bg-dark: #020617;
+    --soc-bg-card: rgba(10, 15, 30, 0.7);
+    --soc-primary: #00ff88;
+    --soc-primary-glow: rgba(0, 255, 136, 0.3);
+    --soc-secondary: #0ea5e9;
+    --soc-accent: #f59e0b;
+    --soc-danger: #ef4444;
+    --soc-text-main: #f8fafc;
+    --soc-text-muted: #94a3b8;
+    --soc-border: rgba(255, 255, 255, 0.08);
+    --soc-border-glow: rgba(0, 255, 136, 0.2);
+    
+    /* Systematic Spacing & Borders */
+    --soc-radius: 12px;
+    --soc-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    --soc-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Systematic Card Component */
+.soc-card {
+    background: var(--soc-bg-card);
+    border: 1px solid var(--soc-border);
+    border-radius: var(--soc-radius);
+    padding: 1.5rem;
+    backdrop-filter: blur(12px);
+    transition: var(--soc-transition);
+    height: 100%;
+}
+
+.soc-card:hover {
+    border-color: var(--soc-primary);
+    box-shadow: 0 0 20px var(--soc-border-glow);
+    transform: translateY(-2px);
+}
+
+/* Systematic Header Component */
+.soc-header {
+    border-left: 4px solid var(--soc-primary);
+    padding-left: 1rem;
+    margin-bottom: 2rem;
+}
+
+.soc-header h2 {
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--soc-text-main);
+}
+
+/* Systematic Status Badge */
+.soc-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.soc-status-active { background: rgba(0, 255, 136, 0.1); color: var(--soc-primary); border: 1px solid rgba(0, 255, 136, 0.2); }
+.soc-status-locked { background: rgba(255, 255, 255, 0.05); color: var(--soc-text-muted); border: 1px solid rgba(255, 255, 255, 0.1); }
+.soc-status-danger { background: rgba(239, 68, 68, 0.1); color: var(--soc-danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+
+/* Systematic Grid System Override */
+.soc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Systematic UI Elements */
+.soc-input {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--soc-border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--soc-text-main);
+    width: 100%;
+    transition: var(--soc-transition);
+}
+
+.soc-input:focus {
+    border-color: var(--soc-primary);
+    outline: none;
+    box-shadow: 0 0 0 4px var(--soc-border-glow);
+}
+
+.soc-btn-primary {
+    background: var(--soc-primary);
+    color: var(--soc-bg-dark);
+    font-weight: 700;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: var(--soc-transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.soc-btn-primary:hover {
+    background: #00e67a;
+    transform: scale(1.02);
+}
+
+/* Background Pattern Systematic */
+.soc-pattern {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-image: 
+        radial-gradient(circle at 2px 2px, rgba(255,255,255,0.02) 1px, transparent 0);
+    background-size: 24px 24px;
+}

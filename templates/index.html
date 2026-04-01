@@ -1,0 +1,445 @@
+{% extends "base.html" %}
+
+{% block title %}Dark Web Leak Monitor - Protect Your Digital Identity{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+        <div class="hero-badge animate-fade-in">
+            <div class="badge-pulse"></div>
+            <i class="fas fa-shield-virus"></i>
+            <span>OSINT Security Platform v4.0</span>
+        </div>
+        <h1 class="hero-title animate-fade-in-up">
+            <span class="title-line">
+                <span class="cyber-bracket">[</span>
+                <span class="gradient-text glowing-text">Dark Web</span>
+                <span class="cyber-bracket">]</span>
+            </span>
+            <span class="title-line title-sub">Leak Monitor</span>
+        </h1>
+        <p class="hero-subtitle animate-fade-in-up delay-1">
+            <span class="terminal-prefix">$</span>
+            Advanced OSINT & breach intelligence toolkit. Detect leaked passwords, 
+            compromised emails, and digital exposure. <span class="typing-cursor">|</span>
+        </p>
+        <div class="hero-actions animate-fade-in-up delay-2">
+            <a href="/password-check" class="btn btn-primary btn-lg btn-glow">
+                <i class="fas fa-key"></i> Check Password
+                <span class="btn-shine"></span>
+            </a>
+            <a href="/email-check" class="btn btn-secondary btn-lg">
+                <i class="fas fa-envelope"></i> Check Email
+            </a>
+        </div>
+    </div>
+    
+    <!-- Hero Visual -->
+    <div class="hero-visual">
+        <div class="shield-container">
+            <div class="shield-animation">
+                <div class="shield-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="shield-ring ring-1"></div>
+                <div class="shield-ring ring-2"></div>
+                <div class="shield-ring ring-3"></div>
+                <div class="data-orbit">
+                    <span class="orbit-dot"></span>
+                    <span class="orbit-dot"></span>
+                    <span class="orbit-dot"></span>
+                </div>
+            </div>
+            <div class="shield-stats">
+                <div class="mini-stat">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Secure</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Bar -->
+<section class="stats-bar">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-icon"><i class="fas fa-database"></i></div>
+                <div class="stat-content">
+                    <span class="stat-number counter" data-target="700">0</span><span class="stat-suffix">+</span>
+                    <span class="stat-label">Data Breaches Indexed</span>
+                </div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-content">
+                    <span class="stat-number counter" data-target="12">0</span><span class="stat-suffix">B+</span>
+                    <span class="stat-label">Breached Accounts Analyzed</span>
+                </div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <div class="stat-icon"><i class="fas fa-lock"></i></div>
+                <div class="stat-content">
+                    <span class="stat-number">100</span><span class="stat-suffix">%</span>
+                    <span class="stat-label">Privacy Protected</span>
+                </div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <div class="stat-icon"><i class="fas fa-bolt"></i></div>
+                <div class="stat-content">
+                    <span class="stat-number">&lt;1</span><span class="stat-suffix">s</span>
+                    <span class="stat-label">Response Time</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Check Section -->
+<section class="quick-check">
+    <div class="container">
+        <div class="quick-check-card">
+            <div class="quick-check-header">
+                <i class="fas fa-terminal"></i>
+                <h2>Quick Password Check</h2>
+            </div>
+            <p class="quick-check-desc">Enter a password to instantly check if it has been compromised in any data breach</p>
+            
+            <div class="quick-check-form">
+                <div class="input-wrapper">
+                    <i class="fas fa-key input-icon"></i>
+                    <input type="password" id="quickPassword" placeholder="Enter password to check..." autocomplete="off">
+                    <button type="button" class="toggle-password" onclick="togglePassword('quickPassword')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <button type="button" class="btn btn-primary btn-glow" onclick="quickCheck()">
+                    <i class="fas fa-search"></i> Analyze
+                </button>
+            </div>
+            
+            <div class="quick-check-hint">
+                <i class="fas fa-info-circle"></i>
+                <span>Your password is never stored or transmitted. We use k-anonymity for complete privacy.</span>
+            </div>
+            
+            <div id="quickResult" class="quick-result hidden"></div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge"><i class="fas fa-cogs"></i> Features</span>
+            <h2 class="section-title">Powerful Security <span class="gradient-text">Tools</span></h2>
+            <p class="section-subtitle">Comprehensive suite of cybersecurity tools for digital protection</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card" data-aos="fade-up">
+                <div class="feature-icon-wrapper">
+                    <div class="feature-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <div class="feature-icon-glow"></div>
+                </div>
+                <h3>Password Breach Detection</h3>
+                <p>Check if your passwords have been exposed in known data breaches using secure k-anonymity protection.</p>
+                <a href="/password-check" class="feature-link">
+                    <span>Check Now</span> <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-icon-wrapper">
+                    <div class="feature-icon accent">
+                        <i class="fas fa-envelope-open-text"></i>
+                    </div>
+                    <div class="feature-icon-glow accent"></div>
+                </div>
+                <h3>Email Breach Detection</h3>
+                <p>Discover if your email appears in any known data breaches and which services were compromised.</p>
+                <a href="/email-check" class="feature-link">
+                    <span>Check Email</span> <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-icon-wrapper">
+                    <div class="feature-icon purple">
+                        <i class="fas fa-user-secret"></i>
+                    </div>
+                    <div class="feature-icon-glow purple"></div>
+                </div>
+                <h3>OSINT Intelligence</h3>
+                <p>Username enumeration, domain scanning, IP intelligence, and digital footprint analysis.</p>
+                <a href="{{ url_for('username_osint_page') }}" class="feature-link">
+                    <span>Explore OSINT</span> <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-icon-wrapper">
+                    <div class="feature-icon red">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div class="feature-icon-glow red"></div>
+                </div>
+                <h3>Cybersecurity Tools</h3>
+                <p>Hash generators, Base64 encoding, JWT decoders, DNS lookup, and more security utilities.</p>
+                <a href="{{ url_for('cyber_tools_page') }}" class="feature-link">
+                    <span>View Tools</span> <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="feature-icon-wrapper">
+                    <div class="feature-icon gold">
+                        <i class="fas fa-fingerprint"></i>
+                    </div>
+                    <div class="feature-icon-glow gold"></div>
+                </div>
+                <h3>Digital Footprint Analysis</h3>
+                <p>Analyze metadata from files, track username presence across platforms, and assess your exposure.</p>
+                <a href="{{ url_for('metadata_extractor_page') }}" class="feature-link">
+                    <span>Analyze</span> <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
+                <div class="feature-icon-wrapper">
+                    <div class="feature-icon cyan">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="feature-icon-glow cyan"></div>
+                </div>
+                <h3>Risk Assessment</h3>
+                <p>Comprehensive cyber risk scoring and personalized security recommendations for your organization.</p>
+                <a href="{{ url_for('risk_assessment_page') }}" class="feature-link">
+                    <span>Assess Risk</span> <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge"><i class="fas fa-project-diagram"></i> Process</span>
+            <h2 class="section-title">How It <span class="gradient-text">Works</span></h2>
+            <p class="section-subtitle">Your security is protected at every step</p>
+        </div>
+        
+        <div class="steps-timeline">
+            <div class="timeline-line"></div>
+            
+            <div class="step">
+                <div class="step-number">01</div>
+                <div class="step-card">
+                    <div class="step-icon"><i class="fas fa-keyboard"></i></div>
+                    <h3>Enter Your Password</h3>
+                    <p>Type or paste the password you want to check. It's processed locally first.</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">02</div>
+                <div class="step-card">
+                    <div class="step-icon"><i class="fas fa-lock"></i></div>
+                    <h3>SHA-1 Hashing</h3>
+                    <p>Your password is converted to a SHA-1 hash. Only the first 5 characters are sent.</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">03</div>
+                <div class="step-card">
+                    <div class="step-icon"><i class="fas fa-user-shield"></i></div>
+                    <h3>k-Anonymity Check</h3>
+                    <p>The API returns matching hashes. Your full hash never leaves your device.</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">04</div>
+                <div class="step-card">
+                    <div class="step-icon"><i class="fas fa-chart-bar"></i></div>
+                    <h3>Get Results</h3>
+                    <p>We compare results locally and show if your password was found in any breach.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta">
+    <div class="container">
+        <div class="cta-card">
+            <div class="cta-glow"></div>
+            <div class="cta-content">
+                <h2>Start Protecting Your <span class="gradient-text">Digital Identity</span></h2>
+                <p>Check your passwords and emails for breaches now. It's free, fast, and completely private.</p>
+                <div class="cta-actions">
+                    <a href="/password-check" class="btn btn-primary btn-lg btn-glow">
+                        <i class="fas fa-shield-alt"></i> Get Started Now
+                    </a>
+                    <a href="/about" class="btn btn-outline btn-lg">
+                        <i class="fas fa-info-circle"></i> Learn More
+                    </a>
+                </div>
+            </div>
+            <div class="cta-visual">
+                <i class="fas fa-lock"></i>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Counter animation
+function animateCounters() {
+    const counters = document.querySelectorAll('.counter');
+    counters.forEach(counter => {
+        const target = parseInt(counter.dataset.target);
+        const duration = 2000;
+        const step = target / (duration / 16);
+        let current = 0;
+        
+        const updateCounter = () => {
+            current += step;
+            if (current < target) {
+                counter.textContent = Math.floor(current);
+                requestAnimationFrame(updateCounter);
+            } else {
+                counter.textContent = target;
+            }
+        };
+        updateCounter();
+    });
+}
+
+// Trigger counter animation when stats-bar is visible
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            animateCounters();
+            observer.disconnect();
+        }
+    });
+}, { threshold: 0.5 });
+
+const statsBar = document.querySelector('.stats-bar');
+if (statsBar) observer.observe(statsBar);
+
+// Quick password check
+async function quickCheck() {
+    const password = document.getElementById('quickPassword').value;
+    const resultDiv = document.getElementById('quickResult');
+    
+    if (!password) {
+        showToast('Please enter a password', 'warning');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/api/check-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+        
+        const data = await response.json();
+        hideLoading();
+        
+        if (data.error) {
+            showToast(data.error, 'error');
+            return;
+        }
+        
+        resultDiv.classList.remove('hidden');
+        resultDiv.innerHTML = generateQuickResultHTML(data);
+        
+    } catch (error) {
+        hideLoading();
+        showToast('An error occurred. Please try again.', 'error');
+    }
+}
+
+function generateQuickResultHTML(data) {
+    const riskClass = data.risk_level.toLowerCase();
+    const statusIcon = data.is_compromised ? 'times-circle' : 'check-circle';
+    const statusText = data.is_compromised ? 'COMPROMISED' : 'SECURE';
+    
+    return `
+        <div class="result-card ${riskClass}">
+            <div class="result-header">
+                <div class="result-status ${data.is_compromised ? 'compromised' : 'safe'}">
+                    <i class="fas fa-${statusIcon}"></i>
+                    <span>${statusText}</span>
+                </div>
+                <div class="result-risk-badge risk-${riskClass}">
+                    ${data.risk_level}
+                </div>
+            </div>
+            <div class="result-stats">
+                <div class="result-stat">
+                    <span class="stat-value">${data.breach_count.toLocaleString()}</span>
+                    <span class="stat-label">Breaches Found</span>
+                </div>
+                <div class="result-stat">
+                    <span class="stat-value">${data.risk_score}/100</span>
+                    <span class="stat-label">Risk Score</span>
+                </div>
+            </div>
+            <div class="result-actions">
+                <a href="/password-check" class="btn btn-sm btn-primary">
+                    <i class="fas fa-search-plus"></i> Detailed Analysis
+                </a>
+                <a href="/generator" class="btn btn-sm btn-secondary">
+                    <i class="fas fa-lock"></i> Generate New Password
+                </a>
+            </div>
+        </div>
+    `;
+}
+
+// Allow Enter key to submit
+document.getElementById('quickPassword').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        quickCheck();
+    }
+});
+
+// Create floating particles
+function createParticles() {
+    const container = document.getElementById('cyberParticles');
+    if (!container) return;
+    
+    for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'cyber-particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 20 + 's';
+        particle.style.animationDuration = (15 + Math.random() * 20) + 's';
+        container.appendChild(particle);
+    }
+}
+
+createParticles();
+</script>
+{% endblock %}

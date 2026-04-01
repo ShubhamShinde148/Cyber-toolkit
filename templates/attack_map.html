@@ -1,0 +1,124 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Live Attack Map - Dark Web Monitor{% endblock %}
+
+{% block extra_css %}
+<style>
+    .maintenance-page {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .maintenance-box {
+        max-width: 600px;
+        background: rgba(11, 15, 25, 0.95);
+        border: 1px solid rgba(0, 255, 136, 0.15);
+        border-radius: 20px;
+        padding: 3.5rem 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .maintenance-box::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        animation: scanline 3s ease-in-out infinite;
+    }
+
+    @keyframes scanline {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 1; }
+    }
+
+    .maintenance-icon {
+        font-size: 4rem;
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+        text-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+        animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+        0%, 100% { text-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
+        50% { text-shadow: 0 0 40px rgba(0, 255, 136, 0.6), 0 0 80px rgba(0, 255, 136, 0.2); }
+    }
+
+    .maintenance-title {
+        font-family: 'Orbitron', monospace;
+        font-size: 1.8rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+    }
+
+    .maintenance-subtitle {
+        font-family: 'JetBrains Mono', monospace;
+        color: var(--text-secondary);
+        font-size: 1rem;
+        line-height: 1.8;
+        margin-bottom: 2rem;
+    }
+
+    .maintenance-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255, 214, 10, 0.1);
+        border: 1px solid rgba(255, 214, 10, 0.3);
+        border-radius: 8px;
+        padding: 0.6rem 1.2rem;
+        color: #ffd60a;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.85rem;
+    }
+
+    .maintenance-status .dot {
+        width: 8px;
+        height: 8px;
+        background: #ffd60a;
+        border-radius: 50%;
+        animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+
+    .maintenance-feature {
+        font-family: 'Orbitron', monospace;
+        font-size: 0.85rem;
+        color: var(--primary);
+        margin-top: 2rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="maintenance-page">
+    <div class="maintenance-box">
+        <div class="maintenance-icon">
+            <i class="fas fa-globe-americas"></i>
+        </div>
+        <h1 class="maintenance-title">Under Maintenance</h1>
+        <p class="maintenance-subtitle">
+            The Live Global Cyber Attack Map is currently undergoing scheduled maintenance to upgrade threat intelligence feeds and improve real-time visualization.
+        </p>
+        <div class="maintenance-status">
+            <span class="dot"></span>
+            Maintenance in progress
+        </div>
+        <p class="maintenance-feature">Live Attack Map</p>
+    </div>
+</div>
+{% endblock %}

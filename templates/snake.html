@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+
+{% block title %}Snake - Dark Web Monitor{% endblock %}
+
+{% block extra_css %}
+<style>
+    .snake-wrap {
+        max-width: 760px;
+        margin: 0 auto;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--glow-soft);
+    }
+
+    .snake-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .snake-title h1 {
+        font-size: 1.6rem;
+        margin-bottom: 6px;
+    }
+
+    .snake-title p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .snake-stats {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        font-family: 'JetBrains Mono', monospace;
+        color: var(--text-secondary);
+    }
+
+    .snake-stats strong {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .snake-grid {
+        --grid-size: 20;
+        display: grid;
+        grid-template-columns: repeat(var(--grid-size), 1fr);
+        gap: 4px;
+        width: min(90vw, 520px);
+        aspect-ratio: 1 / 1;
+        padding: 10px;
+        margin: 0 auto 18px;
+        background: rgba(2, 6, 10, 0.85);
+        border: 1px solid rgba(0, 255, 136, 0.2);
+        border-radius: 12px;
+    }
+
+    .snake-cell {
+        background: rgba(8, 17, 26, 0.6);
+        border-radius: 6px;
+    }
+
+    .snake-cell.snake {
+        background: rgba(0, 255, 136, 0.45);
+    }
+
+    .snake-cell.head {
+        background: rgba(0, 255, 136, 0.85);
+        box-shadow: 0 0 8px rgba(0, 255, 136, 0.45);
+    }
+
+    .snake-cell.food {
+        background: rgba(255, 62, 62, 0.85);
+        box-shadow: 0 0 8px rgba(255, 62, 62, 0.4);
+    }
+
+    .snake-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 12px;
+    }
+
+    .snake-controls .btn-primary,
+    .snake-controls .btn-outline {
+        min-width: 110px;
+    }
+
+    .snake-pad {
+        display: grid;
+        grid-template-columns: repeat(3, 48px);
+        grid-template-rows: repeat(3, 48px);
+        gap: 6px;
+        justify-content: center;
+    }
+
+    .snake-pad button {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        border: 1px solid rgba(0, 255, 136, 0.25);
+        background: rgba(8, 17, 26, 0.75);
+        color: var(--text-primary);
+    }
+
+    .snake-pad button:active {
+        transform: translateY(1px);
+    }
+
+    .snake-instructions {
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 720px) {
+        .snake-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .snake-controls {
+            flex-direction: column;
+        }
+
+        .snake-controls .btn-primary,
+        .snake-controls .btn-outline {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <div class="snake-wrap">
+            <div class="snake-header">
+                <div class="snake-title">
+                    <h1><i class="fas fa-gamepad"></i> Snake</h1>
+                    <p>Classic grid loop. Eat to grow. Don’t hit the walls or yourself.</p>
+                </div>
+                <div class="snake-stats">
+                    <div>Score: <strong id="snakeScore">0</strong></div>
+                    <div>Status: <strong id="snakeStatus">Running</strong></div>
+                </div>
+            </div>
+
+            <div id="snakeGrid" class="snake-grid" role="application" aria-label="Snake game grid"></div>
+
+            <div class="snake-controls">
+                <button class="btn-primary" id="snakeRestartBtn"><i class="fas fa-rotate"></i> Restart</button>
+                <button class="btn-outline" id="snakePauseBtn"><i class="fas fa-pause"></i> Pause</button>
+            </div>
+
+            <div class="snake-pad" aria-label="On-screen controls">
+                <span></span>
+                <button data-dir="up" aria-label="Move up"><i class="fas fa-arrow-up"></i></button>
+                <span></span>
+                <button data-dir="left" aria-label="Move left"><i class="fas fa-arrow-left"></i></button>
+                <span></span>
+                <button data-dir="right" aria-label="Move right"><i class="fas fa-arrow-right"></i></button>
+                <span></span>
+                <button data-dir="down" aria-label="Move down"><i class="fas fa-arrow-down"></i></button>
+                <span></span>
+            </div>
+
+            <p class="snake-instructions">
+                Controls: Arrow keys or WASD. Space/P to pause. Restart to play again.
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+    const GRID_SIZE = 20;
+    const TICK_MS = 140;
+    const DIRS = {
+        up: { x: 0, y: -1 },
+        down: { x: 0, y: 1 },
+        left: { x: -1, y: 0 },
+        right: { x: 1, y: 0 }
+    };
+
+    const gridEl = document.getElementById('snakeGrid');
+    const scoreEl = document.getElementById('snakeScore');
+    const statusEl = document.getElementById('snakeStatus');
+    const restartBtn = document.getElementById('snakeRestartBtn');
+    const pauseBtn = document.getElementById('snakePauseBtn');
+    const padButtons = document.querySelectorAll('.snake-pad button[data-dir]');
+
+    gridEl.style.setProperty('--grid-size', GRID_SIZE);
+    const cells = [];
+    for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'snake-cell';
+        gridEl.appendChild(cell);
+        cells.push(cell);
+    }
+
+    const state = {
+        snake: [],
+        direction: DIRS.right,
+        nextDirection: DIRS.right,
+        food: null,
+        score: 0,
+        gameOver: false,
+        paused: false
+    };
+
+    function index(x, y) {
+        return y * GRID_SIZE + x;
+    }
+
+    function isOpposite(a, b) {
+        return a.x === -b.x && a.y === -b.y;
+    }
+
+    function setDirection(dir) {
+        if (!dir) return;
+        if (state.snake.length > 1 && isOpposite(state.direction, dir)) {
+            return;
+        }
+        state.nextDirection = dir;
+    }
+
+    function placeFood() {
+        const occupied = new Set(state.snake.map(p => `${p.x},${p.y}`));
+        if (occupied.size >= GRID_SIZE * GRID_SIZE) {
+            state.food = null;
+            state.gameOver = true;
+            statusEl.textContent = 'You Win';
+            return;
+        }
+        while (true) {
+            const candidate = {
+                x: Math.floor(Math.random() * GRID_SIZE),
+                y: Math.floor(Math.random() * GRID_SIZE)
+            };
+            if (!occupied.has(`${candidate.x},${candidate.y}`)) {
+                state.food = candidate;
+                return;
+            }
+        }
+    }
+
+    function resetGame() {
+        const mid = Math.floor(GRID_SIZE / 2);
+        state.snake = [
+            { x: mid, y: mid },
+            { x: mid - 1, y: mid },
+            { x: mid - 2, y: mid }
+        ];
+        state.direction = DIRS.right;
+        state.nextDirection = DIRS.right;
+        state.score = 0;
+        state.gameOver = false;
+        state.paused = false;
+        statusEl.textContent = 'Running';
+        placeFood();
+        render();
+    }
+
+    function tick() {
+        if (state.gameOver || state.paused) {
+            return;
+        }
+
+        state.direction = state.nextDirection;
+        const head = state.snake[0];
+        const newHead = { x: head.x + state.direction.x, y: head.y + state.direction.y };
+
+        if (
+            newHead.x < 0 ||
+            newHead.y < 0 ||
+            newHead.x >= GRID_SIZE ||
+            newHead.y >= GRID_SIZE
+        ) {
+            state.gameOver = true;
+            statusEl.textContent = 'Game Over';
+            return;
+        }
+
+        const grow = state.food && newHead.x === state.food.x && newHead.y === state.food.y;
+        const body = grow ? state.snake : state.snake.slice(0, -1);
+        if (body.some(p => p.x === newHead.x && p.y === newHead.y)) {
+            state.gameOver = true;
+            statusEl.textContent = 'Game Over';
+            return;
+        }
+
+        state.snake.unshift(newHead);
+        if (grow) {
+            state.score += 1;
+            placeFood();
+        } else {
+            state.snake.pop();
+        }
+
+        render();
+    }
+
+    function render() {
+        cells.forEach(cell => {
+            cell.className = 'snake-cell';
+        });
+
+        state.snake.forEach((segment, idx) => {
+            const cell = cells[index(segment.x, segment.y)];
+            if (!cell) return;
+            cell.classList.add('snake');
+            if (idx === 0) {
+                cell.classList.add('head');
+            }
+        });
+
+        if (state.food) {
+            const foodCell = cells[index(state.food.x, state.food.y)];
+            if (foodCell) {
+                foodCell.classList.add('food');
+            }
+        }
+
+        scoreEl.textContent = state.score;
+        if (!state.gameOver) {
+            statusEl.textContent = state.paused ? 'Paused' : 'Running';
+        }
+    }
+
+    document.addEventListener('keydown', (event) => {
+        const key = event.key.toLowerCase();
+        if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd', ' ', 'p'].includes(key)) {
+            event.preventDefault();
+        }
+
+        if (key === 'arrowup' || key === 'w') setDirection(DIRS.up);
+        if (key === 'arrowdown' || key === 's') setDirection(DIRS.down);
+        if (key === 'arrowleft' || key === 'a') setDirection(DIRS.left);
+        if (key === 'arrowright' || key === 'd') setDirection(DIRS.right);
+
+        if (key === ' ' || key === 'p') {
+            state.paused = !state.paused;
+            render();
+        }
+    });
+
+    padButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const dir = DIRS[btn.dataset.dir];
+            setDirection(dir);
+        });
+    });
+
+    restartBtn.addEventListener('click', resetGame);
+    pauseBtn.addEventListener('click', () => {
+        state.paused = !state.paused;
+        render();
+    });
+
+    resetGame();
+    setInterval(tick, TICK_MS);
+})();
+</script>
+{% endblock %}

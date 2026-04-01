@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Mission: {{ challenge.title }} - Dark Web Monitor CTF{% endblock %}
+
+{% block content %}
+<div class="ctf-mission-wrapper py-5">
+    <div class="container">
+        <!-- Breadcrumbs & Status -->
+        <div class="d-flex justify-content-between align-items-center mb-4 animate-fade-in">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent p-0 mb-0">
+                    <li class="breadcrumb-item"><a href="{{ url_for('ctf.dashboard') }}" class="text-soc">Mission Control</a></li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">{{ challenge.title }}</li>
+                </ol>
+            </nav>
+            <div id="mission-status-badge">
+                {% if is_solved %}
+                    <span class="soc-status soc-status-active">
+                        <i class="fas fa-check-circle"></i> MISSION SECURED
+                    </span>
+                {% else %}
+                    <span class="soc-status soc-status-locked">
+                        <i class="fas fa-satellite-dish animate-pulse"></i> INFILTRATING...
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="soc-header mb-5">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-soc fw-bold small text-uppercase mb-1 d-block">{{ challenge.type }}</span>
+                    <h2 class="mb-0">{{ challenge.title }}</h2>
+                </div>
+                <div class="text-end">
+                    <span class="text-muted small d-block">CLASSIFICATION</span>
+                    <span class="fw-bold {% if challenge.difficulty == 'Beginner' %}text-soc{% elif challenge.difficulty == 'Intermediate' %}text-warning{% else %}text-danger{% endif %}">{{ challenge.difficulty|upper }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Intel & Mission Brief -->
+            <div class="col-lg-8">
+                <div class="soc-card animate-fade-in-up">
+                    <div class="intel-section mb-5">
+                        <h5 class="text-soc h6 mb-3 fw-bold"><i class="fas fa-terminal me-2"></i> FIELD INTELLIGENCE</h5>
+                        <div class="mission-text-container p-4 bg-dark-soft rounded border-left-soc shadow-inner">
+                            <p class="text-light-muted mb-0 font-monospace">{{ challenge.scenario }}</p>
+                        </div>
+                    </div>
+
+                    <div class="intel-section mb-5">
+                        <h5 class="text-soc h6 mb-3 fw-bold"><i class="fas fa-crosshairs me-2"></i> TACTICAL OBJECTIVE</h5>
+                        <p class="text-light-muted lead-sm">{{ challenge.objective }}</p>
+                    </div>
+
+                    {% if challenge.asset_path %}
+                    <div class="intel-section mb-5">
+                        <div class="asset-vault p-4 rounded border-dashed-soc d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="asset-icon-box me-4">
+                                    <i class="fas fa-folder-open fa-2x text-soc"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1 text-white fw-bold">ENCRYPTED ASSET PACKAGE</h6>
+                                    <p class="text-muted small mb-0">Contains necessary forensic artifacts</p>
+                                </div>
+                            </div>
+                            <a href="{{ challenge.asset_path }}" class="soc-btn-primary py-2 px-4" download>
+                                <i class="fas fa-download"></i> EXTRACT
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Submission Area -->
+                    <div class="submission-vault mt-5 pt-4 border-top-faded">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="text-white h6 mb-0 fw-bold">FLAG VERIFICATION</h5>
+                            <span class="text-muted x-small">FORMAT: DWM{...}</span>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col">
+                                <input type="text" id="flag-input" class="soc-input" 
+                                       placeholder="Enter Flag Here..." {% if is_solved %}disabled value="ACCESS GRANTED - MISSION COMPLETE"{% endif %}>
+                            </div>
+                            <div class="col-auto">
+                                <button class="soc-btn-primary" id="submit-btn" {% if is_solved %}disabled{% endif %}>
+                                    <i class="fas fa-key"></i> VALIDATE
+                                </button>
+                            </div>
+                        </div>
+                        <div id="submission-feedback" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Rewards & Clues -->
+            <div class="col-lg-4">
+                <div class="d-flex flex-column gap-4">
+                    <!-- Point Reward Card -->
+                    <div class="soc-card animate-fade-in-up" style="animation-delay: 0.1s;">
+                        <h6 class="text-muted small fw-bold mb-3 text-uppercase tracking-wider">Asset Value</h6>
+                        <div class="reward-display d-flex align-items-center gap-4">
+                            <div class="reward-circle shadow-soc">
+                                <i class="fas fa-database text-soc"></i>
+                            </div>
+                            <div>
+                                <h3 class="fw-black text-white mb-0 h2">{{ challenge.points }}<span class="h6 text-soc ms-1">XP</span></h3>
+                                <p class="text-muted small mb-0">Operational Credit</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hints Section -->
+                    <div class="soc-card animate-fade-in-up" style="animation-delay: 0.2s;">
+                        <h5 class="text-white h6 mb-4 fw-bold"><i class="fas fa-lightbulb text-soc me-2"></i> INTEL CLUES</h5>
+                        <div class="hint-stack d-flex flex-column gap-3">
+                            {% for hint in challenge.hints %}
+                            <div class="hint-item p-3 rounded bg-dark-soft border-faded">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-soc x-small fw-bold">CLUE #{{ loop.index }}</span>
+                                    <i class="fas fa-lock-open x-small text-muted"></i>
+                                </div>
+                                <p class="text-light-muted mb-0 small">{{ hint }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Solution Revealed (Only if solved) -->
+                    <div id="solution-reveal" class="soc-card border-soc animate-fade-in {% if is_solved %}d-block{% else %}d-none{% endif %}">
+                        <h5 class="text-soc h6 mb-3 fw-bold"><i class="fas fa-file-invoice me-2"></i> POST-MISSION REPORT</h5>
+                        <div class="p-3 bg-soc-transparent rounded">
+                            <p class="text-soc small mb-0">{{ challenge.solution }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Local Context Overrides & Refinements */
+.bg-dark-soft { background: rgba(15, 23, 42, 0.4); }
+.border-left-soc { border-left: 3px solid var(--soc-primary); }
+.border-dashed-soc { border: 2px dashed rgba(0, 255, 136, 0.3); }
+.border-top-faded { border-top: 1px solid rgba(255, 255, 255, 0.05); }
+.border-faded { border: 1px solid rgba(255, 255, 255, 0.05); }
+.text-soc { color: var(--soc-primary); }
+.bg-soc-transparent { background: rgba(0, 255, 136, 0.05); }
+.text-light-muted { color: #cbd5e1; }
+.x-small { font-size: 0.7rem; }
+.tracking-wider { letter-spacing: 0.1em; }
+
+.reward-circle {
+    width: 60px;
+    height: 60px;
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+}
+
+.shadow-soc { box-shadow: 0 0 20px rgba(0, 255, 136, 0.15); }
+.shadow-inner { box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3); }
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.font-monospace { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+.fw-black { font-weight: 900; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const submitBtn = document.getElementById('submit-btn');
+    const flagInput = document.getElementById('flag-input');
+    const feedback = document.getElementById('submission-feedback');
+    const solutionBox = document.getElementById('solution-reveal');
+    const statusBadge = document.getElementById('mission-status-badge');
+
+    submitBtn.addEventListener('click', async () => {
+        const flag = flagInput.value.trim();
+        if (!flag) return;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> VERIFYING...';
+
+        try {
+            const response = await fetch('{{ url_for("ctf.validate_flag") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ challenge_id: "{{ challenge.id }}", flag: flag })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                feedback.innerHTML = `<div class="alert bg-soc-transparent border-soc text-soc animate-fade-in">
+                    <i class="fas fa-shield-check me-2"></i> ${data.message} <strong class="ms-2">+${data.points_awarded} XP</strong>
+                </div>`;
+                
+                flagInput.disabled = true;
+                flagInput.value = "ACCESS GRANTED - MISSION COMPLETE";
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> SECURED';
+                
+                solutionBox.classList.remove('d-none');
+                solutionBox.querySelector('p').textContent = data.solution;
+                
+                statusBadge.innerHTML = `<span class="soc-status soc-status-active">
+                    <i class="fas fa-check-circle"></i> MISSION SECURED
+                </span>`;
+                
+                showToast("Mission Secured! Operational credits added.", "success");
+            } else {
+                feedback.innerHTML = `<div class="alert bg-danger-transparent border-danger text-danger animate-shake">
+                    <i class="fas fa-shield-exclamation me-2"></i> ${data.message}
+                </div>`;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-key"></i> VALIDATE';
+                showToast(data.message, "error");
+            }
+        } catch (error) {
+            console.error(error);
+            showToast("System Link Failure. Re-trying...", "error");
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-key"></i> VALIDATE';
+        }
+    });
+
+    flagInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') submitBtn.click();
+    });
+});
+</script>
+{% endblock %}

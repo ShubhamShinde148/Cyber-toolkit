@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Learning Mode - Dark Web Monitor{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/learning_mode.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="hero hero-sm">
+    <div class="hero-content">
+        <h1><i class="fas fa-book-open"></i> Cybersecurity Learning Mode</h1>
+        <p>Master cybersecurity from beginner to advanced with AI-powered learning paths</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+
+        <!-- Progress Overview -->
+        <div class="lm-progress-bar-wrap card">
+            <div class="lm-progress-header">
+                <div>
+                    <h2><i class="fas fa-chart-line"></i> Learning Progress</h2>
+                    <p class="lm-progress-subtitle">Completed <span id="completedCount">0</span> of <span id="totalCount">18</span> topics</p>
+                </div>
+                <span class="lm-level-badge" id="currentLevelBadge">Beginner</span>
+            </div>
+            <div class="lm-progress-track">
+                <div class="lm-progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
+        </div>
+
+        <!-- Daily Topic -->
+        <div class="lm-daily card" id="dailyTopicCard">
+            <div class="lm-daily-header">
+                <h3><i class="fas fa-calendar-day"></i> Topic of the Day</h3>
+                <button class="btn btn-sm btn-outline" id="refreshDailyBtn" title="Get new daily topic"><i class="fas fa-sync-alt"></i></button>
+            </div>
+            <div class="lm-daily-body" id="dailyTopicBody">
+                <div class="lm-loader"><div class="spinner"></div> Loading daily topic...</div>
+            </div>
+        </div>
+
+        <!-- Roadmap Levels -->
+        {% for level_key, level in roadmap.items() %}
+        <div class="lm-level-section" data-level="{{ level_key }}">
+            <div class="lm-level-title">
+                <i class="fas {{ level.icon }}" style="color:{{ level.color }}"></i>
+                <h2>{{ level.label }} Roadmap</h2>
+            </div>
+
+            <div class="lm-roadmap-track">
+                {% for topic in level.topics %}
+                <div class="lm-topic-card" data-topic-id="{{ topic.id }}" data-level="{{ level_key }}" data-title="{{ topic.title }}">
+                    <div class="lm-topic-status">
+                        <span class="lm-status-dot"></span>
+                    </div>
+                    <div class="lm-topic-info">
+                        <h4>{{ topic.title }}</h4>
+                        <div class="lm-topic-meta">
+                            <span class="lm-badge lm-badge-{{ level_key }}">{{ level.label }}</span>
+                            <span class="lm-time"><i class="fas fa-clock"></i> {{ topic.time }}</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-cyber lm-start-btn" data-topic-id="{{ topic.id }}" data-level="{{ level_key }}" data-title="{{ topic.title }}">
+                        Start Learning
+                    </button>
+                </div>
+                {% if not loop.last %}
+                <div class="lm-connector"><i class="fas fa-arrow-right"></i></div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+    </div><!-- /.container -->
+</section>
+
+<!-- Topic Detail Modal -->
+<div class="lm-modal-overlay" id="topicModal">
+    <div class="lm-modal">
+        <div class="lm-modal-header">
+            <h2 id="modalTopicTitle">Loading…</h2>
+            <button class="lm-modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="lm-modal-body" id="modalBody">
+            <div class="lm-loader"><div class="spinner"></div> Generating AI content…</div>
+        </div>
+        <div class="lm-modal-footer">
+            <button class="btn btn-sm btn-outline" id="markCompleteBtn"><i class="fas fa-check"></i> Mark Completed</button>
+        </div>
+    </div>
+</div>
+
+<!-- AI Question Modal -->
+<div class="lm-modal-overlay" id="aiAskModal">
+    <div class="lm-modal lm-modal-sm">
+        <div class="lm-modal-header">
+            <h2><i class="fas fa-robot"></i> Ask AI about this topic</h2>
+            <button class="lm-modal-close" id="aiAskClose"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="lm-modal-body">
+            <div class="lm-ai-form">
+                <input type="text" id="aiQuestionInput" class="cyber-input" placeholder="Type your question…">
+                <button class="btn btn-cyber" id="aiAskSubmit"><i class="fas fa-paper-plane"></i> Ask</button>
+            </div>
+            <div class="lm-ai-answer" id="aiAnswerBox"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/learning_mode.js') }}"></script>
+{% endblock %}

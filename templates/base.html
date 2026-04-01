@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dark Web Leak Monitor{% endblock %}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔒</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Animated Cyber Background -->
+    <div class="cyber-background">
+        <!-- Canvas will be injected by cyber-particles.js -->
+        <div class="cyber-grid"></div>
+        <div class="cyber-particles" id="cyberParticles"></div>
+        <div class="cyber-scanline"></div>
+        <div class="cyber-vignette"></div>
+        <div class="cyber-hex-pattern"></div>
+    </div>
+
+    <!-- Navigation -->
+    {% include "navbar.html" %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <section class="flash-stack" aria-live="polite">
+            <div class="container">
+                {% for category, message in messages %}
+                <div class="flash-banner flash-{{ category }}">
+                    <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'error' %}fa-circle-xmark{% elif category == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content with consistent spacing -->
+    <main class="page-container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    {% include "footer.html" %}
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>Processing...</p>
+    </div>
+
+    <!-- Exit Feedback Modal -->
+    {% include "exit_feedback.html" %}
+
+    <!-- Chatbot Widget -->
+    {% include "chatbot.html" %}
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/cyber-particles.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/exit-feedback.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+    <script>
+        document.addEventListener("contextmenu", function(event) {
+            event.preventDefault();
+            alert("⚠️ Right-click is disabled for security reasons.");
+        });
+    </script>
+</body>
+</html>

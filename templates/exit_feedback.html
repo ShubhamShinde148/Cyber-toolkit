@@ -1,0 +1,99 @@
+<!-- Exit Feedback Modal -->
+<div class="exit-feedback-overlay hidden" id="exitFeedbackOverlay">
+    <div class="exit-feedback-modal" id="exitFeedbackModal">
+        <!-- Neon Border Glow -->
+        <div class="feedback-glow-border"></div>
+        
+        <!-- Modal Header -->
+        <div class="feedback-modal-header">
+            <div class="feedback-icon">
+                <i class="fas fa-comment-dots"></i>
+                <div class="feedback-icon-glow"></div>
+            </div>
+            <h3 class="feedback-title">Before You Go...</h3>
+            <p class="feedback-subtitle">Could you tell us how your experience was?</p>
+        </div>
+        
+        <!-- Feedback Form -->
+        <form class="feedback-form" id="exitFeedbackForm">
+            <!-- Star Rating -->
+            <div class="rating-section">
+                <label class="rating-label">Rate your experience</label>
+                <div class="star-rating" id="starRating">
+                    <input type="radio" id="star5" name="rating" value="5">
+                    <label for="star5" class="star-label" data-value="5">
+                        <i class="fas fa-star"></i>
+                    </label>
+                    <input type="radio" id="star4" name="rating" value="4">
+                    <label for="star4" class="star-label" data-value="4">
+                        <i class="fas fa-star"></i>
+                    </label>
+                    <input type="radio" id="star3" name="rating" value="3">
+                    <label for="star3" class="star-label" data-value="3">
+                        <i class="fas fa-star"></i>
+                    </label>
+                    <input type="radio" id="star2" name="rating" value="2">
+                    <label for="star2" class="star-label" data-value="2">
+                        <i class="fas fa-star"></i>
+                    </label>
+                    <input type="radio" id="star1" name="rating" value="1">
+                    <label for="star1" class="star-label" data-value="1">
+                        <i class="fas fa-star"></i>
+                    </label>
+                </div>
+                <div class="rating-text" id="ratingText">Select a rating</div>
+            </div>
+            
+            <!-- Feedback Textarea -->
+            <div class="feedback-textarea-section">
+                <label for="feedbackText" class="feedback-text-label">
+                    <i class="fas fa-pencil-alt"></i> Your feedback (optional)
+                </label>
+                <textarea 
+                    id="feedbackText" 
+                    name="feedback" 
+                    class="feedback-textarea" 
+                    placeholder="What did you like or what can we improve?"
+                    rows="4"
+                    maxlength="500"
+                ></textarea>
+                <div class="char-counter"><span id="charCount">0</span>/500</div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="feedback-actions">
+                <button type="submit" class="btn btn-primary feedback-submit-btn" id="submitFeedback">
+                    <i class="fas fa-paper-plane"></i>
+                    Submit Feedback
+                </button>
+                <button type="button" class="btn btn-outline feedback-skip-btn" id="skipFeedback">
+                    <i class="fas fa-times"></i>
+                    Skip
+                </button>
+            </div>
+        </form>
+        
+        <!-- Thank You State -->
+        <div class="feedback-thankyou hidden" id="feedbackThankyou">
+            <div class="thankyou-icon">
+                <i class="fas fa-check-circle"></i>
+                <div class="thankyou-pulse"></div>
+            </div>
+            <h3 class="thankyou-title">Thank You!</h3>
+            <p class="thankyou-message">Your feedback helps us improve Dark Web Leak Monitor.</p>
+            <div class="thankyou-stars" id="thankyouStars"></div>
+        </div>
+        
+        <!-- Close Button -->
+        <button class="feedback-close-btn" id="closeFeedback" aria-label="Close feedback">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <!-- Decorative Elements -->
+        <div class="feedback-circuit-lines">
+            <div class="circuit-line circuit-line-1"></div>
+            <div class="circuit-line circuit-line-2"></div>
+            <div class="circuit-line circuit-line-3"></div>
+        </div>
+    </div>
+</div>

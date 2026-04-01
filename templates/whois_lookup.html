@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}WHOIS Lookup - Dark Web Monitor{% endblock %}
+
+{% block extra_css %}
+<style>
+    .whois-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: var(--font-mono);
+    }
+
+    .whois-table th,
+    .whois-table td {
+        padding: 0.9rem 1rem;
+        border-bottom: 1px solid var(--card-border);
+        vertical-align: top;
+    }
+
+    .whois-table th {
+        width: 220px;
+        text-align: left;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.85rem;
+    }
+
+    .whois-table td {
+        color: var(--text-primary);
+        word-break: break-word;
+    }
+
+    .whois-list {
+        list-style: none;
+        display: grid;
+        gap: 0.5rem;
+        padding: 0;
+        margin: 0;
+    }
+
+    .whois-list li {
+        padding: 0.55rem 0.75rem;
+        border: 1px solid rgba(0, 255, 136, 0.12);
+        background: rgba(0, 255, 136, 0.05);
+        border-radius: var(--border-radius);
+    }
+
+    .whois-domain-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.45rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(0, 212, 255, 0.1);
+        border: 1px solid rgba(0, 212, 255, 0.2);
+        color: var(--accent-color);
+        font-family: var(--font-mono);
+        margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .whois-table,
+        .whois-table tbody,
+        .whois-table tr,
+        .whois-table th,
+        .whois-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .whois-table tr {
+            padding: 0.75rem 0;
+        }
+
+        .whois-table th {
+            padding-bottom: 0.35rem;
+            border-bottom: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero hero-sm">
+    <div class="hero-content">
+        <h1><i class="fas fa-address-card"></i> WHOIS Lookup</h1>
+        <p>Query public registration metadata for a domain name</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-search"></i> Lookup Domain</h2>
+            </div>
+            <div class="card-body">
+                <form id="whoisForm">
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fas fa-globe"></i></span>
+                        <input type="text" id="domainInput" placeholder="example.com" required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-binoculars"></i> Lookup
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="resultsSection" class="hidden mt-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-table"></i> WHOIS Results</h2>
+                </div>
+                <div class="card-body">
+                    <div id="domainBadge" class="whois-domain-badge"></div>
+                    <table class="whois-table">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Registrar</th>
+                                <td id="registrarValue">-</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Creation Date</th>
+                                <td id="creationDateValue">-</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Expiration Date</th>
+                                <td id="expirationDateValue">-</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Name Servers</th>
+                                <td>
+                                    <ul id="nameServersValue" class="whois-list"></ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('whoisForm');
+    const resultsSection = document.getElementById('resultsSection');
+
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const domain = document.getElementById('domainInput').value.trim();
+        if (!domain) {
+            return;
+        }
+
+        showLoading('Retrieving WHOIS data...');
+
+        try {
+            const response = await fetch('/api/whois-lookup', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ domain: domain })
+            });
+
+            const data = await response.json();
+            hideLoading();
+
+            if (response.ok && data.success) {
+                displayResults(data);
+                return;
+            }
+
+            showToast(data.error || 'WHOIS lookup failed', 'error');
+            resultsSection.classList.add('hidden');
+        } catch (error) {
+            hideLoading();
+            resultsSection.classList.add('hidden');
+            showToast('Connection error', 'error');
+        }
+    });
+
+    function displayResults(data) {
+        const whois = data.whois || {};
+        const nameServers = whois.name_servers || [];
+
+        document.getElementById('domainBadge').innerHTML = '<i class="fas fa-globe"></i><span>' + escapeHtml(data.domain || '-') + '</span>';
+        document.getElementById('registrarValue').textContent = whois.registrar || 'Not available';
+        document.getElementById('creationDateValue').textContent = whois.creation_date || 'Not available';
+        document.getElementById('expirationDateValue').textContent = whois.expiration_date || 'Not available';
+
+        const nameServersList = document.getElementById('nameServersValue');
+        nameServersList.innerHTML = nameServers.map(function(server) {
+            return '<li>' + escapeHtml(server) + '</li>';
+        }).join('');
+
+        resultsSection.classList.remove('hidden');
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+});
+</script>
+{% endblock %}

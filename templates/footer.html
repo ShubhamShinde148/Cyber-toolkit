@@ -1,0 +1,78 @@
+<!-- Footer - Consistent across all pages -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <!-- Brand & Developer Section -->
+            <div class="footer-section footer-brand-section">
+                <div class="footer-brand">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Dark Web Leak Monitor</span>
+                </div>
+                <p class="footer-description">
+                    Dark Web Leak Monitor is an OSINT and breach intelligence toolkit designed to detect leaked passwords, emails, and digital exposure.
+                </p>
+                <div class="footer-developer">
+                    <span class="developer-label"><i class="fas fa-code"></i> Developed by</span>
+                    <span class="developer-name">Shubham Shinde</span>
+                    <span class="developer-profession"><i class="fas fa-user-graduate"></i> Cybersecurity Student & Ethical Hacking Enthusiast</span>
+                </div>
+            </div>
+
+            <!-- Quick Links Section -->
+            <div class="footer-section">
+                <h4 class="footer-heading"><i class="fas fa-link"></i> Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('password_check_page') }}"><i class="fas fa-key"></i> Password Check</a></li>
+                    <li><a href="{{ url_for('email_check_page') }}"><i class="fas fa-envelope"></i> Email Check</a></li>
+                    <li><a href="{{ url_for('username_osint_page') }}"><i class="fas fa-user-secret"></i> Username OSINT</a></li>
+                    <li><a href="{{ url_for('domain_scanner_page') }}"><i class="fas fa-globe"></i> Domain Scanner</a></li>
+                </ul>
+            </div>
+
+            <!-- Tools Section -->
+            <div class="footer-section">
+                <h4 class="footer-heading"><i class="fas fa-tools"></i> Tools</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('ip_intelligence_page') }}"><i class="fas fa-network-wired"></i> IP Intelligence</a></li>
+                    <li><a href="{{ url_for('risk_assessment_page') }}"><i class="fas fa-chart-line"></i> Risk Assessment</a></li>
+                    <li><a href="{{ url_for('generator_page') }}"><i class="fas fa-random"></i> Generator</a></li>
+                    <li><a href="{{ url_for('quiz_page') }}"><i class="fas fa-graduation-cap"></i> Security Quiz</a></li>
+                    <li><a href="{{ url_for('cyber_tools_page') }}"><i class="fas fa-tools"></i> Cyber Tools</a></li>
+                </ul>
+            </div>
+
+            <!-- Disclaimer Section -->
+            <div class="footer-section">
+                <h4 class="footer-heading"><i class="fas fa-exclamation-triangle"></i> Disclaimer</h4>
+                <p class="footer-disclaimer">
+                    <i class="fas fa-info-circle"></i> This tool is created for educational and cybersecurity research purposes only.
+                </p>
+            </div>
+
+            <!-- Follow Me Section -->
+            <div class="footer-section follow-me-section">
+                <h4 class="footer-heading"><i class="fas fa-hashtag"></i> Follow Me</h4>
+                <p class="follow-me-text">Connect with me on social media</p>
+                <div class="footer-social">
+                    <a href="https://github.com/ShubhamShinde148" target="_blank" rel="noopener noreferrer" class="social-link github" title="GitHub - Shubham Shinde">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/in/shubham-shinde148" target="_blank" rel="noopener noreferrer" class="social-link linkedin" title="LinkedIn - Shubham Shinde">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="#" target="_blank" rel="noopener noreferrer" class="social-link twitter" title="Twitter/X - Coming Soon">
+                        <i class="fab fa-x-twitter"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
+                <span class="copyright">&copy; 2026 Shubham Shinde. All rights reserved.</span>
+                <span class="footer-tagline"><i class="fas fa-terminal"></i> Securing the digital frontier</span>
+            </div>
+        </div>
+    </div>
+</footer>

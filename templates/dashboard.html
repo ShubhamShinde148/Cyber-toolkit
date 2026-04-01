@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Dark Web Leak Monitor{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-gauge-high"></i> Security Dashboard</h1>
+        <p>Welcome back, {{ current_user.username }}. Your protected cybersecurity workspace is ready.</p>
+    </div>
+</section>
+
+<section class="content-section dashboard-section">
+    <div class="container">
+        <div class="card dashboard-summary">
+            <span class="dashboard-user-pill"><i class="fas fa-at"></i> {{ current_user.email }}</span>
+            <h2>Mission Control</h2>
+            <p>Run breach checks, OSINT scans, domain analysis, and utility workflows from one authenticated workspace. Each tool route and its supporting API now requires a valid login session.</p>
+        </div>
+
+        <!-- Scan History -->
+        <div class="card dashboard-history-card">
+            <div class="card-header">
+                <div class="card-icon"><i class="fas fa-history"></i></div>
+                <div>
+                    <h2>Recent Scan History</h2>
+                    <p>Your latest tool scans and analysis results.</p>
+                </div>
+            </div>
+            {% if scans %}
+            <div class="scan-history-table-wrap">
+                <table class="scan-history-table">
+                    <thead>
+                        <tr>
+                            <th>Tool</th>
+                            <th>Input</th>
+                            <th>Result</th>
+                            <th>Risk</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for scan in scans %}
+                        <tr>
+                            <td><span class="scan-tool-badge">{{ scan.tool_used }}</span></td>
+                            <td class="scan-input-cell">{{ scan.input_value }}</td>
+                            <td class="scan-result-cell">{{ scan.result_summary }}</td>
+                            <td>
+                                {% if scan.risk_score is not none %}
+                                <span class="risk-pill {% if scan.risk_score >= 75 %}risk-critical{% elif scan.risk_score >= 50 %}risk-high{% elif scan.risk_score >= 25 %}risk-medium{% else %}risk-low{% endif %}">{{ scan.risk_score }}</span>
+                                {% else %}
+                                <span class="risk-pill risk-none">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="scan-time-cell">{{ scan.timestamp[:16].replace('T', ' ') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <p>No scans yet. Use the tools below to start scanning.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Security Reports -->
+        {% if reports %}
+        <div class="card dashboard-history-card">
+            <div class="card-header">
+                <div class="card-icon"><i class="fas fa-file-shield"></i></div>
+                <div>
+                    <h2>Security Reports</h2>
+                    <p>Generated reports from comprehensive scans and risk assessments.</p>
+                </div>
+            </div>
+            <div class="reports-grid">
+                {% for report in reports %}
+                <div class="report-card">
+                    <div class="report-header">
+                        <span class="report-type-badge">{{ report.report_type }}</span>
+                        <span class="risk-pill {% if report.risk_level == 'Critical' %}risk-critical{% elif report.risk_level == 'High' %}risk-high{% elif report.risk_level == 'Medium' %}risk-medium{% else %}risk-low{% endif %}">{{ report.risk_level }}</span>
+                    </div>
+                    <p class="report-date"><i class="fas fa-calendar-alt"></i> {{ report.created_at[:16].replace('T', ' ') }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Certificate History -->
+        <div class="card dashboard-history-card">
+            <div class="card-header">
+                <div class="card-icon"><i class="fas fa-certificate"></i></div>
+                <div>
+                    <h2>My Certificates</h2>
+                    <p>Certificates earned from the Cybersecurity Awareness Quiz.</p>
+                </div>
+                <a href="{{ url_for('certificate_history_page') }}" class="dashboard-tool-link" style="margin-left:auto;">View All <i class="fas fa-arrow-right"></i></a>
+            </div>
+            {% if certificates %}
+            <div class="cert-dash-grid">
+                {% for c in certificates[:4] %}
+                <a href="/certificate/{{ c.certificate_id }}" class="cert-dash-card" target="_blank">
+                    <div class="cert-dash-top">
+                        <span class="cert-dash-id">{{ c.certificate_id }}</span>
+                        {% if c.passed %}
+                        <span class="cert-dash-badge passed">PASSED</span>
+                        {% else %}
+                        <span class="cert-dash-badge failed">FAILED</span>
+                        {% endif %}
+                    </div>
+                    <div class="cert-dash-score">
+                        <div class="cert-dash-ring">
+                            <svg viewBox="0 0 36 36">
+                                <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3"/>
+                                <path class="ring-fill" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="{% if c.percentage >= 70 %}var(--primary-color){% elif c.percentage >= 40 %}var(--warning-color){% else %}var(--danger-color){% endif %}" stroke-width="3" stroke-dasharray="{{ c.percentage }}, 100" stroke-linecap="round"/>
+                            </svg>
+                            <span class="cert-dash-pct">{{ c.percentage }}%</span>
+                        </div>
+                        <div class="cert-dash-meta">
+                            <span class="cert-dash-correct">{{ c.score }}/{{ c.total }} correct</span>
+                            <span class="cert-dash-date">{{ c.completion_time }}</span>
+                        </div>
+                    </div>
+                    <div class="cert-dash-actions" onclick="event.preventDefault(); event.stopPropagation();">
+                        <button class="btn-sm btn-email" onclick="emailCert('{{ c.certificate_id }}')" title="Send to your email">
+                            <i class="fas fa-envelope"></i> Email
+                        </button>
+                        <button class="btn-sm btn-copy" onclick="navigator.clipboard.writeText('{{ c.certificate_id }}'); if(typeof showToast==='function') showToast('ID Copied!','success');" title="Copy ID">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-award"></i>
+                <p>No certificates yet. <a href="/quiz" style="color:var(--primary-color);">Take the Quiz</a> to earn your first!</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Quick Access Tools -->
+        <div class="quick-tools-section">
+            <h2 class="dashboard-section-title"><i class="fas fa-bolt"></i> Quick Access</h2>
+            <div class="quick-tools-grid">
+                <a href="{{ url_for('password_check_page') }}" class="quick-tool-btn">
+                    <i class="fas fa-key"></i>
+                    <span>Password Check</span>
+                </a>
+                <a href="{{ url_for('email_check_page') }}" class="quick-tool-btn">
+                    <i class="fas fa-envelope-open-text"></i>
+                    <span>Email Breach</span>
+                </a>
+                <a href="{{ url_for('ip_intelligence_page') }}" class="quick-tool-btn">
+                    <i class="fas fa-network-wired"></i>
+                    <span>IP Intelligence</span>
+                </a>
+                <a href="{{ url_for('domain_scanner_page') }}" class="quick-tool-btn">
+                    <i class="fas fa-globe"></i>
+                    <span>Domain Scanner</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Tools Grid -->
+        <h2 class="dashboard-section-title"><i class="fas fa-toolbox"></i> Cybersecurity Tools</h2>
+
+        <div class="dashboard-grid">
+            <a href="{{ url_for('password_check_page') }}" class="dashboard-tool-card">
+                <div class="dashboard-tool-icon"><i class="fas fa-key"></i></div>
+                <h3>Password Breach Check</h3>
+                <p>Check leaked password exposure using privacy-preserving k-anonymity queries.</p>
+                <span class="dashboard-tool-link">Open Tool <i class="fas fa-arrow-right"></i></span>
+            </a>
+
+            <a href="{{ url_for('email_check_page') }}" class="dashboard-tool-card">
+                <div class="dashboard-tool-icon"><i class="fas fa-envelope"></i></div>
+                <h3>Email Breach Check</h3>
+                <p>Review account breach history and identify which services exposed an email address.</p>
+                <span class="dashboard-tool-link">Open Tool <i class="fas fa-arrow-right"></i></span>
+            </a>
+
+            <a href="{{ url_for('username_osint_page') }}" class="dashboard-tool-card">
+                <div class="dashboard-tool-icon"><i class="fas fa-user-secret"></i></div>
+                <h3>Username OSINT</h3>
+                <p>Enumerate public username presence across supported platforms and services.</p>
+                <span class="dashboard-tool-link">Open Tool <i class="fas fa-arrow-right"></i></span>
+            </a>
+
+            <a href="{{ url_for('domain_scanner_page') }}" class="dashboard-tool-card">
+                <div class="dashboard-tool-icon"><i class="fas fa-globe"></i></div>
+                <h3>Domain Security Scanner</h3>
+                <p>Inspect domain posture, resolution data, and security-relevant exposure indicators.</p>
+                <span class="dashboard-tool-link">Open Tool <i class="fas fa-arrow-right"></i></span>
+            </a>
+
+            <a href="{{ url_for('whois_lookup_page') }}" class="dashboard-tool-card">
+                <div class="dashboard-tool-icon"><i class="fas fa-address-card"></i></div>
+                <h3>WHOIS Lookup</h3>
+                <p>Retrieve registrar, registration dates, and nameserver details for a target domain.</p>
+                <span class="dashboard-tool-link">Open Tool <i class="fas fa-arrow-right"></i></span>
+            </a>
+
+            <a href="{{ url_for('ip_intelligence_page') }}" class="dashboard-tool-card">
+                <div class="dashboard-tool-icon"><i class="fas fa-network-wired"></i></div>
+                <h3>IP Intelligence</h3>
+                <p>Analyze ownership, geolocation context, and quick-recon details for IP addresses.</p>
+                <span class="dashboard-tool-link">Open Tool <i class="fas fa-arrow-right"></i></span>
+            </a>
+
+            <a href="{{ url_for('website_technology_detector_page') }}" class="dashboard-tool-card">
+                <div class="dashboard-tool-icon"><i class="fas fa-fingerprint"></i></div>
+                <h3>Website Technology Detector</h3>
+                <p>Inspect HTTP response headers and fingerprint exposed web server or runtime technologies.</p>
+                <span class="dashboard-tool-link">Open Tool <i class="fas fa-arrow-right"></i></span>
+            </a>
+
+            <a href="{{ url_for('cyber_tools_page') }}" class="dashboard-tool-card">
+                <div class="dashboard-tool-icon"><i class="fas fa-tools"></i></div>
+                <h3>Cyber Tools</h3>
+                <p>Use hash, Base64, URL, JWT, DNS, and text conversion utilities behind the same login session.</p>
+                <span class="dashboard-tool-link">Open Tool <i class="fas fa-arrow-right"></i></span>
+            </a>
+
+            <a href="{{ url_for('generator_page') }}" class="dashboard-tool-card">
+                <div class="dashboard-tool-icon"><i class="fas fa-lock"></i></div>
+                <h3>Password Generator</h3>
+                <p>Create high-entropy random, memorable, or PIN-style passwords for secure rotation.</p>
+                <span class="dashboard-tool-link">Open Tool <i class="fas fa-arrow-right"></i></span>
+            </a>
+
+            <a href="{{ url_for('batch_page') }}" class="dashboard-tool-card">
+                <div class="dashboard-tool-icon"><i class="fas fa-layer-group"></i></div>
+                <h3>Batch Processing</h3>
+                <p>Run bulk password or email exposure checks and export the results securely.</p>
+                <span class="dashboard-tool-link">Open Tool <i class="fas fa-arrow-right"></i></span>
+            </a>
+
+            <a href="{{ url_for('steganography_page') }}" class="dashboard-tool-card">
+                <div class="dashboard-tool-icon"><i class="fas fa-eye-slash"></i></div>
+                <h3>Steganography</h3>
+                <p>Hide secret messages in images or extract hidden data from encoded images.</p>
+                <span class="dashboard-tool-link">Open Tool <i class="fas fa-arrow-right"></i></span>
+            </a>
+        </div>
+
+        <div style="text-align:center;margin-top:24px;">
+            <a href="{{ url_for('tools_hub_page') }}" class="btn-view-all-tools"><i class="fas fa-th-large"></i> View All Tools</a>
+        </div>
+    </div>
+</section>
+
+<style>
+.cert-dash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    padding: 1rem 0 0;
+}
+.cert-dash-card {
+    display: block;
+    background: var(--bg-secondary);
+    border: 1px solid var(--card-border);
+    border-radius: var(--border-radius-lg);
+    padding: 1.2rem;
+    text-decoration: none;
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+}
+.cert-dash-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+.cert-dash-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+}
+.cert-dash-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent-color);
+    background: rgba(0,212,255,0.1);
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--border-radius-sm);
+}
+.cert-dash-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.cert-dash-badge.passed { background: rgba(0,255,136,0.15); color: var(--primary-color); }
+.cert-dash-badge.failed { background: rgba(255,0,85,0.15); color: var(--danger-color); }
+
+.cert-dash-score {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+}
+.cert-dash-ring {
+    position: relative;
+    width: 52px; height: 52px;
+    flex-shrink: 0;
+}
+.cert-dash-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.cert-dash-pct {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.cert-dash-meta { display: flex; flex-direction: column; gap: 0.2rem; }
+.cert-dash-correct { font-size: 0.85rem; color: var(--text-primary); font-weight: 600; }
+.cert-dash-date { font-size: 0.75rem; color: var(--text-muted); }
+
+.cert-dash-actions {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: flex-end;
+}
+.btn-sm {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text-secondary);
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: var(--transition);
+    display: inline-flex; align-items: center; gap: 0.3rem;
+}
+.btn-sm:hover { border-color: var(--primary-color); color: var(--primary-color); }
+.btn-email:hover { border-color: var(--accent-color); color: var(--accent-color); }
+@media (max-width: 600px) { .cert-dash-grid { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+async function emailCert(certId) {
+    if (typeof showToast === 'function') showToast('Sending certificate to your email...', 'info');
+    try {
+        const resp = await fetch('/api/email-certificate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ certificate_id: certId })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            if (typeof showToast === 'function') showToast('Certificate sent to your email!', 'success');
+        } else {
+            if (typeof showToast === 'function') showToast(data.error || 'Failed to send email', 'error');
+        }
+    } catch (e) {
+        if (typeof showToast === 'function') showToast('Failed to send email', 'error');
+    }
+}
+</script>
+{% endblock %}

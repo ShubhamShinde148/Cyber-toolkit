@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Dark Web Leak Monitor{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-user-shield"></i> Secure Login</h1>
+        <p>Authenticate first to access the cybersecurity dashboard and toolset.</p>
+    </div>
+</section>
+
+<section class="content-section auth-section">
+    <div class="container">
+        <div class="auth-shell">
+            <div class="card auth-card">
+                <div class="card-header">
+                    <div class="card-icon"><i class="fas fa-fingerprint"></i></div>
+                    <div>
+                        <h2>Access Dashboard</h2>
+                        <p>Sign in with your username or email to unlock protected tools.</p>
+                    </div>
+                </div>
+
+                <form method="post" class="auth-form">
+                    <input type="hidden" name="next" value="{{ next_url }}">
+
+                    <div class="form-group">
+                        <label for="identifier">Username or Email</label>
+                        <input type="text" id="identifier" name="identifier" value="{{ login_identifier or '' }}" placeholder="analyst@example.com" autocomplete="username" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('password', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group auth-checkbox-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="remember">
+                            <span>Remember this device</span>
+                        </label>
+                    </div>
+
+                    <div class="auth-actions">
+                        <button type="submit" class="btn btn-primary auth-submit">
+                            <i class="fas fa-right-to-bracket"></i> Login
+                        </button>
+
+                        <div class="auth-divider">
+                            <span>OR</span>
+                        </div>
+
+                        <button type="button" onclick="googleLogin()" class="google-login-btn">
+                            <i class="fab fa-google"></i> Continue with Google
+                        </button>
+
+                        <div class="auth-links">
+                            <span>Need an account? <a href="{{ url_for('register', next=next_url) }}">Register</a></span>
+                            <a href="{{ url_for('index') }}">Back to home</a>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="auth-note">
+                    <i class="fas fa-shield-alt"></i>
+                    Tool access is session-protected. Unauthorized tool requests are redirected here automatically.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCXR3Y9KXA3vTTh9IeVc2rsNX9m4W_JTM8",
+        authDomain: "darkweb-monitor-fee1c.firebaseapp.com",
+        projectId: "darkweb-monitor-fee1c",
+        storageBucket: "darkweb-monitor-fee1c.firebasestorage.app",
+        messagingSenderId: "440658339496",
+        appId: "1:440658339496:web:cd52fbb6aa8e426764849d"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    function googleLogin() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithPopup(provider)
+            .then((result) => {
+                const user = result.user;
+                return user.getIdToken();
+            })
+            .then((idToken) => {
+                return fetch("/google-login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ idToken: idToken })
+                });
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status === "success") {
+                    window.location = "/dashboard";
+                } else {
+                    alert(data.message || "Google login failed.");
+                }
+            })
+            .catch((error) => {
+                console.error("Google login error:", error);
+                alert("Google login failed. Please try again.");
+            });
+    }
+</script>
+{% endblock %}
