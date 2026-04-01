@@ -13,6 +13,9 @@ class Question:
 
 import uuid
 from datetime import datetime
+from io import BytesIO
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 
 class CybersecurityQuiz:
     def __init__(self):
@@ -337,7 +340,62 @@ class QuizResult:
 
 class CertificateGenerator:
     def generate(self, result, certificate_id=None):
-        # For demo, just return dummy PDF bytes
-        # In real use, generate a PDF file
-        pdf_content = f"Certificate for {result.participant_name}, Score: {result.score}/{result.total}, ID: {certificate_id}"
-        return pdf_content.encode("utf-8")
+        """
+        Generate a valid PDF certificate bytes payload.
+        """
+        buffer = BytesIO()
+        c = canvas.Canvas(buffer, pagesize=A4)
+        width, height = A4
+
+        title = "CERTIFICATE OF COMPLETION"
+        name = result.participant_name or "Participant"
+        cert_id = certificate_id or f"DWM-CERT-{datetime.now().strftime('%Y')}-LOCAL"
+        pct = int(result.percentage or 0)
+        status = "PASSED" if result.passed else "NOT PASSED"
+
+        c.setTitle(f"Cybersecurity Certificate - {cert_id}")
+        c.setFont("Helvetica-Bold", 24)
+        c.drawCentredString(width / 2, height - 110, title)
+
+        c.setFont("Helvetica", 14)
+        c.drawCentredString(width / 2, height - 155, "This is to certify that")
+
+        c.setFont("Helvetica-Bold", 28)
+        c.drawCentredString(width / 2, height - 205, name)
+
+        c.setFont("Helvetica", 13)
+        c.drawCentredString(
+            width / 2,
+            height - 245,
+            "has successfully completed the Cybersecurity Awareness Quiz"
+        )
+
+        c.setFont("Helvetica", 12)
+        c.drawCentredString(
+            width / 2,
+            height - 285,
+            f"Score: {result.score}/{result.total} ({pct}%)   |   Status: {status}"
+        )
+
+        c.setFont("Helvetica", 11)
+        c.drawCentredString(
+            width / 2,
+            height - 315,
+            f"Certificate ID: {cert_id}"
+        )
+        c.drawCentredString(
+            width / 2,
+            height - 335,
+            f"Issued: {result.completion_time}"
+        )
+
+        c.setFont("Helvetica-Oblique", 10)
+        c.drawCentredString(
+            width / 2,
+            80,
+            "Dark Web Monitor Security Lab"
+        )
+
+        c.showPage()
+        c.save()
+        return buffer.getvalue()

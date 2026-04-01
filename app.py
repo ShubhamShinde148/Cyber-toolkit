@@ -1790,6 +1790,51 @@ def _delete_quiz_from_firestore(quiz_id):
         print(f'[QUIZ] ERROR deleting quiz {quiz_id}: {e}')
 
 
+def _local_certificate_paths(certificate_id):
+    cert_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'certificates')
+    pdf_path = os.path.join(cert_dir, f'{certificate_id}.pdf')
+    json_path = os.path.join(cert_dir, f'{certificate_id}.json')
+    return cert_dir, pdf_path, json_path
+
+
+def _save_local_certificate_record(certificate_id, cert_record):
+    """Persist certificate metadata locally when Firestore is unavailable."""
+    try:
+        cert_dir, _, json_path = _local_certificate_paths(certificate_id)
+        os.makedirs(cert_dir, exist_ok=True)
+        with open(json_path, 'w', encoding='utf-8') as jf:
+            json.dump(cert_record, jf, ensure_ascii=True, indent=2)
+    except Exception as e:
+        print(f'[CERT] ERROR saving local metadata for {certificate_id}: {e}')
+
+
+def _load_local_certificate_record(certificate_id):
+    """Load certificate metadata from local fallback storage."""
+    try:
+        _, pdf_path, json_path = _local_certificate_paths(certificate_id)
+        if os.path.exists(json_path):
+            with open(json_path, 'r', encoding='utf-8') as jf:
+                data = json.load(jf)
+                if isinstance(data, dict):
+                    return data
+        if os.path.exists(pdf_path):
+            return {
+                'certificate_id': certificate_id,
+                'participant_name': 'Participant',
+                'email': '',
+                'score': 0,
+                'total': 0,
+                'percentage': 0,
+                'passed': False,
+                'completion_time': '',
+                'created_at': '',
+                'certificate_file': f'certificates/{certificate_id}.pdf'
+            }
+    except Exception as e:
+        print(f'[CERT] ERROR loading local metadata for {certificate_id}: {e}')
+    return None
+
+
 def _send_certificate_email(to_email, participant_name, certificate_id, result, pdf_bytes):
     """Send certificate PDF as email attachment to the user.
 
@@ -2062,6 +2107,7 @@ def api_quiz_submit():
                 }), 500
         else:
             print(f'[CERT] Firestore unavailable; generated certificate without DB persistence: {certificate_id}')
+            _save_local_certificate_record(certificate_id, cert_record)
         
         # ── 5. Auto-email certificate to user ──
         email_sent = False
@@ -2213,16 +2259,13 @@ def download_saved_certificate(certificate_id):
     if not re.match(r'^DWM-CERT-\d{4}-[A-Z0-9]+$', certificate_id):
         return jsonify({'success': False, 'error': 'Invalid certificate ID format'}), 400
 
-    # Verify the certificate belongs to the current user
-    doc = resolve_awaitable(db.collection('quiz_certificates').document(certificate_id).get())
-    if not getattr(doc, 'exists', False):
-        return jsonify({'success': False, 'error': 'Certificate not found'}), 404
-    cert = doc.to_dict() if doc else None
-    # if cert.get('user_id') != current_user.id:
-    #     return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+    # Verify via DB when available; otherwise serve local file fallback.
+    if db is not None:
+        doc = resolve_awaitable(db.collection('quiz_certificates').document(certificate_id).get())
+        if not getattr(doc, 'exists', False):
+            return jsonify({'success': False, 'error': 'Certificate not found'}), 404
 
-    cert_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'certificates')
-    pdf_path = os.path.join(cert_dir, f'{certificate_id}.pdf')
+    _, pdf_path, _ = _local_certificate_paths(certificate_id)
     if not os.path.isfile(pdf_path):
         return jsonify({'success': False, 'error': 'PDF file not found on server'}), 404
 
@@ -2240,10 +2283,13 @@ def download_saved_certificate(certificate_id):
 def certificate_page(certificate_id):
     """Display a web-based certificate page."""
     try:
-        doc = resolve_awaitable(db.collection('quiz_certificates').document(certificate_id).get())
-        if not getattr(doc, 'exists', False):
-            return render_template('404.html'), 404
-        cert = doc.to_dict() if doc else None
+        cert = None
+        if db is not None:
+            doc = resolve_awaitable(db.collection('quiz_certificates').document(certificate_id).get())
+            if getattr(doc, 'exists', False):
+                cert = doc.to_dict() if doc else None
+        else:
+            cert = _load_local_certificate_record(certificate_id)
         if cert is None:
             return render_template('404.html'), 404
 
@@ -2251,7 +2297,8 @@ def certificate_page(certificate_id):
         if not cert.get('certificate_id'):
             cert['certificate_id'] = certificate_id
             try:
-                db.collection('quiz_certificates').document(certificate_id).update({'certificate_id': certificate_id})
+                if db is not None:
+                    db.collection('quiz_certificates').document(certificate_id).update({'certificate_id': certificate_id})
             except Exception:
                 pass
 
@@ -2265,10 +2312,16 @@ def certificate_page(certificate_id):
 def verify_certificate(certificate_id):
     """Public verification endpoint for certificates."""
     try:
-        doc = resolve_awaitable(db.collection('quiz_certificates').document(certificate_id).get())
-        if not getattr(doc, 'exists', False):
+        cert = None
+        if db is not None:
+            doc = resolve_awaitable(db.collection('quiz_certificates').document(certificate_id).get())
+            if getattr(doc, 'exists', False):
+                cert = doc.to_dict() if doc else {}
+        else:
+            cert = _load_local_certificate_record(certificate_id)
+
+        if not cert:
             return jsonify({'valid': False, 'error': 'Certificate not found'}), 404
-        cert = doc.to_dict() if doc else {}
         resolved_certificate_id = cert.get('certificate_id') or certificate_id
         return jsonify({
             'valid': True,
@@ -2297,6 +2350,25 @@ def certificate_history_page():
 def api_certificate_history():
     """Get all certificates for the current logged-in user."""
     try:
+        if db is None:
+            cert_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'certificates')
+            certificates = []
+            if os.path.isdir(cert_dir):
+                for name in os.listdir(cert_dir):
+                    if not name.endswith('.json'):
+                        continue
+                    path = os.path.join(cert_dir, name)
+                    try:
+                        with open(path, 'r', encoding='utf-8') as jf:
+                            data = json.load(jf)
+                            if isinstance(data, dict):
+                                certificates.append(data)
+                    except Exception:
+                        continue
+
+            certificates.sort(key=lambda c: c.get('created_at', ''), reverse=True)
+            return jsonify({'success': True, 'certificates': certificates[:100]})
+
         docs = resolve_awaitable(db.collection('quiz_certificates').stream())
         certificates = []
         for doc in docs:
@@ -2326,10 +2398,16 @@ def api_verify_certificate_public():
         cert_id = data.get('certificate_id', '').strip()
         if not cert_id:
             return jsonify({'valid': False, 'error': 'Certificate ID is required'}), 400
-        doc = resolve_awaitable(db.collection('quiz_certificates').document(cert_id).get())
-        if not getattr(doc, 'exists', False):
+        cert = None
+        if db is not None:
+            doc = resolve_awaitable(db.collection('quiz_certificates').document(cert_id).get())
+            if getattr(doc, 'exists', False):
+                cert = doc.to_dict() if doc else {}
+        else:
+            cert = _load_local_certificate_record(cert_id)
+
+        if not cert:
             return jsonify({'valid': False, 'error': 'Certificate not found. This ID does not match any issued certificate.'})
-        cert = doc.to_dict() if doc else {}
         resolved_certificate_id = cert.get('certificate_id') or cert_id
         return jsonify({
             'valid': True,
