@@ -1970,11 +1970,14 @@ def api_quiz_submit():
             if not _restore_quiz_from_firestore(quiz_id):
                 return jsonify({'success': False, 'error': 'Invalid quiz ID or quiz expired'}), 400
         
-        # Prevent duplicate: check if this quiz_id was already submitted
-        dup_check = db.collection('quiz_certificates') \
-            .where(filter=FieldFilter('quiz_id', '==', quiz_id)).limit(1).stream()
-        if any(True for _ in dup_check):
-            return jsonify({'success': False, 'error': 'This quiz has already been submitted'}), 400
+        firestore_enabled = db is not None
+
+        # Prevent duplicate only when Firestore is available.
+        if firestore_enabled:
+            dup_check = db.collection('quiz_certificates') \
+                .where(filter=FieldFilter('quiz_id', '==', quiz_id)).limit(1).stream()
+            if any(True for _ in dup_check):
+                return jsonify({'success': False, 'error': 'This quiz has already been submitted'}), 400
         
         # Get detailed results before submitting
         detailed = cybersecurity_quiz.get_detailed_results(quiz_id, answers)
@@ -1989,13 +1992,18 @@ def api_quiz_submit():
         _delete_quiz_from_firestore(quiz_id)
         
         # ── 1. Generate Certificate ID ──
-        cert_seq = db.collection('quiz_certificates').document('cert_counter')
-        counter_doc = resolve_awaitable(cert_seq.get())
-        seq_num = 1
-        if hasattr(counter_doc, 'exists') and counter_doc.exists:
-            counter_data = counter_doc.to_dict() if hasattr(counter_doc, 'to_dict') else {}
-            seq_num = counter_data.get('seq', 0) + 1 if counter_data else 1
-        cert_seq.set({'seq': seq_num})
+        seq_num = None
+        if firestore_enabled:
+            cert_seq = db.collection('quiz_certificates').document('cert_counter')
+            counter_doc = resolve_awaitable(cert_seq.get())
+            seq_num = 1
+            if hasattr(counter_doc, 'exists') and counter_doc.exists:
+                counter_data = counter_doc.to_dict() if hasattr(counter_doc, 'to_dict') else {}
+                seq_num = counter_data.get('seq', 0) + 1 if counter_data else 1
+            cert_seq.set({'seq': seq_num})
+        else:
+            # Fallback deterministic-ish sequence when DB is unavailable.
+            seq_num = int(datetime.now().strftime('%m%d%H%M%S'))
         cert_year = datetime.now().strftime('%Y')
         certificate_id = f'DWM-CERT-{cert_year}-{seq_num:04d}'
         
@@ -2022,7 +2030,7 @@ def api_quiz_submit():
             f.write(pdf_bytes)
         print(f'[CERT] PDF saved: {pdf_path}')
         
-        # ── 4. Save certificate metadata to Firestore ──
+        # ── 4. Save certificate metadata to Firestore (optional) ──
         cert_record = {
             'certificate_id': certificate_id,
             'quiz_id': quiz_id,
@@ -2039,17 +2047,21 @@ def api_quiz_submit():
             'certificate_file': f'certificates/{pdf_filename}',
             'created_at': datetime.now().isoformat()
         }
-        db.collection('quiz_certificates').document(certificate_id).set(cert_record)
-        print(f'[CERT] Firestore record saved: {certificate_id}')
+        db_verified = False
+        if firestore_enabled:
+            db.collection('quiz_certificates').document(certificate_id).set(cert_record)
+            print(f'[CERT] Firestore record saved: {certificate_id}')
 
-        # ── 4b. Verify certificate record was persisted in Firestore ──
-        verify_doc = resolve_awaitable(db.collection('quiz_certificates').document(certificate_id).get())
-        db_verified = bool(getattr(verify_doc, 'exists', False))
-        if not db_verified:
-            return jsonify({
-                'success': False,
-                'error': 'Certificate was generated but database persistence verification failed.'
-            }), 500
+            # ── 4b. Verify certificate record was persisted in Firestore ──
+            verify_doc = resolve_awaitable(db.collection('quiz_certificates').document(certificate_id).get())
+            db_verified = bool(getattr(verify_doc, 'exists', False))
+            if not db_verified:
+                return jsonify({
+                    'success': False,
+                    'error': 'Certificate was generated but database persistence verification failed.'
+                }), 500
+        else:
+            print(f'[CERT] Firestore unavailable; generated certificate without DB persistence: {certificate_id}')
         
         # ── 5. Auto-email certificate to user ──
         email_sent = False
@@ -2073,6 +2085,7 @@ def api_quiz_submit():
             'success': True,
             'certificate_id': certificate_id,
             'db_verified': db_verified,
+            'firestore_enabled': firestore_enabled,
             'email_sent': email_sent,
             'email_error': email_error,
             'result': {
