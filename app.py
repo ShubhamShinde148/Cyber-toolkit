@@ -118,15 +118,17 @@ app = Flask(__name__,
             template_folder='templates')
 os.makedirs(app.instance_path, exist_ok=True)
 
-# Import and initialize the new V2 Modular App architecture
-# This must happen after Firebase is initialized so modular services can access DB
-from app_modular import create_modular_app
-app_v2 = create_modular_app()
-
-# Mount the modular app under /v2 inside the legacy server process
-app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
-    '/v2': app_v2.wsgi_app
-})
+# Import and mount the optional V2 modular app without blocking main app startup.
+modular_ready = False
+try:
+    from app_modular import create_modular_app
+    app_v2 = create_modular_app()
+    app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+        '/v2': app_v2.wsgi_app
+    })
+    modular_ready = True
+except Exception as modular_err:
+    print(f"[WARN] Modular V2 app disabled: {modular_err}")
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'change-this-secret-key-in-production')
 app.config['SESSION_COOKIE_HTTPONLY'] = True
@@ -139,7 +141,8 @@ def health():
     return jsonify({
         'status': 'ok',
         'service': 'dark-web-monitor',
-        'firebase_ready': firebase_ready
+        'firebase_ready': firebase_ready,
+        'modular_ready': modular_ready
     }), 200
 
 # login_manager = LoginManager()
