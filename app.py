@@ -26,8 +26,10 @@ import io
 import re
 import uuid
 import base64
+import time
 import requests
 from urllib.parse import urlsplit
+from collections import defaultdict, deque
 from dotenv import load_dotenv
 
 # Load environment variables from .env file BEFORE other imports
@@ -120,7 +122,155 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'change-this-secret-key-in-pr
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['REMEMBER_COOKIE_HTTPONLY'] = True
+app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_CONTENT_LENGTH', 16 * 1024 * 1024))
 CORS(app)
+
+# ==================== SECURITY HARDENING ====================
+
+_RATE_LIMIT_BUCKET = defaultdict(deque)
+_DEFAULT_RATE_LIMIT = (120, 60)  # requests, seconds
+_RATE_LIMIT_RULES = {
+    'chatbot_api': (40, 60),
+    'ask_ai': (40, 60),
+    'api_quiz_submit': (25, 60),
+    'google_login': (20, 60),
+    'login': (20, 60),
+    'register': (20, 60),
+}
+
+_SECURITY_TEXT_EXEMPT_KEYS = {
+    'message', 'content', 'question', 'answer', 'feedback', 'description', 'notes', 'text'
+}
+
+_XSS_PATTERN = re.compile(
+    r"(<\s*script\b|</\s*script\s*>|javascript:|on\w+\s*=|<\s*(iframe|svg|object|embed|link|meta)\b)",
+    re.IGNORECASE
+)
+
+_SQLI_PATTERN = re.compile(
+    r"(\bunion\s+select\b|\bunion\s+all\s+select\b|\bdrop\s+table\b|\bdelete\s+from\b|"
+    r"\binsert\s+into\b|\bupdate\s+\w+\s+set\b|\btruncate\s+table\b|\bor\s+1\s*=\s*1\b|"
+    r"\band\s+1\s*=\s*1\b|'\s*or\s*'1'\s*=\s*'1|\"\s*or\s*\"1\"\s*=\s*\"1|;\s*(drop|delete|truncate|alter|create)\b)",
+    re.IGNORECASE
+)
+
+
+def _get_client_ip():
+    forwarded = request.headers.get('X-Forwarded-For', '')
+    if forwarded:
+        return forwarded.split(',')[0].strip()
+    return request.remote_addr or 'unknown'
+
+
+def _iter_payload_values(data, prefix=''):
+    if isinstance(data, dict):
+        for key, value in data.items():
+            key_name = f'{prefix}.{key}' if prefix else str(key)
+            yield from _iter_payload_values(value, key_name)
+    elif isinstance(data, list):
+        for idx, value in enumerate(data):
+            key_name = f'{prefix}[{idx}]' if prefix else f'[{idx}]'
+            yield from _iter_payload_values(value, key_name)
+    else:
+        yield prefix or 'value', data
+
+
+def _payload_values_from_request():
+    for key, value in request.args.items(multi=True):
+        yield ('query', key, value)
+    for key, value in request.form.items(multi=True):
+        yield ('form', key, value)
+    json_payload = request.get_json(silent=True)
+    if json_payload is not None:
+        for key, value in _iter_payload_values(json_payload):
+            yield ('json', key, value)
+
+
+def _has_xss_payload(value: str) -> bool:
+    return bool(_XSS_PATTERN.search(value))
+
+
+def _has_sqli_payload(value: str) -> bool:
+    return bool(_SQLI_PATTERN.search(value))
+
+
+@app.before_request
+def security_request_guard():
+    if request.endpoint == 'static' or request.method == 'OPTIONS':
+        return None
+
+    # Basic origin check for state-changing requests (CSRF mitigation layer).
+    if request.method in {'POST', 'PUT', 'PATCH', 'DELETE'}:
+        origin = request.headers.get('Origin')
+        if origin:
+            try:
+                origin_host = urlsplit(origin).netloc
+            except Exception:
+                origin_host = ''
+            if origin_host and origin_host != request.host:
+                return jsonify({'success': False, 'error': 'Blocked by origin policy'}), 403
+
+    # Simple in-memory rate limiting per endpoint + client IP.
+    endpoint = request.endpoint or 'unknown'
+    limit_count, limit_window = _RATE_LIMIT_RULES.get(endpoint, _DEFAULT_RATE_LIMIT)
+    bucket_key = f'{_get_client_ip()}::{endpoint}'
+    now = time.time()
+    bucket = _RATE_LIMIT_BUCKET[bucket_key]
+    while bucket and now - bucket[0] > limit_window:
+        bucket.popleft()
+    if len(bucket) >= limit_count:
+        return jsonify({'success': False, 'error': 'Too many requests. Please slow down.'}), 429
+    bucket.append(now)
+
+    # Input inspection for common XSS/SQLi payloads.
+    for source, key, raw_value in _payload_values_from_request():
+        if not isinstance(raw_value, str):
+            continue
+        value = raw_value.strip()
+        if not value:
+            continue
+        if len(value) > 10000:
+            return jsonify({'success': False, 'error': f'Input too large in {source}:{key}'}), 413
+
+        if _has_xss_payload(value):
+            return jsonify({'success': False, 'error': f'Potential XSS payload blocked in {source}:{key}'}), 400
+
+        key_tail = key.split('.')[-1].lower()
+        if key_tail not in _SECURITY_TEXT_EXEMPT_KEYS and _has_sqli_payload(value):
+            return jsonify({'success': False, 'error': f'Potential SQL injection payload blocked in {source}:{key}'}), 400
+
+    return None
+
+
+@app.after_request
+def apply_security_headers(response):
+    response.headers.setdefault('X-Content-Type-Options', 'nosniff')
+    response.headers.setdefault('X-Frame-Options', 'SAMEORIGIN')
+    response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
+    response.headers.setdefault('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+    response.headers.setdefault('Cross-Origin-Resource-Policy', 'same-origin')
+    response.headers.setdefault('Cross-Origin-Opener-Policy', 'same-origin')
+    response.headers.setdefault('X-XSS-Protection', '1; mode=block')
+
+    csp = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
+        "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
+        "img-src 'self' data: https:; "
+        "connect-src 'self' https:; "
+        "object-src 'none'; "
+        "base-uri 'self'; "
+        "frame-ancestors 'self'; "
+        "form-action 'self'"
+    )
+    response.headers.setdefault('Content-Security-Policy', csp)
+
+    proto = request.headers.get('X-Forwarded-Proto', 'http')
+    if request.is_secure or proto == 'https':
+        response.headers.setdefault('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+
+    return response
 
 @app.route('/health')
 def health():
