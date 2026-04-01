@@ -1,6 +1,6 @@
 /**
  * Dark Web Leak Monitor - Chatbot Widget
- * AI-powered cybersecurity assistant using OpenAI GPT
+ * AI-powered cybersecurity assistant (Groq/OpenAI + local fallback)
  */
 
 class CybersecurityChatbot {
@@ -75,7 +75,9 @@ class CybersecurityChatbot {
             const data = await response.json();
             
             if (!data.configured) {
-                console.warn('Chatbot: OpenAI API key not configured');
+                console.warn('Chatbot: no GROQ_API_KEY / OPENAI_API_KEY configured; using local fallback');
+            } else {
+                console.log(`Chatbot provider: ${data.provider || 'unknown'}, model: ${data.model || 'unknown'}`);
             }
         } catch (error) {
             console.error('Chatbot status check failed:', error);

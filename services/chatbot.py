@@ -873,7 +873,7 @@ def _looks_like_html_response(value: str) -> bool:
     )
 
 
-# ==================== OpenAI Client ====================
+# ==================== AI Client ====================
 
 SYSTEM_PROMPT = """You are a helpful AI assistant called CyberGuard AI.
 
@@ -894,24 +894,50 @@ Response Style:
 
 You can answer ANY topic: programming, cybersecurity, technology, science, education, networking, Linux/Windows, AI, web development, general knowledge, and more."""
 
-client = None
-_api_key = os.getenv("OPENAI_API_KEY")
-if _api_key:
-    client = OpenAI(api_key=_api_key)
+GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+
+
+def _build_ai_client():
+    """Create AI client with provider priority: GROQ > OpenAI."""
+    groq_api_key = os.getenv("GROQ_API_KEY", "").strip()
+    if groq_api_key:
+        return {
+            "provider": "groq",
+            "model": os.getenv("GROQ_MODEL", "llama-3.1-8b-instant"),
+            "client": OpenAI(api_key=groq_api_key, base_url=GROQ_BASE_URL),
+            "api_key": groq_api_key
+        }
+
+    openai_api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if openai_api_key:
+        return {
+            "provider": "openai",
+            "model": os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
+            "client": OpenAI(api_key=openai_api_key),
+            "api_key": openai_api_key
+        }
+
+    return {"provider": None, "model": None, "client": None, "api_key": ""}
+
+
+_runtime = _build_ai_client()
+client = _runtime["client"]
+client_provider = _runtime["provider"]
+client_model = _runtime["model"]
 
 
 class CybersecurityChatbot:
     """ChatGPT-powered cybersecurity assistant with local fallback."""
 
     def __init__(self):
-        self.api_key = os.getenv("OPENAI_API_KEY")
-        self.client = None
-        self.model = "gpt-4.1-mini"
-        if self.api_key:
-            self.client = OpenAI(api_key=self.api_key)
+        runtime = _build_ai_client()
+        self.api_key = runtime["api_key"]
+        self.client = runtime["client"]
+        self.model = runtime["model"] or "llama-3.1-8b-instant"
+        self.provider = runtime["provider"] or "none"
 
     def is_configured(self) -> bool:
-        return self.api_key is not None and len(self.api_key) > 0
+        return self.client is not None and self.api_key is not None and len(self.api_key) > 0
 
     def get_response(self, user_message: str, conversation_history: list = None) -> dict:
         if not user_message or not user_message.strip():
@@ -940,7 +966,7 @@ class CybersecurityChatbot:
                 if isinstance(ai_message, str) and not _looks_like_html_response(ai_message):
                     return {"success": True, "message": ai_message.strip()}
             except Exception as e:
-                print("CyberGuard AI: switching to built-in engine:", e)
+                print(f"CyberGuard AI ({self.provider}): switching to built-in engine:", e)
 
         # Built-in knowledge engine
         local_answer = _match_knowledge_base(user_message)
@@ -971,7 +997,7 @@ def ask_chatbot(message: str) -> str:
     if client:
         try:
             response = client.chat.completions.create(
-                model="gpt-4.1-mini",
+                model=client_model or "llama-3.1-8b-instant",
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": message.strip()}
@@ -984,7 +1010,7 @@ def ask_chatbot(message: str) -> str:
             if isinstance(ai_message, str) and not _looks_like_html_response(ai_message):
                 return ai_message.strip()
         except Exception as e:
-            print("CyberGuard AI: switching to built-in engine:", e)
+            print(f"CyberGuard AI ({client_provider or 'none'}): switching to built-in engine:", e)
 
     # Built-in knowledge engine
     local_answer = _match_knowledge_base(message)
@@ -997,3 +1023,12 @@ def ask_chatbot(message: str) -> str:
 def is_chatbot_configured() -> bool:
     """Check if the chatbot API key is configured."""
     return client is not None
+
+
+def get_chatbot_runtime() -> dict:
+    """Expose chatbot provider/runtime metadata for status API."""
+    return {
+        "configured": client is not None,
+        "provider": client_provider or "none",
+        "model": client_model or "none"
+    }

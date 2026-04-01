@@ -72,7 +72,7 @@ from services.metadata_extractor import MetadataExtractor
 from services.website_technology_detector import WebsiteTechnologyDetector
 from services.steganography import SteganographyTool
 from services.whois_lookup import WhoisLookup
-from services.chatbot import CybersecurityChatbot, ask_chatbot, is_chatbot_configured
+from services.chatbot import CybersecurityChatbot, ask_chatbot, is_chatbot_configured, get_chatbot_runtime
 from services.feedback_mailer import send_feedback_email, is_email_configured
 
 import firebase_admin
@@ -3599,9 +3599,11 @@ def chatbot_api():
 @app.route('/api/chatbot/status', methods=['GET'])
 def chatbot_status():
     """Check if chatbot is configured and ready."""
+    runtime = get_chatbot_runtime()
     return jsonify({
         'configured': is_chatbot_configured(),
-        'model': 'llama-3.1-8b-instant'
+        'provider': runtime.get('provider', 'none'),
+        'model': runtime.get('model', 'none')
     })
 
 
