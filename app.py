@@ -40,7 +40,6 @@ from flask_cors import CORS
 import json
 from datetime import datetime
 from werkzeug.security import check_password_hash, generate_password_hash
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 # from breach_checker import BreachChecker
 
@@ -118,18 +117,6 @@ app = Flask(__name__,
             template_folder='templates')
 os.makedirs(app.instance_path, exist_ok=True)
 
-# Import and mount the optional V2 modular app without blocking main app startup.
-modular_ready = False
-try:
-    from app_modular import create_modular_app
-    app_v2 = create_modular_app()
-    app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
-        '/v2': app_v2.wsgi_app
-    })
-    modular_ready = True
-except Exception as modular_err:
-    print(f"[WARN] Modular V2 app disabled: {modular_err}")
-
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'change-this-secret-key-in-production')
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
@@ -141,8 +128,7 @@ def health():
     return jsonify({
         'status': 'ok',
         'service': 'dark-web-monitor',
-        'firebase_ready': firebase_ready,
-        'modular_ready': modular_ready
+        'firebase_ready': firebase_ready
     }), 200
 
 
@@ -434,14 +420,14 @@ last_results = {}
 
 
 @app.route('/login')
-def login_redirect():
-    """Redirect legacy login requests to the V2 platform."""
-    return redirect('/v2/auth/login')
+def login():
+    """Render login page."""
+    return render_template('login.html')
 
 @app.route('/register')
-def register_redirect():
-    """Redirect legacy registration requests to the V2 platform."""
-    return redirect('/v2/auth/register')
+def register():
+    """Render registration page."""
+    return render_template('register.html')
 
 
 @app.route('/google-login', methods=['POST'])
@@ -495,7 +481,7 @@ def google_login():
         return jsonify({'status': 'error', 'message': 'User creation failed'}), 500
 
 
-# Legacy register logic removed. Uses V2 platform registration via global redirect.
+# Registration handled through current app routes/templates.
 
 
 # @app.route('/logout', methods=['POST'])
@@ -2285,10 +2271,9 @@ def api_send_certificate_email():
 # ── CTF CHALLENGES ROUTES ──
 @app.route('/ctf/')
 def ctf_dashboard():
-    """Redirect to the new modular CTF platform."""
-    return redirect('/v2/ctf/')
-
-# Note: Migrated to routes/ctf_routes.py and registered as blueprint in V2 platform.
+    """CTF view is currently unavailable in this build."""
+    flash('CTF module is currently unavailable.', 'warning')
+    return redirect(url_for('dashboard'))
 
 
 @app.route('/api/quiz/certificate', methods=['POST'])
