@@ -1,5 +1,6 @@
 import os
 import json
+import base64
 import hashlib
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Optional, Any
@@ -27,11 +28,28 @@ class CTFPlatformEngine:
     """Professional CTF Engine with Firestore-backed dynamic loading."""
     
     def __init__(self, db: Any = None, challenges_path: str = "ctf/challenges.json"):
-        # Ensure Firebase is initialized (safe to call multiple times)
+        # Ensure Firebase is initialized (safe to call multiple times).
+        # Must not crash app startup when credentials are not available yet.
         if not firebase_admin._apps:
-            cred_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "darkweb-monitor-fee1c-firebase-adminsdk-fbsvc-be2b34d535.json")
-            cred = credentials.Certificate(cred_path)
-            firebase_admin.initialize_app(cred)
+            try:
+                cred_path = os.path.join(
+                    os.path.dirname(os.path.dirname(__file__)),
+                    "darkweb-monitor-fee1c-firebase-adminsdk-fbsvc-be2b34d535.json",
+                )
+
+                if os.getenv("FIREBASE_CREDENTIALS_JSON"):
+                    cred_info = json.loads(os.getenv("FIREBASE_CREDENTIALS_JSON"))
+                    firebase_admin.initialize_app(credentials.Certificate(cred_info))
+                elif os.getenv("FIREBASE_CREDENTIALS_BASE64"):
+                    decoded = base64.b64decode(os.getenv("FIREBASE_CREDENTIALS_BASE64")).decode("utf-8")
+                    cred_info = json.loads(decoded)
+                    firebase_admin.initialize_app(credentials.Certificate(cred_info))
+                elif os.path.exists(cred_path):
+                    firebase_admin.initialize_app(credentials.Certificate(cred_path))
+                else:
+                    print("[CTF] Firebase credentials not found. CTF DB features will stay disabled.")
+            except Exception as e:
+                print(f"[CTF] Firebase init skipped: {e}")
         self._db = db
         self.challenges_path = challenges_path
         self.challenges: List[ProChallenge] = []

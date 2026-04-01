@@ -207,10 +207,11 @@ class LearningModeEngine:
         for level in ROADMAP.values():
             for topic in level["topics"]:
                 if topic["title"].lower() == topic_title.lower():
+                    topic_name = topic.get("title", topic_title)
                     return {
-                        "title": topic["title"],
+                        "title": topic_name,
                         "difficulty": difficulty,
-                        "explanation": f"This is a static fallback explanation for {topic['title']}.",
+                        "explanation": f"This is a static fallback explanation for {topic_name}.",
                         "tools": [],
                         "practice": "No AI content available. Practice with online resources.",
                         "quick_notes": [],
