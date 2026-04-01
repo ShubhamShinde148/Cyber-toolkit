@@ -7,8 +7,7 @@ This document provides a technical overview of the **DarkWeb Monitor** project s
 ## 📂 Directory Hierarchy
 
 ### 1. 🏰 Application Entry Points
-- `app.py`: The central hub. It handles legacy V1 routes and acts as a dispatcher for the V2 modular system.
-- `app_modular.py`: The **Application Factory**. It initializes the Flask app, registers all blueprints (routes), and sets up shared extensions.
+- `app.py`: The central hub. It serves all active routes and API endpoints.
 - `.env`: **Critical Security File**. Stores all private API keys (OpenAI, HIBP, Firebase) and SMTP credentials.
 
 ### 2. 🛡️ `services/` — The Intelligence Engines
@@ -22,8 +21,8 @@ This is the "Brain" of the platform. Each file is a standalone security service.
 ### 3. 🌐 `routes/` — The Blueprint Layer
 Separates the UI and logic from the main application file.
 - `auth_routes.py`: Logic for User Login, Registration, and Session management.
-- `ui_routes.py`: Delivers the V3 Mission Control Dashboard and tool interfaces.
-- `ctf_routes.py`: Manages the Capture The Flag challenges and scoring.
+- `tools_routes.py`: Tool-level endpoints used by the main dashboard.
+- `quiz_routes.py`: Quiz-related APIs and route handlers.
 - `osint_routes.py`: Dedicated endpoints for Domain and Username intelligence.
 
 ### 4. 🧰 `tools/` — Atomic Security Utilities
@@ -47,4 +46,4 @@ Lightweight, reusable technical tools (CyberChef style).
 ## ⚡ Development Workflow
 - **Adding a Feature**: Create a new class in `services/`, define its routes in `routes/`, and add a UI link in `dashboard.html`.
 - **Applying Styles**: Modify `style.css` globally; use CSS variables for neon colors.
-- **API Updates**: Add new keys to `.env` and initialize the service in `app_modular.py`.
+- **API Updates**: Add new keys to `.env` and initialize the service in `app.py`.

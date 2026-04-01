@@ -74,7 +74,6 @@ from services.steganography import SteganographyTool
 from services.whois_lookup import WhoisLookup
 from services.chatbot import CybersecurityChatbot, ask_chatbot, is_chatbot_configured
 from services.feedback_mailer import send_feedback_email, is_email_configured
-from routes.ctf_routes import ctf_engine
 
 import firebase_admin
 
@@ -2266,14 +2265,6 @@ def api_send_certificate_email():
     except Exception as e:
         print(f'[CERT] Manual email error: {e}')
         return jsonify({'success': False, 'error': str(e)}), 500
-
-
-# ── CTF CHALLENGES ROUTES ──
-@app.route('/ctf/')
-def ctf_dashboard():
-    """CTF view is currently unavailable in this build."""
-    flash('CTF module is currently unavailable.', 'warning')
-    return redirect(url_for('dashboard'))
 
 
 @app.route('/api/quiz/certificate', methods=['POST'])

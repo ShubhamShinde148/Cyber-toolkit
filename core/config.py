@@ -21,7 +21,7 @@ class Config:
     # Session Config
     PERMANENT_SESSION_LIFETIME = timedelta(days=1)
     
-    # API Keys (Loaded automatically via load_dotenv in app_modular.py)
+    # API Keys (loaded via load_dotenv in app.py)
     GROQ_API_KEY = os.environ.get('GROQ_API_KEY')
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
     ABUSEIPDB_API_KEY = os.environ.get('ABUSEIPDB_API_KEY')

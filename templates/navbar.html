@@ -76,6 +76,21 @@
             <li><a href="{{ url_for('quiz_page') }}" class="nav-link {% if request.path == '/quiz' %}active{% endif %}"><i class="fas fa-graduation-cap"></i><span>Quiz</span></a></li>
             <li><a href="{{ url_for('cyber_tools_page') }}" class="nav-link {% if request.path == '/cyber-tools' %}active{% endif %}"><i class="fas fa-tools"></i><span>Cyber Tools</span></a></li>
             <li><a href="{{ url_for('about_page') }}" class="nav-link {% if request.path == '/about' %}active{% endif %}"><i class="fas fa-life-ring"></i><span>Help</span></a></li>
+            <li class="nav-dropdown">
+                <a href="#" class="nav-link dropdown-toggle" aria-label="Theme switcher">
+                    <i id="currentThemeIcon" class="fas fa-user-secret"></i>
+                    <span id="currentThemeText">Theme</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </a>
+                <ul class="theme-dropdown-menu">
+                    <li><a href="#" class="theme-option" data-theme-value="default"><i class="fas fa-user-secret"></i><span>Cyber Green</span><i class="fas fa-check theme-check"></i></a></li>
+                    <li><a href="#" class="theme-option" data-theme-value="purple"><i class="fas fa-mask"></i><span>Purple Hacker</span><i class="fas fa-check theme-check"></i></a></li>
+                    <li><a href="#" class="theme-option" data-theme-value="blue"><i class="fas fa-shield-virus"></i><span>Blue Security</span><i class="fas fa-check theme-check"></i></a></li>
+                    <li><a href="#" class="theme-option" data-theme-value="red"><i class="fas fa-biohazard"></i><span>Red Threat</span><i class="fas fa-check theme-check"></i></a></li>
+                    <li><a href="#" class="theme-option" data-theme-value="light"><i class="fas fa-sun"></i><span>Light Mode</span><i class="fas fa-check theme-check"></i></a></li>
+                    <li><a href="#" class="theme-option" data-theme-value="soc"><i class="fas fa-network-wired"></i><span>SOC Analyst</span><i class="fas fa-check theme-check"></i></a></li>
+                </ul>
+            </li>
 
             <li><a href="{{ url_for('about_page') }}" class="nav-link {% if request.path == '/about' %}active{% endif %}"><i class="fas fa-info-circle"></i><span>About</span></a></li>
         </ul>
