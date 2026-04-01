@@ -75,7 +75,6 @@ from services.steganography import SteganographyTool
 from services.whois_lookup import WhoisLookup
 from services.chatbot import CybersecurityChatbot, ask_chatbot, is_chatbot_configured
 from services.feedback_mailer import send_feedback_email, is_email_configured
-from services.learning_mode import LearningModeEngine
 from routes.ctf_routes import ctf_engine
 
 import firebase_admin
@@ -379,7 +378,8 @@ steganography_tool = SteganographyTool()
 cybersecurity_chatbot = CybersecurityChatbot()
 
 # Learning Mode
-learning_engine = LearningModeEngine()
+LEARNING_MODE_MAINTENANCE = True
+learning_engine = None
 
 # Cyber Tools instances
 hash_tool = HashTool()
@@ -685,6 +685,12 @@ def ip_threat_intel_page():
 # @login_required
 def learning_mode_page():
     """Cybersecurity Learning Mode page."""
+    if LEARNING_MODE_MAINTENANCE:
+        return (
+            "<h2>Learning Mode is under maintenance</h2>"
+            "<p>Please try again later.</p>",
+            503,
+        )
     return render_template('learning_mode.html', roadmap=learning_engine.get_roadmap())
 
 
@@ -692,6 +698,9 @@ def learning_mode_page():
 # @login_required
 def api_learning_topic_content():
     """Generate AI learning content for a single topic. Always returns valid fallback data."""
+    if LEARNING_MODE_MAINTENANCE:
+        return jsonify({'error': 'Learning Mode is under maintenance'}), 503
+
     data = request.get_json(silent=True) or {}
     topic = data.get('topic', '').strip()
     difficulty = data.get('difficulty', 'beginner').strip()
@@ -732,6 +741,9 @@ def api_learning_topic_content():
 # @login_required
 def api_learning_ask():
     """Ask the AI a deeper question about a topic. Always returns valid fallback data."""
+    if LEARNING_MODE_MAINTENANCE:
+        return jsonify({'error': 'Learning Mode is under maintenance'}), 503
+
     data = request.get_json(silent=True) or {}
     topic = data.get('topic', '').strip()
     question = data.get('question', '').strip()
@@ -748,6 +760,9 @@ def api_learning_ask():
 # @login_required
 def api_learning_daily_topic():
     """Generate a daily cybersecurity topic. Always returns valid fallback data and uses 24h cache."""
+    if LEARNING_MODE_MAINTENANCE:
+        return jsonify({'error': 'Learning Mode is under maintenance'}), 503
+
     try:
         result = learning_engine.generate_daily_topic()
         return jsonify(result)
