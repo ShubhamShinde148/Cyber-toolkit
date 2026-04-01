@@ -210,7 +210,7 @@ class LearningModeEngine:
                     return {
                         "title": topic["title"],
                         "difficulty": difficulty,
-                        "explanation": f"This is a static fallback explanation for {topic["title"]}.",
+                        "explanation": f"This is a static fallback explanation for {topic['title']}.",
                         "tools": [],
                         "practice": "No AI content available. Practice with online resources.",
                         "quick_notes": [],
