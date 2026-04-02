@@ -568,6 +568,16 @@ surface_audit_tool = SurfaceAuditTool(allowlist_hosts=_defense_allowlist, timeou
 last_results = {}
 
 
+@app.route('/favicon.ico')
+def favicon():
+    """Serve the favicon from static/images for browsers that request /favicon.ico directly."""
+    return send_from_directory(
+        os.path.join(app.root_path, 'static', 'images'),
+        'favicon.ico',
+        mimetype='image/vnd.microsoft.icon'
+    )
+
+
 @app.route('/login')
 def login():
     """Render login page."""
